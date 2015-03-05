@@ -1,0 +1,6 @@
+edp-*
+.edp*
+*.conf
+dep/
+doc/
+tool/

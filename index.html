@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style>
+        body {
+            background-color: #EEE;
+        }
+        canvas {
+            background-color: #FFF;
+            width: 600px;
+            height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+
+    <script src="http://s1.bdstatic.com/r/www/cache/ecom/esl/2-0-4/esl.js"></script>
+    <script>
+        require.config({
+            baseUrl: './src'
+        });
+
+        require(['main'], function (main) {
+            main.init();
+        });
+    </script>
+</body>
+</html>
