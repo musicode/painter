@@ -1,5 +1,5 @@
 /**
- * @file 绘制网格
+ * @file 绘制网格路径
  * @author musicode
  */
 define(function (require, exports, module) {
@@ -7,7 +7,7 @@ define(function (require, exports, module) {
     'use strict';
 
     /**
-     * 绘制网格
+     * 绘制网格路径
      *
      * @param {CanvasRenderingContext2D} context
      * @param {number} stepX 水平间隔
@@ -15,17 +15,7 @@ define(function (require, exports, module) {
      * @param {string} color 线条颜色
      * @param {number} thickness 线条粗细
      */
-    return function (context, stepX, stepY, color, thickness) {
-
-        context.save();
-
-        context.beginPath();
-
-        if (color) {
-            context.strokeStyle = color;
-        }
-
-        context.lineWidth = thickness || 0.5;
+    return function (context, stepX, stepY) {
 
         var canvas = context.canvas;
         var width = canvas.width;
@@ -41,9 +31,6 @@ define(function (require, exports, module) {
             context.lineTo(width, i);
         }
 
-        context.stroke();
-
-        context.restore();
     };
 
 });
