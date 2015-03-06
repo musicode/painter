@@ -6,6 +6,8 @@ define(function (require, exports, module) {
 
     'use strict';
 
+    var drawRect = require('./rect');
+
     /**
      * 绘制圆角矩形路径
      *
@@ -18,41 +20,44 @@ define(function (require, exports, module) {
      */
     return function (context, x, y, width, height, radius) {
 
-        context.moveTo(x + radius, y);
+        if (radius > 0) {
+            context.moveTo(x + radius, y);
 
-        context.arcTo(
-            x + width,
-            y,
-            x + width,
-            y + radius,
-            radius
-        );
+            context.arcTo(
+                x + width,
+                y,
+                x + width,
+                y + radius,
+                radius
+            );
 
-        // 由上面的列表项 4 可知，无需调用 lineTo
-        context.arcTo(
-            x + width,
-            y + height,
-            x + width - radius,
-            y + height,
-            radius
-        );
+            context.arcTo(
+                x + width,
+                y + height,
+                x + width - radius,
+                y + height,
+                radius
+            );
 
-        context.arcTo(
-            x,
-            y + height,
-            x,
-            y + height - radius,
-            radius
-        );
+            context.arcTo(
+                x,
+                y + height,
+                x,
+                y + height - radius,
+                radius
+            );
 
-        context.arcTo(
-            x,
-            y,
-            x + radius,
-            y,
-            radius
-        );
-
+            context.arcTo(
+                x,
+                y,
+                x + radius,
+                y,
+                radius
+            );
+        }
+        else {
+            drawRect(context, x, y, width, height);
+        }
     };
 
 });

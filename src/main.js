@@ -2,54 +2,61 @@ define(function (require, exports) {
 
     'use strict';
 
+    var Painter = require('./Painter');
+
     var retina = require('./util/retina');
+
     var grid = require('./path/grid');
     var line = require('./path/line');
     var lines = require('./path/lines');
     var ellipse = require('./path/ellipse');
     var roundedRect = require('./path/roundedRect');
 
+    function g(id) {
+        return document.getElementById(id);
+    }
+
     exports.init = function () {
 
-        var canvas = document.getElementById('canvas');
+        var canvas = g('canvas');
         var context = canvas.getContext('2d');
+
+        var thicknessInput = g('input-thickness');
+        thicknessInput.oninput = function () {
+            context.lineWidth = this.value;
+        };
+        var colorInput = g('input-color');
+        colorInput.oninput = function () {
+            context.strokeStyle = this.value;
+        };
+
+        document.body.onchange = function (e) {
+            var target = e.target;
+            if (target.tagName === 'INPUT' && target.type === 'radio') {
+                painter.startDrawing(target.value);
+            }
+        };
 
         retina(canvas);
 
         context.lineWidth = 0.5;
+        context.shadowColor = 'rgba(0,0,0,0.4)';
+        context.shadowOffsetX = 2;
+        context.shadowOffsetY = 2;
+        context.shadowBlur = 4;
 
         context.save();
         context.beginPath();
-        context.strokeStyle = 'rgba(0,0,0,0.2)';
+        context.strokeStyle = 'rgba(0,0,0,0.1)';
         grid(context, 10, 10);
         context.stroke();
         context.restore();
 
-        context.beginPath();
-        ellipse(context, 100, 100, 100, 60);
-        context.stroke();
+        var painter = new Painter({
+            context: context
+        });
 
-        context.beginPath();
-        line(context, 0, 0, 200, 200);
-        context.stroke();
-
-        context.beginPath();
-        lines(
-            context,
-            [
-                { x: 0, y: 0 },
-                { x: 10, y: 0 },
-                { x: 20, y: 0 },
-                { x: 20, y: 10 },
-                { x: 30, y: 40 },
-                { x: 10, y: 100 }
-            ]
-        );
-        context.stroke();
-
-        context.beginPath();
-        roundedRect(context, 170, 50, 100, 60, 10);
-        context.stroke();
+        painter.startDrawing('doodle');
     };
 
 });
