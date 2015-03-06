@@ -17,12 +17,10 @@ define(function (require, exports, module) {
     function getOneThirdPoint(p1, p2) {
         var x = (p2.x - p1.x) / 3;
         var y = (p2.y - p1.y) / 3;
-        var p = {
+        return {
             x: p1.x + x,
             y: p1.y + y
         };
-console.log(p1, p2, p)
-        return p;
     }
 
     /**

@@ -38,7 +38,7 @@ define(function (require, exports, module) {
             canvas.onmousedown = function (e) {
 
                 points.push(
-                    window2Canvas(canvas, e.x, e.y)
+                    window2Canvas(canvas, e.clientX, e.clientY)
                 );
 
                 me.saveDrawingSurface();
@@ -46,7 +46,7 @@ define(function (require, exports, module) {
                 document.onmousemove = function (e) {
 
                     points.push(
-                        window2Canvas(canvas, e.x, e.y)
+                        window2Canvas(canvas, e.clientX, e.clientY)
                     );
 
                     draw('move');
@@ -99,14 +99,14 @@ define(function (require, exports, module) {
     };
 
     var painters = {
-        doodle: require('./processor/doodle'),
-        line: require('./processor/line'),
-        rect: require('./processor/rect'),
+        doodle: require('./point/doodle'),
+        line: require('./point/line'),
+        rect: require('./point/rect'),
         text: function () {
 
         },
-        ellipse: require('./processor/ellipse'),
-        arrow: require('./processor/arrow')
+        ellipse: require('./point/ellipse'),
+        arrow: require('./point/arrow')
     };
 
     return Painter;

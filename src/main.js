@@ -40,6 +40,7 @@ define(function (require, exports) {
         retina(canvas);
 
         context.lineWidth = 0.5;
+        context.lineCap = 'round';
         context.shadowColor = 'rgba(0,0,0,0.4)';
         context.shadowOffsetX = 2;
         context.shadowOffsetY = 2;
