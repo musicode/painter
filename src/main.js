@@ -27,7 +27,8 @@ define(function (require, exports) {
         };
         var colorInput = g('input-color');
         colorInput.oninput = function () {
-            context.strokeStyle = this.value;
+            context.strokeStyle =
+            context.fillStyle = this.value;
         };
 
         document.body.onchange = function (e) {

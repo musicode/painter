@@ -20,7 +20,7 @@ define(function (require, exports, module) {
         var len = points.length;
 
         if (len > 2) {
-            for (var i = 0; i < 2; i++) {
+            for (var i = 0; i < 3; i++) {
                 points = chaikinCurve(points);
             }
         }

@@ -19,7 +19,9 @@ define(function (require, exports, module) {
      */
     return function (context, points, action) {
 
+        context.beginPath();
         actionHandler[action](context, points);
+        context.stroke();
 
     };
 

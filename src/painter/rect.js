@@ -1,15 +1,15 @@
 /**
- * @file 通过点数组绘制椭圆
+ * @file 通过点数组绘制矩形
  * @author musicode
  */
 define(function (require, exports, module) {
 
     'use strict';
 
-    var drawEllipse = require('../path/ellipse');
+    var drawRect = require('../path/rect');
 
     /**
-     * 通过点数组绘制椭圆
+     * 通过点数组绘制矩形
      *
      * @param {CanvasRenderingContext2D} context
      * @param {Array.<Object>} points
@@ -24,16 +24,9 @@ define(function (require, exports, module) {
         var endX = Math.max(start.x, end.x);
         var endY = Math.max(start.y, end.y);
 
-        var width = endX - startX;
-        var height = endY - startY;
-
-        drawEllipse(
-            context,
-            startX + width / 2,
-            startY + height / 2,
-            width,
-            height
-        );
+        context.beginPath();
+        drawRect(context, startX, startY, endX - startX, endY - startY);
+        context.stroke();
 
     };
 

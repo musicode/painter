@@ -30,9 +30,7 @@ define(function (require, exports, module) {
                 context.clearRect(0, 0, canvas.width, canvas.height);
                 me.restoreDrawingSurface();
 
-                context.beginPath();
                 paint(context, points, action);
-                context.stroke();
             };
 
             canvas.onmousedown = function (e) {
@@ -99,14 +97,14 @@ define(function (require, exports, module) {
     };
 
     var painters = {
-        doodle: require('./point/doodle'),
-        line: require('./point/line'),
-        rect: require('./point/rect'),
+        doodle: require('./painter/doodle'),
+        line: require('./painter/line'),
+        rect: require('./painter/rect'),
         text: function () {
 
         },
-        ellipse: require('./point/ellipse'),
-        arrow: require('./point/arrow')
+        ellipse: require('./painter/ellipse'),
+        arrow: require('./painter/arrow')
     };
 
     return Painter;

@@ -15,14 +15,17 @@ define(function (require, exports, module) {
 
         var ratio = window.devicePixelRatio;
 
+        var style = window.getComputedStyle(canvas);
+        var width = parseInt(style.width, 10);
+        var height = parseInt(style.height, 10);
+
         if (ratio > 1) {
-
-            var style = window.getComputedStyle(canvas);
-
-            canvas.width = ratio * parseInt(style.width, 10);
-            canvas.height = ratio  * parseInt(style.height, 10);
-
+            width *= ratio;
+            height *= ratio;
         }
+
+        canvas.width = width;
+        canvas.height = height;
 
     };
 

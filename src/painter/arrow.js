@@ -1,15 +1,15 @@
 /**
- * @file 通过点数组绘制线条
+ * @file 通过点数组绘制箭头
  * @author musicode
  */
 define(function (require, exports, module) {
 
     'use strict';
 
-    var drawLine = require('../path/line');
+    var drawArrow = require('../path/arrow');
 
     /**
-     * 通过点数组绘制线条
+     * 通过点数组绘制箭头
      *
      * @param {CanvasRenderingContext2D} context
      * @param {Array.<Object>} points
@@ -19,7 +19,9 @@ define(function (require, exports, module) {
         var start = points[0];
         var end = points[points.length - 1];
 
-        drawLine(context, start.x, start.y, end.x, end.y);
+        context.beginPath();
+        drawArrow(context, start.x, start.y, end.x, end.y, context.lineWidth * 10, 60, 80, 60 * Math.PI / 180);
+        context.fill();
 
     };
 
