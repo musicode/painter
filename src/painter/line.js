@@ -13,6 +13,7 @@ define(function (require, exports, module) {
      *
      * @param {CanvasRenderingContext2D} context
      * @param {Shape} shape
+     * @return {boolean}
      */
     return function (context, shape) {
 
@@ -24,6 +25,8 @@ define(function (require, exports, module) {
         context.beginPath();
         drawLine(context, start.x, start.y, end.x, end.y);
         context.stroke();
+
+        return true;
 
     };
 

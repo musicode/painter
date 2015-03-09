@@ -17,8 +17,16 @@ define(function (require, exports, module) {
      * @property {Array.<Object>} options.points 用户操作产生的轨迹点
      * @property {string} options.action 操作类型，如 add remove
      * @property {string} options.name 形状名称
+     *
+     * @property {number} options.x
+     * @property {number} options.y
      * @property {number} options.z
+     * @property {number} options.width
+     * @property {number} options.height
+     *
      * @property {ImageData} options.snapshoot
+     *
+     * @property {string} options.text 文本
      *
      * @property {Object} options.style 样式
      * @property {number} options.style.alpha 透明度
@@ -31,6 +39,7 @@ define(function (require, exports, module) {
      * @property {number} options.shadow.offsetX 阴影水平偏移量
      * @property {number} options.shadow.offsetY 阴影垂直偏移量
      * @property {number} options.shadow.blur 阴影模糊值
+     *
      */
     function Shape(options) {
         extend(this, Shape.defaultOptions, options);
@@ -74,18 +83,21 @@ define(function (require, exports, module) {
 
             var style = me.style;
 
-            if (style.alpha != null) {
-                context.globalAlpha = style.alpha;
+            if (style) {
+                if (style.alpha != null) {
+                    context.globalAlpha = style.alpha;
+                }
+                if (style.thickness != null) {
+                    context.lineWidth = style.thickness;
+                }
+                if (style.stroke) {
+                    context.strokeStyle = style.stroke;
+                }
+                if (style.fill) {
+                    context.fillStyle = style.fill;
+                }
             }
-            if (style.thickness != null) {
-                context.lineWidth = style.thickness;
-            }
-            if (style.stroke) {
-                context.strokeStyle = style.stroke;
-            }
-            if (style.fill) {
-                context.fillStyle = style.fill;
-            }
+
 
             var shadow = me.shadow;
 
@@ -104,7 +116,7 @@ define(function (require, exports, module) {
 
             var fn = painter[me.name];
             if (fn) {
-                fn(context, me, action);
+                return fn(context, me, action);
             }
 
         },

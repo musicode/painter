@@ -31,11 +31,12 @@ define(function (require, exports, module) {
      *
      * @param {CanvasRenderingContext2D} context
      * @param {Shape} shape
+     * @return {boolean}
      */
     return function (context, shape, action) {
 
         if (textarea) {
-            return;
+            return false;
         }
 
         if (shape.text) {
@@ -85,6 +86,8 @@ define(function (require, exports, module) {
 
 
         }
+
+        return true;
 
     };
 

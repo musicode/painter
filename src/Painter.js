@@ -45,7 +45,7 @@ define(function (require, exports, module) {
 
             var draw = function (action) {
                 shape.undo(context);
-                shape.draw(context, action);
+                return shape.draw(context, action);
             };
 
             canvas.onmousedown = function (e) {
@@ -64,27 +64,30 @@ define(function (require, exports, module) {
                     }
                 });
 
-                draw('down');
+                if (draw('down')) {
 
-                document.onmousemove = function (e) {
+                    document.onmousemove = function (e) {
 
-                    shape.addPoint(
-                        window2Canvas(canvas, e.clientX, e.clientY)
-                    );
+                        shape.addPoint(
+                            window2Canvas(canvas, e.clientX, e.clientY)
+                        );
 
-                    draw('move');
-                };
+                        draw('move');
+                    };
 
-                document.onmouseup = function () {
+                    document.onmouseup = function () {
 
-                    draw('up');
+                        draw('up');
 
-                    me.history.push(shape);
+                        me.history.push(shape);
 
-                    document.onmousemove =
-                    document.onmouseup = null;
+                        document.onmousemove =
+                        document.onmouseup = null;
 
-                };
+                    };
+
+                }
+
             };
 
 

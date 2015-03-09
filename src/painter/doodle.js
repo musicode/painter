@@ -16,6 +16,7 @@ define(function (require, exports, module) {
      *
      * @param {CanvasRenderingContext2D} context
      * @param {Shape} shape
+     * @return {boolean}
      */
     return function (context, shape, action) {
 
@@ -27,6 +28,8 @@ define(function (require, exports, module) {
         }
 
         context.stroke();
+
+        return true;
 
     };
 
