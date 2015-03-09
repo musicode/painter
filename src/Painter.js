@@ -1,11 +1,17 @@
+/**
+ * @file 画笔
+ * @author musicode
+ */
 define(function (require, exports, module) {
 
     'use strict';
 
     var window2Canvas = require('./util/window2Canvas');
+    var Shape = require('./Shape');
 
     function Painter(options) {
         this.context = options.context;
+        this.init();
     }
 
     Painter.prototype = {
@@ -14,36 +20,55 @@ define(function (require, exports, module) {
 
         init: function () {
 
+            /**
+             * 操作历史
+             *
+             * @type {Array}
+             */
+            this.history = [ ];
 
         },
 
-        startDrawing: function (type) {
+        startClearing: function (type) {
+
+        },
+
+        startDrawing: function (name) {
 
             var me = this;
             var context = me.context;
             var canvas = context.canvas;
 
-            var points = [ ];
-            var paint = painters[type];
+
+            var shape;
 
             var draw = function (action) {
                 context.clearRect(0, 0, canvas.width, canvas.height);
                 me.restoreDrawingSurface();
 
-                paint(context, points, action);
+                shape.draw(context, action);
             };
 
             canvas.onmousedown = function (e) {
 
-                points.push(
-                    window2Canvas(canvas, e.clientX, e.clientY)
-                );
+                shape = new Shape({
+                    name: name,
+                    action: 'add',
+                    points: [
+                        window2Canvas(canvas, e.clientX, e.clientY)
+                    ],
+                    style: {
+                        thickness: context.lineWidth,
+                        stroke: context.strokeStyle,
+                        fill: context.fillStyle
+                    }
+                });
 
                 me.saveDrawingSurface();
 
                 document.onmousemove = function (e) {
 
-                    points.push(
+                    shape.addPoint(
                         window2Canvas(canvas, e.clientX, e.clientY)
                     );
 
@@ -53,7 +78,8 @@ define(function (require, exports, module) {
                 document.onmouseup = function () {
 
                     draw('up');
-                    points.length = 0;
+
+                    me.history.push(shape);
 
                     document.onmousemove =
                     document.onmouseup = null;
@@ -94,17 +120,6 @@ define(function (require, exports, module) {
             );
         }
 
-    };
-
-    var painters = {
-        doodle: require('./painter/doodle'),
-        line: require('./painter/line'),
-        rect: require('./painter/rect'),
-        text: function () {
-
-        },
-        ellipse: require('./painter/ellipse'),
-        arrow: require('./painter/arrow')
     };
 
     return Painter;

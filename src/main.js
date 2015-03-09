@@ -33,8 +33,13 @@ define(function (require, exports) {
 
         document.body.onchange = function (e) {
             var target = e.target;
-            if (target.tagName === 'INPUT' && target.type === 'radio') {
-                painter.startDrawing(target.value);
+            if (target.tagName === 'INPUT') {
+                if (target.name === 'shape') {
+                    painter.startDrawing(target.value);
+                }
+                else if (target.name === 'eraser') {
+                    painter.startDrawing('eraser');
+                }
             }
         };
 
@@ -42,10 +47,6 @@ define(function (require, exports) {
 
         context.lineWidth = 0.5;
         context.lineCap = 'round';
-        context.shadowColor = 'rgba(0,0,0,0.4)';
-        context.shadowOffsetX = 2;
-        context.shadowOffsetY = 2;
-        context.shadowBlur = 4;
 
         context.save();
         context.beginPath();

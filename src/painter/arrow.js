@@ -18,9 +18,22 @@ define(function (require, exports, module) {
 
         var start = points[0];
         var end = points[points.length - 1];
+        var lineWidth = context.lineWidth;
 
         context.beginPath();
-        drawArrow(context, start.x, start.y, end.x, end.y, context.lineWidth * 10, 60, 80, 60 * Math.PI / 180);
+
+        drawArrow(
+            context,
+            start.x,
+            start.y,
+            end.x,
+            end.y,
+            lineWidth + 20,
+            lineWidth + 30,
+            lineWidth + 50,
+            60 * Math.PI / 180
+        );
+
         context.fill();
 
     };
