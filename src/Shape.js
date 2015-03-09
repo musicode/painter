@@ -17,7 +17,8 @@ define(function (require, exports, module) {
      * @property {Array.<Object>} options.points 用户操作产生的轨迹点
      * @property {string} options.action 操作类型，如 add remove
      * @property {string} options.name 形状名称
-     * @property {ImageData} options.snapshoot 形状绘制前的快照
+     * @property {number} options.z
+     * @property {ImageData} options.snapshoot
      *
      * @property {Object} options.style 样式
      * @property {number} options.style.alpha 透明度
@@ -45,7 +46,7 @@ define(function (require, exports, module) {
             var me = this;
 
             if (me.points) {
-                extend(me.rect, getRect(me.points));
+                extend(me, getRect(me.points));
             }
 
         },
@@ -56,13 +57,14 @@ define(function (require, exports, module) {
 
             me.points.push(point);
 
-            var rect = me.rect;
-
-            me.rect = getRect([
-                { x: rect.x, y: rect.y },
-                { x: rect.x + rect.width, y: rect.y + rect.height },
-                point
-            ]);
+            extend(
+                me,
+                getRect([
+                    { x: me.x, y: me.y },
+                    { x: me.x + me.width, y: me.y + me.height },
+                    point
+                ])
+            );
 
         },
 
@@ -100,7 +102,16 @@ define(function (require, exports, module) {
                 disableShadow(context);
             }
 
-            painter[me.name](context, me.points, action);
+            var fn = painter[me.name];
+            if (fn) {
+                fn(context, me, action);
+            }
+
+        },
+
+        undo: function (context) {
+
+            context.putImageData(this.snapshoot, 0, 0);
 
         },
 
@@ -124,12 +135,7 @@ define(function (require, exports, module) {
     };
 
     Shape.defaultOptions = {
-        rect: {
-            x: 0,
-            y: 0,
-            width: 0,
-            height: 0
-        },
+        z: 0,
         shadow: {
             color: 'rgba(0,0,0,0.4)',
             offsetX: 2,
@@ -142,23 +148,9 @@ define(function (require, exports, module) {
         doodle: require('./painter/doodle'),
         line: require('./painter/line'),
         rect: require('./painter/rect'),
-        text: function () {
-
-        },
         ellipse: require('./painter/ellipse'),
         arrow: require('./painter/arrow'),
-        eraser: function (context, points) {
-            context.save();
-            context.strokeStyle = 'rgba(255,255,255,0)';
-
-            context.shadowOffsetX =
-            context.shadowOffsetY =
-            context.shadowBlur = 0;
-
-            require('./path/lines')(context, points);
-            context.stroke();
-            context.restore();
-        }
+        text: require('./painter/text')
     };
 
     return Shape;

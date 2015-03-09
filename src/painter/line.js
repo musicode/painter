@@ -1,5 +1,5 @@
 /**
- * @file 通过点数组绘制线条
+ * @file 绘制线条
  * @author musicode
  */
 define(function (require, exports, module) {
@@ -9,12 +9,14 @@ define(function (require, exports, module) {
     var drawLine = require('../path/line');
 
     /**
-     * 通过点数组绘制线条
+     * 绘制线条
      *
      * @param {CanvasRenderingContext2D} context
-     * @param {Array.<Object>} points
+     * @param {Shape} shape
      */
-    return function (context, points) {
+    return function (context, shape) {
+
+        var points = shape.points;
 
         var start = points[0];
         var end = points[points.length - 1];

@@ -1,5 +1,5 @@
 /**
- * @file 通过点数组绘制椭圆
+ * @file 绘制椭圆
  * @author musicode
  */
 define(function (require, exports, module) {
@@ -9,12 +9,14 @@ define(function (require, exports, module) {
     var drawEllipse = require('../path/ellipse');
 
     /**
-     * 通过点数组绘制椭圆
+     * 绘制椭圆
      *
      * @param {CanvasRenderingContext2D} context
-     * @param {Array.<Object>} points
+     * @param {Shape} shape
      */
-    return function (context, points) {
+    return function (context, shape) {
+
+        var points = shape.points;
 
         var start = points[0];
         var end = points[points.length - 1];

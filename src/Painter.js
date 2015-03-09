@@ -7,6 +7,7 @@ define(function (require, exports, module) {
     'use strict';
 
     var window2Canvas = require('./util/window2Canvas');
+    var snapshoot = require('./util/snapshoot');
     var Shape = require('./Shape');
 
     function Painter(options) {
@@ -43,9 +44,7 @@ define(function (require, exports, module) {
             var shape;
 
             var draw = function (action) {
-                context.clearRect(0, 0, canvas.width, canvas.height);
-                me.restoreDrawingSurface();
-
+                shape.undo(context);
                 shape.draw(context, action);
             };
 
@@ -54,6 +53,7 @@ define(function (require, exports, module) {
                 shape = new Shape({
                     name: name,
                     action: 'add',
+                    snapshoot: snapshoot(context),
                     points: [
                         window2Canvas(canvas, e.clientX, e.clientY)
                     ],
@@ -64,7 +64,7 @@ define(function (require, exports, module) {
                     }
                 });
 
-                me.saveDrawingSurface();
+                draw('down');
 
                 document.onmousemove = function (e) {
 
@@ -93,33 +93,7 @@ define(function (require, exports, module) {
 
         stopDrawing: function () {
 
-        },
-
-        saveDrawingSurface: function () {
-
-            var me = this;
-            var context = me.context;
-            var canvas = context.canvas;
-
-            me.drawingSurface = context.getImageData(
-                                    0,
-                                    0,
-                                    canvas.width,
-                                    canvas.height
-                                );
-        },
-
-        restoreDrawingSurface: function () {
-
-            var me = this;
-
-            me.context.putImageData(
-                me.drawingSurface,
-                0,
-                0
-            );
         }
-
     };
 
     return Painter;

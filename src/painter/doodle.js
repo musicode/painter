@@ -1,5 +1,5 @@
 /**
- * @file 通过点数组绘制涂鸦
+ * @file 绘制涂鸦
  * @author musicode
  */
 define(function (require, exports, module) {
@@ -12,15 +12,20 @@ define(function (require, exports, module) {
     };
 
     /**
-     * 通过点数组绘制涂鸦
+     * 绘制涂鸦
      *
      * @param {CanvasRenderingContext2D} context
-     * @param {Array.<Object>} points
+     * @param {Shape} shape
      */
-    return function (context, points, action) {
+    return function (context, shape, action) {
 
         context.beginPath();
-        actionHandler[action](context, points);
+
+        var fn = actionHandler[action];
+        if (fn) {
+            fn(context, shape.points);
+        }
+
         context.stroke();
 
     };
