@@ -30,8 +30,86 @@ define(function (require, exports, module) {
 
         },
 
+        addShape: function (shape) {
+            var index = this.history.push(shape);
+            shape.index = index - 1;
+
+            console.log(shape.x, shape.y, shape.width, shape.height);
+        },
+
+        /**
+         * 删除 Shape
+         *
+         * @param {Array.<Object} shapes
+         */
+        removeShape: function (shapes) {
+
+            if (!Array.isArray(shapes)) {
+                shapes = [ shapes ];
+            }
+
+            if (shapes.length === 0) {
+                return;
+            }
+
+            // shapes 按索引倒序排列，方便删除
+            shapes = shapes.sort(
+                function (a, b) {
+                    return b.index - a.index;
+                }
+            );
+
+            var me = this;
+            var history = me.history;
+
+            shapes.forEach(
+                function (shape) {
+                    history.splice(shape.index, 1);
+                }
+            );
+
+            var shape = shapes[ shapes.length - 1 ];
+            var context = me.context;
+
+            shape.undo(context);
+
+            for (var i = shape.index, len = history.length; i < len; i++) {
+
+                shape = history[i];
+
+                shape.index = i;
+                shape.snapshoot = snapshoot(context);
+                shape.draw(context);
+
+            }
+
+        },
+
         startClearing: function (type) {
 
+            var me = this;
+            var context = me.context;
+            var canvas = context.canvas;
+
+            var history = me.history;
+
+            canvas.onmousedown = function (e) {
+
+                var point = window2Canvas(canvas, e.clientX, e.clientY);
+
+                var shapes = [ ];
+
+                history.forEach(
+                    function (shape) {
+                        if (shape.inRect(point)) {
+                            shapes.push(shape);
+                        }
+                    }
+                );
+
+                me.removeShape(shapes);
+
+            };
         },
 
         startDrawing: function (name) {
@@ -79,7 +157,7 @@ define(function (require, exports, module) {
 
                         draw('up');
 
-                        me.history.push(shape);
+                        me.addShape(shape);
 
                         document.onmousemove =
                         document.onmouseup = null;
@@ -96,6 +174,11 @@ define(function (require, exports, module) {
 
         stopDrawing: function () {
 
+            var me = this;
+            var context = me.context;
+            var canvas = context.canvas;
+
+            canvas.onmousedown = null;
         }
     };
 

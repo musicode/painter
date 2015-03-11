@@ -10,36 +10,42 @@ define(function (require, exports, module) {
 
         var point = points[0];
 
-        var x = point.x;
-        var y = point.y;
-        var width = 0;
-        var height = 0;
+        var minX;
+        var maxX;
+        var minY;
+        var maxY;
 
-        for (var i = 0, len = points.length, point; i < len; i++) {
+        minX = maxX = point.x;
+        minY = maxY = point.y;
+
+        for (var i = 1, len = points.length, x, y; i < len; i++) {
 
             point = points[i];
 
-            if (point.x < x) {
-                x = point.x;
+            x = point.x;
+            y = point.y;
+
+            if (x < minX) {
+                minX = x;
             }
-            else if (point.x > x + width) {
-                width = point.x - x;
+            if (x > maxX) {
+                maxX = x;
             }
 
-            if (point.y < y) {
-                y = point.y;
+            if (y < minY) {
+                minY = y;
             }
-            else if (point.y > y + height) {
-                height = point.y - y;
+            if (y > maxY) {
+                maxY = y;
             }
 
         }
 
         return {
-            x: x,
-            y: y,
-            width: width,
-            height: height
+            x: minX,
+            y: minY,
+            width: maxX - minX,
+            height: maxY - minY
         };
     };
 

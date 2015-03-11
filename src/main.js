@@ -38,7 +38,8 @@ define(function (require, exports) {
                     painter.startDrawing(target.value);
                 }
                 else if (target.name === 'eraser') {
-                    painter.startDrawing('eraser');
+                    painter.stopDrawing();
+                    painter.startClearing();
                 }
             }
         };

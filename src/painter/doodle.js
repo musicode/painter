@@ -16,18 +16,21 @@ define(function (require, exports, module) {
      *
      * @param {CanvasRenderingContext2D} context
      * @param {Shape} shape
+     * @param {string=} action
      * @return {boolean}
      */
     return function (context, shape, action) {
 
         context.beginPath();
 
+        action = action || 'up';
+
         var fn = actionHandler[action];
+
         if (fn) {
             fn(context, shape.points);
+            context.stroke();
         }
-
-        context.stroke();
 
         return true;
 

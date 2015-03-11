@@ -135,12 +135,12 @@ define(function (require, exports, module) {
          */
         inRect: function (point) {
 
-            var rect = this.rect;
+            var me = this;
 
-            return point.x > rect.x
-                && point.x < rect.x + rect.width
-                && point.y > rect.y
-                && point.y < rect.y + rect.height;
+            return point.x > me.x
+                && point.x < me.x + me.width
+                && point.y > me.y
+                && point.y < me.y + me.height;
 
         }
 
