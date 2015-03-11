@@ -9,13 +9,26 @@ define(function (require, exports, module) {
     var drawLine = require('../path/line');
 
     /**
+     * 精简点数组
+     *
+     * @param {Array} points
+     * @return {Array}
+     */
+    exports.trim = function (points) {
+        return [
+            points[0],
+            points[points.length - 1]
+        ];
+    };
+
+    /**
      * 绘制线条
      *
      * @param {CanvasRenderingContext2D} context
      * @param {Shape} shape
      * @return {boolean}
      */
-    return function (context, shape) {
+    exports.draw =  function (context, shape) {
 
         var points = shape.points;
 

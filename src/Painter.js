@@ -8,10 +8,12 @@ define(function (require, exports, module) {
 
     var window2Canvas = require('./util/window2Canvas');
     var snapshoot = require('./util/snapshoot');
+    var extend = require('./util/extend');
+    var retina = require('./util/retina');
     var Shape = require('./Shape');
 
     function Painter(options) {
-        this.context = options.context;
+        extend(this, options);
         this.init();
     }
 
@@ -21,18 +23,26 @@ define(function (require, exports, module) {
 
         init: function () {
 
+            var me = this;
+
             /**
              * 操作历史
              *
              * @type {Array}
              */
-            this.history = [ ];
+            me.history = [ ];
+
+            retina(me.shapeCanvas);
+            retina(me.effectCanvas);
 
         },
 
         addShape: function (shape) {
+
             var index = this.history.push(shape);
             shape.index = index - 1;
+
+            shape.trim();
 
             console.log(shape.x, shape.y, shape.width, shape.height);
         },
@@ -69,33 +79,29 @@ define(function (require, exports, module) {
             );
 
             var shape = shapes[ shapes.length - 1 ];
-            var context = me.context;
 
-            shape.undo(context);
+            shape.undo(
+                getContext(me.shapeCanvas)
+            );
 
-            for (var i = shape.index, len = history.length; i < len; i++) {
-
-                shape = history[i];
-
-                shape.index = i;
-                shape.snapshoot = snapshoot(context);
-                shape.draw(context);
-
-            }
+            me.refresh(shape.index);
 
         },
 
         startClearing: function (type) {
 
             var me = this;
-            var context = me.context;
-            var canvas = context.canvas;
+            var shapeCanvas = me.shapeCanvas;
+            var shapeContext = getContext(shapeCanvas);
+
+            var effectCanvas = me.effectCanvas;
+            var effectContext = getContext(effectCanvas);
 
             var history = me.history;
 
-            canvas.onmousedown = function (e) {
+            effectCanvas.onmousedown = function (e) {
 
-                var point = window2Canvas(canvas, e.clientX, e.clientY);
+                var point = window2Canvas(effectCanvas, e.clientX, e.clientY);
 
                 var shapes = [ ];
 
@@ -110,35 +116,52 @@ define(function (require, exports, module) {
                 me.removeShape(shapes);
 
             };
+            effectCanvas.onmousemove = function (e) {
+
+                var point = window2Canvas(effectCanvas, e.clientX, e.clientY);
+
+                effectContext.clearRect(0, 0, effectCanvas.width, effectCanvas.height);
+
+                history.forEach(
+                    function (shape) {
+                        if (shape.inRect(point)) {
+                            shape.highlight(effectContext);
+                        }
+                    }
+                );
+            };
         },
 
         startDrawing: function (name) {
 
             var me = this;
-            var context = me.context;
-            var canvas = context.canvas;
 
+            var shapeCanvas = me.shapeCanvas;
+            var shapeContext = getContext(shapeCanvas);
+
+            var effectCanvas = me.effectCanvas;
+            var effectContext = getContext(effectCanvas);
 
             var shape;
 
             var draw = function (action) {
-                shape.undo(context);
-                return shape.draw(context, action);
+                shape.undo(shapeContext);
+                return shape.draw(shapeContext, action);
             };
 
-            canvas.onmousedown = function (e) {
+            effectCanvas.onmousedown = function (e) {
 
                 shape = new Shape({
                     name: name,
                     action: 'add',
-                    snapshoot: snapshoot(context),
+                    snapshoot: snapshoot(shapeContext),
                     points: [
-                        window2Canvas(canvas, e.clientX, e.clientY)
+                        window2Canvas(effectCanvas, e.clientX, e.clientY)
                     ],
                     style: {
-                        thickness: context.lineWidth,
-                        stroke: context.strokeStyle,
-                        fill: context.fillStyle
+                        thickness: shapeContext.lineWidth,
+                        stroke: shapeContext.strokeStyle,
+                        fill: shapeContext.fillStyle
                     }
                 });
 
@@ -147,7 +170,7 @@ define(function (require, exports, module) {
                     document.onmousemove = function (e) {
 
                         shape.addPoint(
-                            window2Canvas(canvas, e.clientX, e.clientY)
+                            window2Canvas(effectCanvas, e.clientX, e.clientY)
                         );
 
                         draw('move');
@@ -175,12 +198,34 @@ define(function (require, exports, module) {
         stopDrawing: function () {
 
             var me = this;
-            var context = me.context;
-            var canvas = context.canvas;
 
-            canvas.onmousedown = null;
+            me.shapeCanvas.onmousedown = null;
+
+        },
+
+        refresh: function (index) {
+
+            index = index || 0;
+
+            var me = this;
+            var history = me.history;
+            var context = getContext(me.shapeCanvas);
+
+            for (var i = index, len = history.length, shape; i < len; i++) {
+
+                shape = history[i];
+
+                shape.index = i;
+                shape.snapshoot = snapshoot(context);
+                shape.draw(context);
+
+            }
         }
     };
+
+    function getContext(canvas) {
+        return canvas.getContext('2d');
+    }
 
     return Painter;
 

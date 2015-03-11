@@ -27,13 +27,23 @@ define(function (require, exports, module) {
     }
 
     /**
+     * 精简点数组
+     *
+     * @param {Array} points
+     * @return {Array}
+     */
+    exports.trim = function (points) {
+        return points;
+    };
+
+    /**
      * 绘制文本
      *
      * @param {CanvasRenderingContext2D} context
      * @param {Shape} shape
      * @return {boolean}
      */
-    return function (context, shape, action) {
+    exports.draw = function (context, shape, action) {
 
         if (textarea) {
             return false;

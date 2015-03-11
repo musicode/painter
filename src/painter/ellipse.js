@@ -9,15 +9,12 @@ define(function (require, exports, module) {
     var drawEllipse = require('../path/ellipse');
 
     /**
-     * 绘制椭圆
+     * 精简点数组
      *
-     * @param {CanvasRenderingContext2D} context
-     * @param {Shape} shape
-     * @return {boolean}
+     * @param {Array} points
+     * @return {Array}
      */
-    return function (context, shape) {
-
-        var points = shape.points;
+    exports.trim = function (points) {
 
         var start = points[0];
         var end = points[points.length - 1];
@@ -27,15 +24,35 @@ define(function (require, exports, module) {
         var endX = Math.max(start.x, end.x);
         var endY = Math.max(start.y, end.y);
 
-        var width = endX - startX;
-        var height = endY - startY;
+        return [
+            { x: startX, y: startY },
+            { x: endX, y: endY }
+        ];
+    };
+
+    /**
+     * 绘制椭圆
+     *
+     * @param {CanvasRenderingContext2D} context
+     * @param {Shape} shape
+     * @return {boolean}
+     */
+    exports.draw = function (context, shape) {
+
+        var points = exports.trim(shape.points);
+
+        var start = points[0];
+        var end = points[1];
+
+        var width = end.x - start.x;
+        var height = end.y - start.y;
 
         context.beginPath();
 
         drawEllipse(
             context,
-            startX + width / 2,
-            startY + height / 2,
+            start.x + width / 2,
+            start.y + height / 2,
             width,
             height
         );

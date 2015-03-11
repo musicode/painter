@@ -9,15 +9,12 @@ define(function (require, exports, module) {
     var drawRect = require('../path/rect');
 
     /**
-     * 绘制矩形
+     * 精简点数组
      *
-     * @param {CanvasRenderingContext2D} context
-     * @param {Shape} shape
-     * @return {boolean}
+     * @param {Array} points
+     * @return {Array}
      */
-    return function (context, shape) {
-
-        var points = shape.points;
+    exports.trim = function (points) {
 
         var start = points[0];
         var end = points[points.length - 1];
@@ -27,8 +24,28 @@ define(function (require, exports, module) {
         var endX = Math.max(start.x, end.x);
         var endY = Math.max(start.y, end.y);
 
+        return [
+            { x: startX, y: startY },
+            { x: endX, y: endY }
+        ];
+    };
+
+    /**
+     * 绘制矩形
+     *
+     * @param {CanvasRenderingContext2D} context
+     * @param {Shape} shape
+     * @return {boolean}
+     */
+    exports.draw = function (context, shape) {
+
+        var points = exports.trim(shape.points);
+
+        var start = points[0];
+        var end = points[1];
+
         context.beginPath();
-        drawRect(context, startX, startY, endX - startX, endY - startY);
+        drawRect(context, start.x, start.y, end.x - start.x, end.y - start.y);
         context.stroke();
 
         return true;

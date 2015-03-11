@@ -10,6 +10,7 @@ define(function (require, exports, module) {
     var enableShadow = require('./util/enableShadow');
     var disableShadow = require('./util/disableShadow');
     var getRect = require('./util/rect');
+    var randomColor = require('./util/randomColor');
 
     /**
      *
@@ -54,6 +55,8 @@ define(function (require, exports, module) {
 
             var me = this;
 
+            me.randomColor = randomColor(0.1);
+
             if (me.points) {
                 extend(me, getRect(me.points));
             }
@@ -74,6 +77,22 @@ define(function (require, exports, module) {
                     point
                 ])
             );
+
+        },
+
+        /**
+         * 创建 shape 过程中会创建很多没用的点，这里需要精简一下
+         *
+         * 比如线条只有起点和终点有意义
+         *
+         */
+        trim: function () {
+
+            var me = this;
+
+            me.points = painters[me.name].trim(me.points);
+
+            extend(me, getRect(me.points));
 
         },
 
@@ -114,9 +133,9 @@ define(function (require, exports, module) {
                 disableShadow(context);
             }
 
-            var fn = painter[me.name];
-            if (fn) {
-                return fn(context, me, action);
+            var painter = painters[me.name];
+            if (painter) {
+                return painter.draw(context, me, action);
             }
 
         },
@@ -142,6 +161,28 @@ define(function (require, exports, module) {
                 && point.y > me.y
                 && point.y < me.y + me.height;
 
+        },
+
+        highlight: function (context) {
+
+            var me = this;
+
+            context.save();
+
+            context.fillStyle = me.randomColor;
+            context.beginPath();
+
+            context.rect(me.x, me.y, me.width, me.height);
+
+            context.fill();
+
+            context.restore();
+
+
+        },
+
+        nohighlight: function () {
+
         }
 
     };
@@ -156,7 +197,7 @@ define(function (require, exports, module) {
         }
     };
 
-    var painter = {
+    var painters = {
         doodle: require('./painter/doodle'),
         line: require('./painter/line'),
         rect: require('./painter/rect'),

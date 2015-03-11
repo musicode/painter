@@ -12,6 +12,16 @@ define(function (require, exports, module) {
     };
 
     /**
+     * 精简点数组
+     *
+     * @param {Array} points
+     * @return {Array}
+     */
+    exports.trim = function (points) {
+        return points;
+    };
+
+    /**
      * 绘制涂鸦
      *
      * @param {CanvasRenderingContext2D} context
@@ -19,7 +29,7 @@ define(function (require, exports, module) {
      * @param {string=} action
      * @return {boolean}
      */
-    return function (context, shape, action) {
+    exports.draw = function (context, shape, action) {
 
         context.beginPath();
 

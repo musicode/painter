@@ -18,7 +18,7 @@ define(function (require, exports) {
 
     exports.init = function () {
 
-        var canvas = g('canvas');
+        var canvas = g('shape-layer');
         var context = canvas.getContext('2d');
 
         var thicknessInput = g('input-thickness');
@@ -44,7 +44,14 @@ define(function (require, exports) {
             }
         };
 
-        retina(canvas);
+
+
+        var painter = new Painter({
+            shapeCanvas: canvas,
+            effectCanvas: g('effect-layer')
+        });
+
+        painter.startDrawing('doodle');
 
         context.lineWidth = 0.5;
         context.lineCap = 'round';
@@ -55,12 +62,6 @@ define(function (require, exports) {
         grid(context, 10, 10);
         context.stroke();
         context.restore();
-
-        var painter = new Painter({
-            context: context
-        });
-
-        painter.startDrawing('doodle');
     };
 
 });
