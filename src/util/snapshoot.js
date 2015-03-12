@@ -14,7 +14,7 @@ define(function (require, exports, module) {
     return function (context) {
 
         var canvas = context.canvas;
-
+console.log(11)
         return context.getImageData(
             0,
             0,

@@ -55,8 +55,6 @@ define(function (require, exports, module) {
 
             var me = this;
 
-            me.randomColor = randomColor(0.1);
-
             if (me.points) {
                 extend(me, getRect(me.points));
             }
@@ -169,7 +167,7 @@ define(function (require, exports, module) {
 
             context.save();
 
-            context.fillStyle = me.randomColor;
+            context.fillStyle = me.boxColor;
             context.beginPath();
 
             context.rect(me.x, me.y, me.width, me.height);
@@ -189,6 +187,7 @@ define(function (require, exports, module) {
 
     Shape.defaultOptions = {
         z: 0,
+        boxColor: randomColor(0.3),
         shadow: {
             color: 'rgba(0,0,0,0.4)',
             offsetX: 2,

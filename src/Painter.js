@@ -12,6 +12,12 @@ define(function (require, exports, module) {
     var retina = require('./util/retina');
     var Shape = require('./Shape');
 
+    /**
+     *
+     * @param {Object} options
+     * @property {HTMLElement} options.shapeCanvas
+     * @property {HTMLElement} options.effectCanvas
+     */
     function Painter(options) {
         extend(this, options);
         this.init();
@@ -37,12 +43,23 @@ define(function (require, exports, module) {
 
         },
 
+        /**
+         * 添加形状
+         *
+         * @param {Shape} shape
+         */
         addShape: function (shape) {
 
-            var index = this.history.push(shape);
-            shape.index = index - 1;
+            var me = this;
+
+            var index = me.history.push(shape) - 1;
+
+            // 添加索引，方便删除
+            shape.index = index;
 
             shape.trim();
+
+            me.refresh(index);
 
             console.log(shape.x, shape.y, shape.width, shape.height);
         },
@@ -80,11 +97,7 @@ define(function (require, exports, module) {
 
             var shape = shapes[ shapes.length - 1 ];
 
-            shape.undo(
-                getContext(me.shapeCanvas)
-            );
-
-            me.refresh(shape.index);
+            me.refresh(shape.index, shape);
 
         },
 
@@ -136,11 +149,8 @@ define(function (require, exports, module) {
 
             var me = this;
 
-            var shapeCanvas = me.shapeCanvas;
-            var shapeContext = getContext(shapeCanvas);
-
+            var shapeContext = getContext(me.shapeCanvas);
             var effectCanvas = me.effectCanvas;
-            var effectContext = getContext(effectCanvas);
 
             var shape;
 
@@ -178,7 +188,7 @@ define(function (require, exports, module) {
 
                     document.onmouseup = function () {
 
-                        draw('up');
+                        shape.undo(shapeContext);
 
                         me.addShape(shape);
 
@@ -195,21 +205,23 @@ define(function (require, exports, module) {
 
         },
 
-        stopDrawing: function () {
-
-            var me = this;
-
-            me.shapeCanvas.onmousedown = null;
-
-        },
-
-        refresh: function (index) {
+        /**
+         * 刷新画布
+         *
+         * @param {number=} index
+         * @param {Shape=} base
+         */
+        refresh: function (index, base) {
 
             index = index || 0;
 
             var me = this;
             var history = me.history;
             var context = getContext(me.shapeCanvas);
+
+            if (base) {
+                base.undo(context);
+            }
 
             for (var i = index, len = history.length, shape; i < len; i++) {
 
