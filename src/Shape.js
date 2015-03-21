@@ -7,16 +7,15 @@ define(function (require, exports, module) {
     'use strict';
 
     var extend = require('./util/extend');
-    var enableShadow = require('./util/enableShadow');
-    var disableShadow = require('./util/disableShadow');
     var getRect = require('./util/rect');
     var randomColor = require('./util/randomColor');
+    var enableShadow = require('./util/enableShadow');
+    var disableShadow = require('./util/disableShadow');
 
     /**
      *
      * @param {Object} options
      * @property {Array.<Object>} options.points 用户操作产生的轨迹点
-     * @property {string} options.action 操作类型，如 add remove
      * @property {string} options.name 形状名称
      *
      * @property {number} options.x
@@ -25,7 +24,8 @@ define(function (require, exports, module) {
      * @property {number} options.width
      * @property {number} options.height
      *
-     * @property {ImageData} options.snapshoot
+     * @property {number} options.canvasWidth 画布宽度
+     * @property {number} options.canvasHeight 画布高度
      *
      * @property {string} options.text 文本
      *
@@ -138,12 +138,6 @@ define(function (require, exports, module) {
 
         },
 
-        undo: function (context) {
-
-            context.putImageData(this.snapshoot, 0, 0);
-
-        },
-
         /**
          * 判断 point 是否在形状的矩形范围内
          *
@@ -161,33 +155,30 @@ define(function (require, exports, module) {
 
         },
 
-        highlight: function (context) {
+        /**
+         * 显示边界
+         *
+         * @param {CanvasRenderingContext2D} context
+         */
+        showBoundary: function (context) {
 
             var me = this;
 
             context.save();
 
-            context.fillStyle = me.boxColor;
+            context.fillStyle = me.boundaryColor;
             context.beginPath();
-
             context.rect(me.x, me.y, me.width, me.height);
-
             context.fill();
 
             context.restore();
 
-
-        },
-
-        nohighlight: function () {
-
         }
-
     };
 
     Shape.defaultOptions = {
         z: 0,
-        boxColor: randomColor(0.3),
+        boundaryColor: randomColor(0.3),
         shadow: {
             color: 'rgba(0,0,0,0.4)',
             offsetX: 2,

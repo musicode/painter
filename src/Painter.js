@@ -6,238 +6,144 @@ define(function (require, exports, module) {
 
     'use strict';
 
-    var window2Canvas = require('./util/window2Canvas');
-    var snapshoot = require('./util/snapshoot');
     var extend = require('./util/extend');
-    var retina = require('./util/retina');
+    var window2Canvas = require('./util/window2Canvas');
+    var saveDrawingSurface = require('./util/saveDrawingSurface');
+    var restoreDrawingSurface = require('./util/restoreDrawingSurface');
+
     var Shape = require('./Shape');
 
     /**
      *
      * @param {Object} options
-     * @property {HTMLElement} options.shapeCanvas
-     * @property {HTMLElement} options.effectCanvas
+     * @property {CanvasRenderingContext2D} options.context
+     * @property {Function} options.onAddShape
      */
     function Painter(options) {
         extend(this, options);
-        this.init();
     }
 
     Painter.prototype = {
 
         constructor: Painter,
 
-        init: function () {
-
-            var me = this;
-
-            /**
-             * 操作历史
-             *
-             * @type {Array}
-             */
-            me.history = [ ];
-
-            retina(me.shapeCanvas);
-            retina(me.effectCanvas);
-
-        },
-
         /**
-         * 添加形状
+         * 开始画形状
          *
-         * @param {Shape} shape
+         * @param {Object} options
+         * @property {string} options.name 形状名称
+         * @property {number=} options.thickness 粗细
+         * @property {string=} options.strokeColor 描边色
+         * @property {string=} options.fillColor 填充色
          */
-        addShape: function (shape) {
+        start: function (options) {
 
             var me = this;
 
-            var index = me.history.push(shape) - 1;
-
-            // 添加索引，方便删除
-            shape.index = index;
-
-            shape.trim();
-
-            me.refresh(index);
-
-            console.log(shape.x, shape.y, shape.width, shape.height);
-        },
-
-        /**
-         * 删除 Shape
-         *
-         * @param {Array.<Object} shapes
-         */
-        removeShape: function (shapes) {
-
-            if (!Array.isArray(shapes)) {
-                shapes = [ shapes ];
-            }
-
-            if (shapes.length === 0) {
-                return;
-            }
-
-            // shapes 按索引倒序排列，方便删除
-            shapes = shapes.sort(
-                function (a, b) {
-                    return b.index - a.index;
-                }
-            );
-
-            var me = this;
-            var history = me.history;
-
-            shapes.forEach(
-                function (shape) {
-                    history.splice(shape.index, 1);
-                }
-            );
-
-            var shape = shapes[ shapes.length - 1 ];
-
-            me.refresh(shape.index, shape);
-
-        },
-
-        startClearing: function (type) {
-
-            var me = this;
-            var shapeCanvas = me.shapeCanvas;
-            var shapeContext = getContext(shapeCanvas);
-
-            var effectCanvas = me.effectCanvas;
-            var effectContext = getContext(effectCanvas);
-
-            var history = me.history;
-
-            effectCanvas.onmousedown = function (e) {
-
-                var point = window2Canvas(effectCanvas, e.clientX, e.clientY);
-
-                var shapes = [ ];
-
-                history.forEach(
-                    function (shape) {
-                        if (shape.inRect(point)) {
-                            shapes.push(shape);
-                        }
-                    }
-                );
-
-                me.removeShape(shapes);
-
-            };
-            effectCanvas.onmousemove = function (e) {
-
-                var point = window2Canvas(effectCanvas, e.clientX, e.clientY);
-
-                effectContext.clearRect(0, 0, effectCanvas.width, effectCanvas.height);
-
-                history.forEach(
-                    function (shape) {
-                        if (shape.inRect(point)) {
-                            shape.highlight(effectContext);
-                        }
-                    }
-                );
-            };
-        },
-
-        startDrawing: function (name) {
-
-            var me = this;
-
-            var shapeContext = getContext(me.shapeCanvas);
-            var effectCanvas = me.effectCanvas;
+            var context = me.context;
+            var canvas = context.canvas;
 
             var shape;
+            var drawingSurface;
 
             var draw = function (action) {
-                shape.undo(shapeContext);
-                return shape.draw(shapeContext, action);
+                restoreDrawingSurface(context, drawingSurface);
+                return shape.draw(context, action);
             };
 
-            effectCanvas.onmousedown = function (e) {
+            var onmousemove = function () {
+
+                shape.addPoint(
+                    window2Canvas(canvas, e.clientX, e.clientY)
+                );
+
+                draw('move');
+
+            };
+
+            var onmouseup = function () {
+
+                restoreDrawingSurface(context, drawingSurface);
+
+                me.onAddShape(shape);
+
+                document.removeEventListener(
+                    'mousemove',
+                    onmousemove
+                );
+
+                document.removeEventListener(
+                    'mouseup',
+                    onmouseup
+                );
+
+            };
+
+            var onmousedown = function () {
+
+                drawingSurface = saveDrawingSurface(context);
 
                 shape = new Shape({
-                    name: name,
-                    action: 'add',
-                    snapshoot: snapshoot(shapeContext),
+                    name: opions.name,
                     points: [
-                        window2Canvas(effectCanvas, e.clientX, e.clientY)
+                        window2Canvas(canvas, e.clientX, e.clientY)
                     ],
                     style: {
-                        thickness: shapeContext.lineWidth,
-                        stroke: shapeContext.strokeStyle,
-                        fill: shapeContext.fillStyle
+                        thickness: options.thickness,
+                        stroke: options.strokeColor,
+                        fill: options.fillColor
                     }
                 });
 
                 if (draw('down')) {
 
-                    document.onmousemove = function (e) {
+                    document.addEventListener(
+                        'mousemove',
+                        onmousemove
+                    );
 
-                        shape.addPoint(
-                            window2Canvas(effectCanvas, e.clientX, e.clientY)
-                        );
-
-                        draw('move');
-                    };
-
-                    document.onmouseup = function () {
-
-                        shape.undo(shapeContext);
-
-                        me.addShape(shape);
-
-                        document.onmousemove =
-                        document.onmouseup = null;
-
-                    };
+                    document.addEventListener(
+                        'mouseup',
+                        onmouseup
+                    );
 
                 }
 
             };
 
+            canvas.addEventListener(
+                'mousedown',
+                onmousedown
+            );
 
+            me.onmousedown = onmousedown;
 
         },
 
         /**
-         * 刷新画布
-         *
-         * @param {number=} index
-         * @param {Shape=} base
+         * 停止绘制
          */
-        refresh: function (index, base) {
-
-            index = index || 0;
+        end: function () {
 
             var me = this;
-            var history = me.history;
-            var context = getContext(me.shapeCanvas);
+            var onmousedown = me.onmousedown;
 
-            if (base) {
-                base.undo(context);
-            }
+            if (onmousedown) {
 
-            for (var i = index, len = history.length, shape; i < len; i++) {
+                var canvas = me.context.canvas;
 
-                shape = history[i];
+                canvas.removeEventListener(
+                    'mousedown',
+                    onmousedown
+                );
 
-                shape.index = i;
-                shape.snapshoot = snapshoot(context);
-                shape.draw(context);
+                me.onmousedown = null;
 
             }
+
         }
-    };
 
-    function getContext(canvas) {
-        return canvas.getContext('2d');
-    }
+    };
 
     return Painter;
 

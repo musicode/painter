@@ -1,5 +1,5 @@
 /**
- * @file 画布快照
+ * @file 保存绘图表面
  * @author musicode
  */
 define(function (require, exports, module) {
@@ -7,9 +7,10 @@ define(function (require, exports, module) {
     'use strict';
 
     /**
-     * 画布快照
+     * 保存绘图表面
      *
      * @param {CanvasRenderingContext2D} context
+     * @return {ImageData}
      */
     return function (context) {
 
