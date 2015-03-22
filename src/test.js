@@ -2,7 +2,7 @@ define(function (require, exports) {
 
     'use strict';
 
-    var Painter = require('./Painter');
+    var Painter = require('./Main');
 
     var retina = require('./util/retina');
 
@@ -18,7 +18,7 @@ define(function (require, exports) {
 
     exports.init = function () {
 
-        var canvas = g('shape-layer');
+        var canvas = g('canvas');
         var context = canvas.getContext('2d');
 
         var thicknessInput = g('input-thickness');
@@ -35,10 +35,15 @@ define(function (require, exports) {
             var target = e.target;
             if (target.tagName === 'INPUT') {
                 if (target.name === 'shape') {
-                    painter.startDrawing(target.value);
+                    painter.paint({
+                        name: target.value,
+                        thickness: context.lineWidth,
+                        fillColor: context.fillStyle,
+                        strokeColor: context.strokeStyle
+                    });
                 }
                 else if (target.name === 'eraser') {
-                    painter.startClearing();
+                    painter.erase();
                 }
             }
         };
@@ -46,11 +51,14 @@ define(function (require, exports) {
 
 
         var painter = new Painter({
-            shapeCanvas: canvas,
-            effectCanvas: g('effect-layer')
+            context: context
         });
 
-        painter.startDrawing('doodle');
+        retina(canvas);
+
+        painter.paint({
+            name: 'doodle'
+        });
 
         context.lineWidth = 0.5;
         context.lineCap = 'round';

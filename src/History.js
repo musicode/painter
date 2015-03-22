@@ -27,26 +27,36 @@ define(function (require, exports, module) {
 
         },
 
-        addAction: function (action) {
+        addAction: function (actions) {
 
             var me = this;
-            var index = me.index;
-            var list = me.list;
 
+            // 准备数据
+            var list = me.list;
+            var index = me.index;
+
+            // 放弃 index 之后的部分
             if (index < list.length) {
                 list.length = index;
             }
 
-            list[index] = action;
-
-            // 添加索引，方便删除
-            action.index = index;
-
-            me.index++;
-
-            if (typeof me.onAdd === 'function') {
-                me.onAdd()
+            if (!Array.isArray(actions)) {
+                actions = [ actions ];
             }
+
+            actions.forEach(
+                function (action) {
+
+                    // 添加索引，方便删除
+                    action.index = index;
+                    list[ index ] = action;
+
+                    index++;
+
+                }
+            );
+
+            me.index = index;
 
         },
 
@@ -56,11 +66,7 @@ define(function (require, exports, module) {
                 actions = [ actions ];
             }
 
-            if (actions.length === 0) {
-                return;
-            }
-
-            // actions 按索引倒序排列，方便删除
+            // actions 按索引从小到大排序
             actions = actions.sort(
                 function (a, b) {
                     return b.index - a.index;
@@ -70,15 +76,24 @@ define(function (require, exports, module) {
             var me = this;
             var list = me.list;
 
+            var current = actions.shift();
             var offset = 0;
 
-            actions.forEach(
-                function (action) {
-                    list.splice(action.index, 1);
-                    if (action.index < me.index) {
+            me.iterator(
+                function (action, index) {
+                    if (current && action.index === current.index) {
+
                         offset++;
+
+                        list.splice(index, 1);
+                        current = actions.shift();
+
                     }
-                }
+                    else {
+                        action.index -= offset;
+                    }
+                },
+                current.index
             );
 
             me.index -= offset;
@@ -99,14 +114,13 @@ define(function (require, exports, module) {
 
         },
 
-        redo: function () {
+        redo: function (context) {
 
             var me = this;
-
             var action = me.list[ me.index ];
 
             if (action) {
-                action.redo(context);
+                action.do(context);
                 me.index++;
             }
 
@@ -117,8 +131,12 @@ define(function (require, exports, module) {
             var me = this;
             var list = me.list;
 
-            for (var i = startIndex || 0, len = me.index; i < len; i++) {
+            var i = startIndex || 0;
+            var len = me.index;
+
+            while (i < len) {
                 handler(list[i], i);
+                i++;
             }
 
         }

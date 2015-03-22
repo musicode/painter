@@ -7,6 +7,7 @@ define(function (require, exports, module) {
     'use strict';
 
     var extend = require('./util/extend');
+    var window2Canvas = require('./util/window2Canvas');
     var saveDrawingSurface = require('./util/saveDrawingSurface');
     var restoreDrawingSurface = require('./util/restoreDrawingSurface');
 
@@ -24,6 +25,11 @@ define(function (require, exports, module) {
 
         constructor: Eraser,
 
+        /**
+         * 开始擦除
+         *
+         * @param {Function} iterator 形状遍历器
+         */
         start: function (iterator) {
 
             var me = this;
@@ -32,37 +38,33 @@ define(function (require, exports, module) {
 
             var drawingSurface = saveDrawingSurface(context);
 
+            var shape;
+
             var onmousedown = function (e) {
-
-                var point = window2Canvas(canvas, e.clientX, e.clientY);
-
-                var shapes = [ ];
-
-                iterator(
-                    function (shape) {
-                        if (shape.inRect(point)) {
-                            shapes.push(shape);
-                        }
-                    }
-                );
-
-                me.onRemoveShape(shape);
-
+                if (shape) {
+                    me.onRemoveShape(shape);
+                }
             };
 
             var onmousemove = function (e) {
 
-                var point = window2Canvas(effectCanvas, e.clientX, e.clientY);
+                var point = window2Canvas(canvas, e.clientX, e.clientY);
 
                 restoreDrawingSurface(context, drawingSurface);
 
+                shape = null;
+
                 iterator(
-                    function (shape) {
-                        if (shape.inRect(point)) {
-                            shape.showBoundary(context);
+                    function (shapeItem) {
+                        if (shapeItem.inRect(point)) {
+                            shape = shapeItem;
                         }
                     }
                 );
+
+                if (shape) {
+                    shape.showBoundary(context);
+                }
 
             };
 
@@ -81,6 +83,9 @@ define(function (require, exports, module) {
 
         },
 
+        /**
+         * 结束擦除
+         */
         end: function () {
 
             var me = this;

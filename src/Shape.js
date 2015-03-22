@@ -6,8 +6,10 @@ define(function (require, exports, module) {
 
     'use strict';
 
-    var extend = require('./util/extend');
+    var guid = require('./util/guid');
     var getRect = require('./util/rect');
+    var extend = require('./util/extend');
+
     var randomColor = require('./util/randomColor');
     var enableShadow = require('./util/enableShadow');
     var disableShadow = require('./util/disableShadow');
@@ -54,6 +56,13 @@ define(function (require, exports, module) {
         init: function () {
 
             var me = this;
+
+            /**
+             * 形状全局唯一的 ID
+             *
+             * @type {string}
+             */
+            me.id = guid();
 
             if (me.points) {
                 extend(me, getRect(me.points));
@@ -178,7 +187,7 @@ define(function (require, exports, module) {
 
     Shape.defaultOptions = {
         z: 0,
-        boundaryColor: randomColor(0.3),
+        boundaryColor: randomColor(0.1),
         shadow: {
             color: 'rgba(0,0,0,0.4)',
             offsetX: 2,

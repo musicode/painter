@@ -51,7 +51,7 @@ define(function (require, exports, module) {
                 return shape.draw(context, action);
             };
 
-            var onmousemove = function () {
+            var onmousemove = function (e) {
 
                 shape.addPoint(
                     window2Canvas(canvas, e.clientX, e.clientY)
@@ -79,12 +79,12 @@ define(function (require, exports, module) {
 
             };
 
-            var onmousedown = function () {
+            var onmousedown = function (e) {
 
                 drawingSurface = saveDrawingSurface(context);
 
                 shape = new Shape({
-                    name: opions.name,
+                    name: options.name,
                     points: [
                         window2Canvas(canvas, e.clientX, e.clientY)
                     ],
