@@ -17,6 +17,7 @@ define(function (require, exports, module) {
      *
      * @param {Object} options
      * @property {CanvasRenderingContext2D} options.context
+     * @property {Function} options.stage
      */
     function Main(options) {
         extend(this, options);
@@ -30,28 +31,30 @@ define(function (require, exports, module) {
         init: function () {
 
             var me = this;
-
-            var history =
-            me.history = new History();
-
             var context = me.context;
 
-            var map = { };
+            var history =
+            me.history = new History({
+                context: context
+            });
+
+            history.push(
+                new Action({
+                    type: Action.ADD,
+                    do: me.stage
+                })
+            );
 
             me.painter = new Painter({
                 context: context,
                 onAddShape: function (shape) {
 
-                    var action = new Action({
-                        type: Action.ADD,
-                        shape: shape
-                    });
-
-                    map[ shape.id ] = action;
-
-                    action.refresh(context);
-
-                    history.addAction(action);
+                    history.push(
+                        new Action({
+                            type: Action.ADD,
+                            shape: shape
+                        })
+                    );
 
                 }
             });
@@ -60,16 +63,12 @@ define(function (require, exports, module) {
                 context: context,
                 onRemoveShape: function (shape) {
 
-                    var shapeId = shape.id;
-
-                    var action = new Action({
-                        type: Action.REMOVE,
-                        shapeId: shapeId
-                    });
-
-                    history.addAction(action);
-
-                    me.refresh();
+                    history.push(
+                        new Action({
+                            type: Action.REMOVE,
+                            shape: shape
+                        })
+                    );
 
                 }
             });
@@ -103,27 +102,22 @@ define(function (require, exports, module) {
         refresh: function () {
 
             var me = this;
-            var history = me.history;
-            var removed = { };
-
-            history.iterator(
-                function (action) {
-                    if (action.type === Action.REMOVE) {
-                        removed[ action.shapeId ] = 1;
-                    }
-                }
-            );
-
             var context = me.context;
 
-            history.iterator(
-                function (action) {
-                    if (action.type === Action.ADD
-                        && !removed[ action.shape.id ]
-                    ) {
-                        action.refresh(context);
+            me.history.iterator(
+                function (action, index) {
+
+                    if (index > 0) {
+                        action.save(context);
                     }
-                }
+                    else {
+                        action.restore(context);
+                    }
+
+                    action.do(context);
+
+                },
+                'live'
             );
         },
 
@@ -133,17 +127,22 @@ define(function (require, exports, module) {
         erase: function () {
 
             var me = this;
+            var history = me.history;
+            var eraser = me.eraser;
 
             me.painter.end();
+            eraser.end();
 
-            me.eraser.start(
+            eraser.start(
                 function (fn) {
-                    me.history.iterator(
+                    history.iterator(
                         function (action) {
-                            if (action.type === Action.ADD) {
-                                fn(action.shape);
+                            var shape = action.shape;
+                            if (shape) {
+                                return fn(shape);
                             }
-                        }
+                        },
+                        'live'
                     );
                 }
             );
@@ -162,10 +161,12 @@ define(function (require, exports, module) {
         paint: function (options) {
 
             var me = this;
+            var painter = me.painter;
 
             me.eraser.end();
+            painter.end();
 
-            me.painter.start(options);
+            painter.start(options);
 
         }
 

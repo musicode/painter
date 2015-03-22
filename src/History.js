@@ -7,7 +7,13 @@ define(function (require, exports, module) {
     'use strict';
 
     var extend = require('./util/extend');
+    var Action = require('./Action');
 
+    /**
+     *
+     * @param {Object} options
+     * @property {CanvasRenderingContext2D} options.context
+     */
     function History(options) {
         extend(this, options);
         this.init();
@@ -21,82 +27,81 @@ define(function (require, exports, module) {
 
             var me = this;
 
-            me.list = [ ];
+            me.fullList = [ ];
+
+            me.liveList = [ ];
 
             me.index = 0;
 
         },
 
-        addAction: function (actions) {
+        indexOf: function (shape) {
+
+            var index;
+
+            var me = this;
+            var fullList = me.fullList;
+
+            for (var i = 0, len = me.index; i < len; i++) {
+                if (fullList[i].shape === shape) {
+                    index = i;
+                    break;
+                }
+            }
+
+            return index;
+
+        },
+
+        push: function (actions) {
 
             var me = this;
 
             // 准备数据
-            var list = me.list;
+            var fullList = me.fullList;
             var index = me.index;
 
             // 放弃 index 之后的部分
-            if (index < list.length) {
-                list.length = index;
+            if (index < fullList.length) {
+                fullList.length = index;
             }
 
             if (!Array.isArray(actions)) {
                 actions = [ actions ];
             }
+
+            var context = me.context;
+            var liveList = me.liveList;
 
             actions.forEach(
                 function (action) {
 
-                    // 添加索引，方便删除
-                    action.index = index;
-                    list[ index ] = action;
+                    action.save(context);
 
-                    index++;
+                    if (action.type === Action.REMOVE) {
 
-                }
-            );
+                        var removedIndex = me.indexOf(action.shape);
 
-            me.index = index;
+                        liveList.splice(removedIndex, 1);
 
-        },
-
-        removeAction: function (actions) {
-
-            if (!Array.isArray(actions)) {
-                actions = [ actions ];
-            }
-
-            // actions 按索引从小到大排序
-            actions = actions.sort(
-                function (a, b) {
-                    return b.index - a.index;
-                }
-            );
-
-            var me = this;
-            var list = me.list;
-
-            var current = actions.shift();
-            var offset = 0;
-
-            me.iterator(
-                function (action, index) {
-                    if (current && action.index === current.index) {
-
-                        offset++;
-
-                        list.splice(index, 1);
-                        current = actions.shift();
+                        action.do = Action.removeFactory(
+                            fullList[ removedIndex ],
+                            fullList.slice(removedIndex + 1, index)
+                        );
 
                     }
                     else {
-                        action.index -= offset;
+                        liveList.push(action);
                     }
-                },
-                current.index
-            );
 
-            me.index -= offset;
+                    action.do(context);
+
+                    fullList[ index++ ] = action;
+
+                    me.index = index;
+
+                }
+            );
 
         },
 
@@ -105,11 +110,17 @@ define(function (require, exports, module) {
             var me = this;
 
             var index = me.index - 1;
-            var action = me.list[ index ];
+            var action = me.fullList[ index ];
 
             if (action) {
+
+                if (action.type === Action.ADD) {
+                    me.liveList.pop();
+                }
+
                 action.undo(context);
                 me.index = index;
+
             }
 
         },
@@ -117,26 +128,44 @@ define(function (require, exports, module) {
         redo: function (context) {
 
             var me = this;
-            var action = me.list[ me.index ];
+            var action = me.fullList[ me.index ];
 
             if (action) {
+
+                if (action.type === Action.ADD) {
+                    me.liveList.push(action);
+                }
+
                 action.do(context);
                 me.index++;
+
             }
 
         },
 
-        iterator: function (handler, startIndex) {
+        iterator: function (handler, type) {
 
             var me = this;
-            var list = me.list;
 
-            var i = startIndex || 0;
-            var len = me.index;
+            var list;
+            var len;
 
-            while (i < len) {
-                handler(list[i], i);
-                i++;
+            if (type === 'live') {
+                list = me.liveList;
+                len = list.length;
+            }
+            else {
+                list = fullList;
+                len = me.index;
+            }
+
+            for (var i = 0; i < len; i++) {
+                if (handler(list[i], i) !== false) {
+                    i++;
+                }
+                else {
+                    break;
+                }
             }
 
         }

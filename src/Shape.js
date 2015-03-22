@@ -64,8 +64,8 @@ define(function (require, exports, module) {
              */
             me.id = guid();
 
-            if (me.points) {
-                extend(me, getRect(me.points));
+            if (!Array.isArray(me.points)) {
+                me.points = [ ];
             }
 
         },
@@ -75,15 +75,6 @@ define(function (require, exports, module) {
             var me = this;
 
             me.points.push(point);
-
-            extend(
-                me,
-                getRect([
-                    { x: me.x, y: me.y },
-                    { x: me.x + me.width, y: me.y + me.height },
-                    point
-                ])
-            );
 
         },
 

@@ -14,8 +14,8 @@ define(function (require, exports, module) {
      * @param {Object} options
      * @property {string} options.type 操作类型，可选值有 add remove
      * @property {number=} options.index 当前操作在历史纪录中的索引
-     * @property {Shape} options.shape 形状
-     * @property {ImageData} options.snapshoot 操作之前的快照
+     * @property {Shape=} options.shape 形状
+     * @property {ImageData=} options.snapshoot 操作之前的快照
      */
     function Action(options) {
         extend(this, options);
@@ -35,26 +35,37 @@ define(function (require, exports, module) {
         /**
          * 回到操作之前的快照
          */
-        undo: function (context) {
+        restore: function (context) {
             restoreDrawingSurface(context, this.snapshoot);
         },
 
         /**
-         * 刷新，包括刷新快照
+         * 保存快照
          */
-        refresh: function (context) {
-
-            var me = this;
-
-            me.snapshoot = saveDrawingSurface(context);
-            me.do(context);
-
+        save: function (context) {
+            this.snapshoot = saveDrawingSurface(context);
         }
     };
 
     Action.ADD = 'add';
 
     Action.REMOVE = 'remove';
+
+    Action.removeFactory = function (removedAction, actionList) {
+
+        return function (context) {
+
+            removedAction.restore(context);
+
+            actionList.forEach(
+                function (action) {
+                    action.save(context);
+                    action.do(context);
+                }
+            );
+
+        }
+    };
 
 
     return Action;

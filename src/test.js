@@ -48,13 +48,21 @@ define(function (require, exports) {
             }
         };
 
-
+        retina(canvas);
 
         var painter = new Painter({
-            context: context
+            context: context,
+            stage: function (context) {
+                context.save();
+                context.beginPath();
+                context.strokeStyle = 'rgba(0,0,0,0.1)';
+                grid(context, 10, 10);
+                context.stroke();
+                context.restore();
+            }
         });
 
-        retina(canvas);
+
 
         painter.paint({
             name: 'doodle'
@@ -63,12 +71,7 @@ define(function (require, exports) {
         context.lineWidth = 0.5;
         context.lineCap = 'round';
 
-        context.save();
-        context.beginPath();
-        context.strokeStyle = 'rgba(0,0,0,0.1)';
-        grid(context, 10, 10);
-        context.stroke();
-        context.restore();
+
     };
 
 });

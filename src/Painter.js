@@ -65,6 +65,8 @@ define(function (require, exports, module) {
 
                 restoreDrawingSurface(context, drawingSurface);
 
+                shape.trim();
+
                 me.onAddShape(shape);
 
                 document.removeEventListener(
