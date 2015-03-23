@@ -42,8 +42,12 @@ define(function (require, exports, module) {
 
             var onmousedown = function (e) {
                 if (shape) {
+
                     restoreDrawingSurface(context, drawingSurface);
+
                     me.onRemoveShape(shape);
+
+                    drawingSurface = saveDrawingSurface(context);
                 }
             };
 

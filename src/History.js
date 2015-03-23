@@ -35,19 +35,19 @@ define(function (require, exports, module) {
 
         },
 
-        indexOf: function (shape) {
+        indexOf: function (shape, type) {
 
             var index;
 
-            var me = this;
-            var fullList = me.fullList;
-
-            for (var i = 0, len = me.index; i < len; i++) {
-                if (fullList[i].shape === shape) {
-                    index = i;
-                    break;
-                }
-            }
+            this.iterator(
+                function (action, i) {
+                    if (action.shape === shape) {
+                        index = i;
+                        return false;
+                    }
+                },
+                type
+            );
 
             return index;
 
@@ -80,14 +80,19 @@ define(function (require, exports, module) {
 
                     if (action.type === Action.REMOVE) {
 
-                        var removedIndex = me.indexOf(action.shape);
+                        var shape = action.shape;
 
-                        liveList.splice(removedIndex, 1);
+                        var removedIndex = me.indexOf(shape);
 
                         action.do = Action.removeFactory(
                             fullList[ removedIndex ],
                             fullList.slice(removedIndex + 1, index)
                         );
+
+                        removedIndex = me.indexOf(shape, 'live');
+
+                        // 这里删除有问题
+                        liveList.splice(removedIndex, 1);
 
                     }
                     else {
@@ -155,15 +160,12 @@ define(function (require, exports, module) {
                 len = list.length;
             }
             else {
-                list = fullList;
+                list = me.fullList;
                 len = me.index;
             }
 
             for (var i = 0; i < len; i++) {
-                if (handler(list[i], i) !== false) {
-                    i++;
-                }
-                else {
+                if (handler(list[i], i) === false) {
                     break;
                 }
             }
