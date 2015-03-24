@@ -26,9 +26,6 @@ define(function (require, exports, module) {
      * @property {number} options.width
      * @property {number} options.height
      *
-     * @property {number} options.canvasWidth 画布宽度
-     * @property {number} options.canvasHeight 画布高度
-     *
      * @property {string} options.text 文本
      *
      * @property {Object} options.style 样式
@@ -72,9 +69,7 @@ define(function (require, exports, module) {
 
         addPoint: function (point) {
 
-            var me = this;
-
-            me.points.push(point);
+            this.points.push(point);
 
         },
 
@@ -84,7 +79,7 @@ define(function (require, exports, module) {
          * 比如线条只有起点和终点有意义
          *
          */
-        trim: function () {
+        format: function (width, height) {
 
             var me = this;
 
@@ -94,6 +89,12 @@ define(function (require, exports, module) {
 
         },
 
+        /**
+         *
+         * @param {CanvasRenderingContext2D} context
+         * @param {string=} action
+         * @return {boolean=}
+         */
         draw: function (context, action) {
 
             var me = this;
@@ -114,7 +115,6 @@ define(function (require, exports, module) {
                     context.fillStyle = style.fill;
                 }
             }
-
 
             var shadow = me.shadow;
 
@@ -141,7 +141,7 @@ define(function (require, exports, module) {
         /**
          * 判断 point 是否在形状的矩形范围内
          *
-         * @param {Object} point
+         * @param {Object} point 经过缩放的点，x 和 y 均在 -1 到 1 之间
          * @return {boolean}
          */
         inRect: function (point) {
@@ -179,6 +179,9 @@ define(function (require, exports, module) {
     Shape.defaultOptions = {
         z: 0,
         boundaryColor: randomColor(0.1),
+        style: {
+            thickness: 0.5
+        },
         shadow: {
             color: 'rgba(0,0,0,0.4)',
             offsetX: 2,
@@ -186,6 +189,7 @@ define(function (require, exports, module) {
             blur: 4
         }
     };
+
 
     var painters = {
         doodle: require('./painter/doodle'),

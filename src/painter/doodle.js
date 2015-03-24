@@ -11,6 +11,8 @@ define(function (require, exports, module) {
         up: require('../path/doodle')
     };
 
+    var zoomIn = require('../util/zoomIn');
+
     /**
      * 精简点数组
      *
@@ -31,14 +33,21 @@ define(function (require, exports, module) {
      */
     exports.draw = function (context, shape, action) {
 
-        context.beginPath();
-
         action = action || 'up';
 
         var fn = actionHandler[action];
 
         if (fn) {
-            fn(context, shape.points);
+
+            var canvas = context.canvas;
+
+            context.beginPath();
+
+            fn(
+                context,
+                zoomIn(shape.points, canvas.width, canvas.height)
+            );
+
             context.stroke();
         }
 

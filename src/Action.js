@@ -51,22 +51,6 @@ define(function (require, exports, module) {
 
     Action.REMOVE = 'remove';
 
-    Action.removeFactory = function (removedAction, actionList) {
-
-        return function (context) {
-
-            removedAction.restore(context);
-
-            actionList.forEach(
-                function (action) {
-                    action.save(context);
-                    action.do(context);
-                }
-            );
-
-        }
-    };
-
 
     return Action;
 

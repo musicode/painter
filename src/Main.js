@@ -12,6 +12,7 @@ define(function (require, exports, module) {
     var Eraser = require('./Eraser');
 
     var extend = require('./util/extend');
+    var retina = require('./util/retina');
 
     /**
      *
@@ -167,6 +168,22 @@ define(function (require, exports, module) {
             painter.end();
 
             painter.start(options);
+
+        },
+
+        undo: function () {
+
+            var me = this;
+
+            me.history.undo(me.context);
+
+        },
+
+        redo: function () {
+
+            var me = this;
+
+            me.history.redo(me.context);
 
         }
 

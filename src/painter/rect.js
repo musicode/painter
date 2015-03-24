@@ -8,6 +8,8 @@ define(function (require, exports, module) {
 
     var drawRect = require('../path/rect');
 
+    var zoomIn = require('../util/zoomIn');
+
     /**
      * 精简点数组
      *
@@ -41,8 +43,19 @@ define(function (require, exports, module) {
 
         var points = exports.trim(shape.points);
 
-        var start = points[0];
-        var end = points[1];
+        var canvas = context.canvas;
+
+        var start = zoomIn(
+            points[0],
+            canvas.width,
+            canvas.height
+        );
+
+        var end = zoomIn(
+            points[points.length - 1],
+            canvas.width,
+            canvas.height
+        );
 
         context.beginPath();
         drawRect(context, start.x, start.y, end.x - start.x, end.y - start.y);

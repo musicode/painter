@@ -6,7 +6,19 @@ define(function (require, exports, module) {
 
     'use strict';
 
+    /**
+     * 历史纪录保存两个列表：
+     *
+     * fullList：保存完整的操作，包括删除操作，每个操作都会在执行前获取快照，以便回退
+     *
+     * liveList：保存存活的操作，删除操作会触发操作刷新快照
+     *
+     */
+
     var extend = require('./util/extend');
+    var saveDrawingSurface = require('./util/saveDrawingSurface');
+    var restoreDrawingSurface = require('./util/restoreDrawingSurface');
+
     var Action = require('./Action');
 
     /**
@@ -76,34 +88,49 @@ define(function (require, exports, module) {
             actions.forEach(
                 function (action) {
 
+console.time(action.type + '耗时');
+
                     action.save(context);
 
-                    if (action.type === Action.REMOVE) {
+                    var type = action.type;
+                    var shape = action.shape;
 
-                        var shape = action.shape;
+                    if (type === Action.REMOVE) {
 
-                        var removedIndex = me.indexOf(shape);
+                        var i = me.indexOf(shape, 'live');
+                        liveList[ i ].restore(context);
 
-                        action.do = Action.removeFactory(
-                            fullList[ removedIndex ],
-                            fullList.slice(removedIndex + 1, index)
-                        );
+                        liveList.splice(i, 1);
 
-                        removedIndex = me.indexOf(shape, 'live');
+                        var len = liveList.length;
 
-                        // 这里删除有问题
-                        liveList.splice(removedIndex, 1);
+                        while (i < len) {
+                            liveList[i].save(context);
+                            liveList[i].do(context);
+                            i++;
+                        }
+
+
+                        var snapshoot = saveDrawingSurface(context);
+
+                        action.do = function () {
+                            restoreDrawingSurface(context, snapshoot);
+                        };
 
                     }
                     else {
-                        liveList.push(action);
-                    }
+                        liveList.push(
+                            full2Live(action)
+                        );
 
-                    action.do(context);
+                        action.do(context);
+                    }
 
                     fullList[ index++ ] = action;
 
                     me.index = index;
+
+console.timeEnd(type + '耗时');
 
                 }
             );
@@ -116,14 +143,14 @@ define(function (require, exports, module) {
 
             var index = me.index - 1;
             var action = me.fullList[ index ];
-
+console.log('undo', index, action);
             if (action) {
 
                 if (action.type === Action.ADD) {
                     me.liveList.pop();
                 }
 
-                action.undo(context);
+                action.restore(context);
                 me.index = index;
 
             }
@@ -134,11 +161,13 @@ define(function (require, exports, module) {
 
             var me = this;
             var action = me.fullList[ me.index ];
-
+console.log('redo', me.index, action);
             if (action) {
 
                 if (action.type === Action.ADD) {
-                    me.liveList.push(action);
+                    me.liveList.push(
+                        full2Live(action)
+                    );
                 }
 
                 action.do(context);
@@ -173,6 +202,18 @@ define(function (require, exports, module) {
         }
 
     };
+
+    function full2Live(action) {
+
+        var item = new Action();
+
+        return extend(item, action);
+
+    }
+
+    function noop() {
+
+    }
 
     return History;
 

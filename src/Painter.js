@@ -7,6 +7,7 @@ define(function (require, exports, module) {
     'use strict';
 
     var extend = require('./util/extend');
+    var zoomOut = require('./util/zoomOut');
     var window2Canvas = require('./util/window2Canvas');
     var saveDrawingSurface = require('./util/saveDrawingSurface');
     var restoreDrawingSurface = require('./util/restoreDrawingSurface');
@@ -51,9 +52,14 @@ define(function (require, exports, module) {
                 return shape.draw(context, action);
             };
 
+            var addPoint = function (point) {
+                point = zoomOut(point, canvas.width, canvas.height);
+                shape.addPoint(point);
+            };
+
             var onmousemove = function (e) {
 
-                shape.addPoint(
+                addPoint(
                     window2Canvas(canvas, e.clientX, e.clientY)
                 );
 
@@ -65,7 +71,7 @@ define(function (require, exports, module) {
 
                 restoreDrawingSurface(context, drawingSurface);
 
-                shape.trim();
+                shape.format(canvas.width, canvas.height);
 
                 me.onAddShape(shape);
 
@@ -87,15 +93,16 @@ define(function (require, exports, module) {
 
                 shape = new Shape({
                     name: options.name,
-                    points: [
-                        window2Canvas(canvas, e.clientX, e.clientY)
-                    ],
                     style: {
                         thickness: options.thickness,
                         stroke: options.strokeColor,
                         fill: options.fillColor
                     }
                 });
+
+                addPoint(
+                    window2Canvas(canvas, e.clientX, e.clientY)
+                );
 
                 if (draw('down')) {
 

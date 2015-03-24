@@ -8,6 +8,8 @@ define(function (require, exports, module) {
 
     var drawLine = require('../path/line');
 
+    var zoomIn = require('../util/zoomIn');
+
     /**
      * 精简点数组
      *
@@ -32,8 +34,19 @@ define(function (require, exports, module) {
 
         var points = shape.points;
 
-        var start = points[0];
-        var end = points[points.length - 1];
+        var canvas = context.canvas;
+
+        var start = zoomIn(
+            points[0],
+            canvas.width,
+            canvas.height
+        );
+
+        var end = zoomIn(
+            points[points.length - 1],
+            canvas.width,
+            canvas.height
+        );
 
         context.beginPath();
         drawLine(context, start.x, start.y, end.x, end.y);
