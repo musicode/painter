@@ -163,12 +163,18 @@ define(function (require, exports, module) {
         showBoundary: function (context) {
 
             var me = this;
+            var canvas = context.canvas;
 
             context.save();
 
             context.fillStyle = me.boundaryColor;
             context.beginPath();
-            context.rect(me.x, me.y, me.width, me.height);
+            context.rect(
+                me.x * canvas.width,
+                me.y * canvas.height,
+                me.width * canvas.width,
+                me.height * canvas.height
+            );
             context.fill();
 
             context.restore();

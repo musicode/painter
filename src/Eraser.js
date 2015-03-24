@@ -7,6 +7,7 @@ define(function (require, exports, module) {
     'use strict';
 
     var extend = require('./util/extend');
+    var zoomOut = require('./util/zoomOut');
     var window2Canvas = require('./util/window2Canvas');
     var saveDrawingSurface = require('./util/saveDrawingSurface');
     var restoreDrawingSurface = require('./util/restoreDrawingSurface');
@@ -54,6 +55,8 @@ define(function (require, exports, module) {
             var onmousemove = function (e) {
 
                 var point = window2Canvas(canvas, e.clientX, e.clientY);
+
+                point = zoomOut(point, canvas.width, canvas.height);
 
                 restoreDrawingSurface(context, drawingSurface);
 

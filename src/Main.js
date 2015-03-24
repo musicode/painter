@@ -34,43 +34,32 @@ define(function (require, exports, module) {
             var me = this;
             var context = me.context;
 
-            var history =
             me.history = new History({
                 context: context
             });
 
-            history.push(
-                new Action({
-                    type: Action.ADD,
-                    do: me.stage
-                })
-            );
+            me.clear();
+
+            var push = function (shape, type) {
+                me.history.push(
+                    new Action({
+                        type: type,
+                        shape: shape
+                    })
+                );
+            };
 
             me.painter = new Painter({
                 context: context,
                 onAddShape: function (shape) {
-
-                    history.push(
-                        new Action({
-                            type: Action.ADD,
-                            shape: shape
-                        })
-                    );
-
+                    push(shape, Action.ADD);
                 }
             });
 
             me.eraser = new Eraser({
                 context: context,
                 onRemoveShape: function (shape) {
-
-                    history.push(
-                        new Action({
-                            type: Action.REMOVE,
-                            shape: shape
-                        })
-                    );
-
+                    push(shape, Action.REMOVE);
                 }
             });
 
@@ -105,21 +94,30 @@ define(function (require, exports, module) {
             var me = this;
             var context = me.context;
 
+            me.clear();
+
             me.history.iterator(
                 function (action, index) {
-
-                    if (index > 0) {
-                        action.save(context);
-                    }
-                    else {
-                        action.restore(context);
-                    }
-
+                    action.save(context);
                     action.do(context);
-
                 },
                 'live'
             );
+        },
+
+        /**
+         * 清空画布
+         */
+        clear: function () {
+
+            var me = this;
+            var context = me.context;
+            var canvas = context.canvas;
+
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            me.stage(context);
+
         },
 
         /**

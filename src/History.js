@@ -126,11 +126,15 @@ console.time(action.type + '耗时');
                         action.do(context);
                     }
 
+                    action.index = index;
+
                     fullList[ index++ ] = action;
+
 
                     me.index = index;
 
 console.timeEnd(type + '耗时');
+console.log('liveList', liveList);
 
                 }
             );
@@ -146,7 +150,7 @@ console.timeEnd(type + '耗时');
 console.log('undo', index, action);
             if (action) {
 
-                if (action.type === Action.ADD) {
+                if (!me.isRemovedAction(action)) {
                     me.liveList.pop();
                 }
 
@@ -164,7 +168,7 @@ console.log('undo', index, action);
 console.log('redo', me.index, action);
             if (action) {
 
-                if (action.type === Action.ADD) {
+                if (!me.isRemovedAction(action)) {
                     me.liveList.push(
                         full2Live(action)
                     );
@@ -174,6 +178,32 @@ console.log('redo', me.index, action);
                 me.index++;
 
             }
+
+        },
+
+        /**
+         * 内部调用
+         *
+         * @private
+         * @param {Action}  action
+         * @return {boolean}
+         */
+        isRemovedAction: function (action) {
+
+            var me = this;
+
+            var result = false;
+
+            me.iterator(
+                function (item) {
+                    if (item.type === Action.REMOVE) {
+                        result = true;
+                        return false;
+                    }
+                }
+            );
+
+            return result;
 
         },
 
