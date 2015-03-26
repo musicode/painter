@@ -101,6 +101,8 @@ define(function (require, exports, module) {
 
             var style = me.style;
 
+            context.save();
+
             if (style) {
                 if (style.alpha != null) {
                     context.globalAlpha = style.alpha;
@@ -132,9 +134,14 @@ define(function (require, exports, module) {
             }
 
             var painter = painters[me.name];
+            var result;
             if (painter) {
-                return painter.draw(context, me, action);
+                result = painter.draw(context, me, action);
             }
+
+            context.restore();
+
+            return result;
 
         },
 
