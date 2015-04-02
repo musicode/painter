@@ -6,15 +6,7 @@ define(function (require, exports, module) {
 
     'use strict';
 
-    /**
-     * 历史纪录保存两个列表：
-     *
-     * fullList：保存完整的操作，包括删除操作，每个操作都会在执行前获取快照，以便回退
-     *
-     * liveList：保存存活的操作，删除操作会触发操作刷新快照
-     *
-     */
-
+    var each = require('./util/each');
     var extend = require('./util/extend');
     var saveDrawingSurface = require('./util/saveDrawingSurface');
     var restoreDrawingSurface = require('./util/restoreDrawingSurface');
@@ -24,7 +16,6 @@ define(function (require, exports, module) {
     /**
      *
      * @param {Object} options
-     * @property {CanvasRenderingContext2D} options.context
      */
     function History(options) {
         extend(this, options);
@@ -39,29 +30,9 @@ define(function (require, exports, module) {
 
             var me = this;
 
-            me.fullList = [ ];
-
-            me.liveList = [ ];
+            me.list = [ ];
 
             me.index = 0;
-
-        },
-
-        indexOf: function (shape, type) {
-
-            var index;
-
-            this.iterator(
-                function (action, i) {
-                    if (action.shape === shape) {
-                        index = i;
-                        return false;
-                    }
-                },
-                type
-            );
-
-            return index;
 
         },
 
@@ -70,12 +41,12 @@ define(function (require, exports, module) {
             var me = this;
 
             // 准备数据
-            var fullList = me.fullList;
+            var list = me.list;
             var index = me.index;
 
             // 放弃 index 之后的部分
-            if (index < fullList.length) {
-                fullList.length = index;
+            if (index < list.length) {
+                list.length = index;
             }
 
             if (!Array.isArray(actions)) {
@@ -83,58 +54,33 @@ define(function (require, exports, module) {
             }
 
             var context = me.context;
-            var liveList = me.liveList;
 
             actions.forEach(
                 function (action) {
 
 console.time(action.type + '耗时');
 
-                    action.save(context);
-
-                    var type = action.type;
-                    var shape = action.shape;
-
-                    if (type === Action.REMOVE) {
-
-                        var i = me.indexOf(shape, 'live');
-                        liveList[ i ].restore(context);
-
-                        liveList.splice(i, 1);
-
-                        var len = liveList.length;
-
-                        while (i < len) {
-                            liveList[i].save(context);
-                            liveList[i].do(context);
-                            i++;
-                        }
-
-
-                        var snapshoot = saveDrawingSurface(context);
-
-                        action.do = function () {
-                            restoreDrawingSurface(context, snapshoot);
-                        };
-
-                    }
-                    else {
-                        liveList.push(
-                            full2Live(action)
-                        );
-
-                        action.do(context);
-                    }
-
-                    action.index = index;
-
-                    fullList[ index++ ] = action;
-
+                    list[ index++ ] = action;
 
                     me.index = index;
 
-console.timeEnd(type + '耗时');
-console.log('liveList', liveList);
+                    if (action.type === Action.REMOVE) {
+
+                        each(
+                            me.getLiveActionList(),
+                            function (action) {
+                                action.do(context);
+                            }
+                        );
+
+                        action.do = noop;
+
+                    }
+                    else {
+                        action.do(context);
+                    }
+
+console.timeEnd(action.type + '耗时');
 
                 }
             );
@@ -146,17 +92,16 @@ console.log('liveList', liveList);
             var me = this;
 
             var index = me.index - 1;
-            var action = me.fullList[ index ];
-console.log('undo', index, action);
-            if (action) {
 
-                if (!me.isRemovedAction(action)) {
-                    me.liveList.pop();
-                }
+            if (index >= 0) {
 
-                action.restore(context);
                 me.index = index;
 
+                me.iterator(
+                    function (action) {
+                        action.do(context);
+                    }
+                );
             }
 
         },
@@ -164,64 +109,54 @@ console.log('undo', index, action);
         redo: function (context) {
 
             var me = this;
-            var action = me.fullList[ me.index ];
-console.log('redo', me.index, action);
+
+            var index = me.index;
+            var action = me.list[index];
+
             if (action) {
-
-                if (!me.isRemovedAction(action)) {
-                    me.liveList.push(
-                        full2Live(action)
-                    );
-                }
-
                 action.do(context);
-                me.index++;
-
+                me.index = index + 1;
             }
 
         },
 
-        /**
-         * 内部调用
-         *
-         * @private
-         * @param {Action}  action
-         * @return {boolean}
-         */
-        isRemovedAction: function (action) {
+        getLiveActionList: function () {
 
             var me = this;
 
-            var result = false;
+            var list = [ ];
+            var map = { };
 
             me.iterator(
-                function (item) {
-                    if (item.type === Action.REMOVE) {
-                        result = true;
-                        return false;
+                function (action, index) {
+
+                    var actionType = action.type;
+                    var shapeId = action.shape.id;
+
+                    if (actionType === Action.ADD) {
+                        map[ shapeId ] = index;
+                        list.push(action);
                     }
+                    else if (actionType === Action.REMOVE) {
+                        index = map[ shapeId ];
+                        if (index >= 0) {
+                            list.splice(index, 1);
+                        }
+                    }
+
                 }
             );
 
-            return result;
+            return list;
 
         },
 
-        iterator: function (handler, type) {
+        iterator: function (handler) {
 
             var me = this;
 
-            var list;
-            var len;
-
-            if (type === 'live') {
-                list = me.liveList;
-                len = list.length;
-            }
-            else {
-                list = me.fullList;
-                len = me.index;
-            }
+            var list = me.list;
+            var len = me.index;
 
             for (var i = 0; i < len; i++) {
                 if (handler(list[i], i) === false) {
@@ -233,13 +168,6 @@ console.log('redo', me.index, action);
 
     };
 
-    function full2Live(action) {
-
-        var item = new Action();
-
-        return extend(item, action);
-
-    }
 
     function noop() {
 

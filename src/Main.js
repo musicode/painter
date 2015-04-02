@@ -11,6 +11,7 @@ define(function (require, exports, module) {
     var Painter = require('./Painter');
     var Eraser = require('./Eraser');
 
+    var each = require('./util/each');
     var extend = require('./util/extend');
     var retina = require('./util/retina');
 
@@ -40,26 +41,30 @@ define(function (require, exports, module) {
 
             me.clear();
 
-            var push = function (shape, type) {
-                me.history.push(
-                    new Action({
-                        type: type,
-                        shape: shape
-                    })
-                );
-            };
-
             me.painter = new Painter({
                 context: context,
-                onAddShape: function (shape) {
-                    push(shape, Action.ADD);
+                onAddShape: function (shape, draw) {
+
+                    var action = Action.addAction(shape);
+
+                    action.do = function (context) {
+                        draw(shape, context);
+                    };
+
+                    me.history.push(action);
+
                 }
             });
 
             me.eraser = new Eraser({
                 context: context,
                 onRemoveShape: function (shape) {
-                    push(shape, Action.REMOVE);
+
+                    var action = Action.removeAction(shape);
+                    me.history.push(action);
+
+                    me.removed[ shape.id ] = true;
+
                 }
             });
 
@@ -97,12 +102,11 @@ define(function (require, exports, module) {
             me.clear();
 
             me.history.iterator(
-                function (action, index) {
-                    action.save(context);
+                function (action) {
                     action.do(context);
-                },
-                'live'
+                }
             );
+
         },
 
         /**
@@ -132,17 +136,26 @@ define(function (require, exports, module) {
             me.painter.end();
             eraser.end();
 
+            var list = history.getLiveActionList();
+
+            me.removed = { };
+
             eraser.start(
                 function (fn) {
-                    history.iterator(
+
+                    each(
+                        list,
                         function (action) {
-                            var shape = action.shape;
-                            if (shape) {
-                                return fn(shape);
+
+                            var shape = action && action.shape;
+
+                            if (shape && !me.removed[ shape.id ]) {
+                                fn(shape);
                             }
-                        },
-                        'live'
+
+                        }
                     );
+
                 }
             );
 
@@ -154,8 +167,8 @@ define(function (require, exports, module) {
          * @param {Object} options
          * @property {string} options.name 形状名称
          * @property {number=} options.thickness 粗细
-         * @property {string=} options.strokeColor 描边色
-         * @property {string=} options.fillColor 填充色
+         * @property {string=} options.strokeStyle 描边色
+         * @property {string=} options.fillStyle 填充色
          */
         paint: function (options) {
 

@@ -31,6 +31,10 @@
             line
         </label>
         <label>
+            <input type="radio" name="shape" value="dashLine" />
+            dashLine
+        </label>
+        <label>
             <input type="radio" name="shape" value="rect" />
             rect
         </label>
@@ -69,7 +73,7 @@
             baseUrl: './src'
         });
 
-        require(['test'], function (test) {
+        require(['test/dial'], function (test) {
             test.init();
         });
     </script>

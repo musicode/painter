@@ -10,7 +10,9 @@ define(function (require, exports, module) {
 
     var circle = require('../path/circle');
 
-    function draw
+    function g(id) {
+        return document.getElementById(id);
+    }
 
     exports.init = function () {
 
@@ -19,7 +21,34 @@ define(function (require, exports, module) {
 
         retina(canvas);
 
-        circle(context, canvas.width / 2, canvas.height / 2, 200);
+        var width = canvas.width;
+        var height = canvas.height;
+
+        var x = width / 2;
+        var y = height / 2;
+        var radius = Math.min(width / 2, height / 2) - 100;
+
+        var angle = 0;
+        var unit = 2 * Math.PI / 64;
+
+        context.beginPath();
+        context.moveTo(x + radius, y);
+
+        while (angle <= 2 * Math.PI) {
+
+            context.lineTo(
+                x + radius * Math.cos(angle),
+                y + radius * Math.sin(angle)
+            );
+
+            angle += unit;
+
+        }
+
+        context.stroke();
+
+
+
 
     };
 

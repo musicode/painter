@@ -64,7 +64,9 @@ define(function (require, exports, module) {
 
                 iterator(
                     function (shapeItem) {
-                        if (shapeItem.inRect(point)) {
+                        context.beginPath();
+                        shapeItem.createPath(context);
+                        if (context.pointInPath(point)) {
                             shape = shapeItem;
                         }
                     }

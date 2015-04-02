@@ -1,5 +1,5 @@
 /**
- * @file 绘制网格路径
+ * @file 网格
  * @author musicode
  */
 define(function (require, exports, module) {
@@ -12,8 +12,6 @@ define(function (require, exports, module) {
      * @param {CanvasRenderingContext2D} context
      * @param {number} stepX 水平间隔
      * @param {number} stepY 垂直间隔
-     * @param {string} color 线条颜色
-     * @param {number} thickness 线条粗细
      */
     return function (context, stepX, stepY) {
 
