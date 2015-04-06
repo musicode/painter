@@ -7,6 +7,7 @@ define(function (require, exports, module) {
     'use strict';
 
     var inherits = require('../util/inherits');
+    var rect = require('../util/rect');
 
     /**
      * 构造函数新增参数
@@ -18,7 +19,15 @@ define(function (require, exports, module) {
         require('./Shape'),
         {
 
-            name: 'Doodle'
+            name: 'Doodle',
+
+            getBoundaryRect: function () {
+
+                var points = this.getPoints();
+
+                return rect(points);
+
+            }
 
         }
     );

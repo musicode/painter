@@ -36,7 +36,7 @@ define(function (require, exports, module) {
 
         },
 
-        push: function (actions) {
+        push: function (action) {
 
             var me = this;
 
@@ -49,41 +49,13 @@ define(function (require, exports, module) {
                 list.length = index;
             }
 
-            if (!Array.isArray(actions)) {
-                actions = [ actions ];
+            list[ index++ ] = action;
+
+            me.index = index;
+
+            if (me.onPush) {
+                me.onPush();
             }
-
-            var context = me.context;
-
-            actions.forEach(
-                function (action) {
-
-console.time(action.type + '耗时');
-
-                    list[ index++ ] = action;
-
-                    me.index = index;
-
-                    if (action.type === Action.REMOVE) {
-
-                        each(
-                            me.getLiveActionList(),
-                            function (action) {
-                                action.do(context);
-                            }
-                        );
-
-                        action.do = noop;
-
-                    }
-                    else {
-                        action.do(context);
-                    }
-
-console.timeEnd(action.type + '耗时');
-
-                }
-            );
 
         },
 
@@ -97,11 +69,6 @@ console.timeEnd(action.type + '耗时');
 
                 me.index = index;
 
-                me.iterator(
-                    function (action) {
-                        action.do(context);
-                    }
-                );
             }
 
         },
@@ -111,10 +78,8 @@ console.timeEnd(action.type + '耗时');
             var me = this;
 
             var index = me.index;
-            var action = me.list[index];
 
-            if (action) {
-                action.do(context);
+            if (me.list[index]) {
                 me.index = index + 1;
             }
 
@@ -140,14 +105,18 @@ console.timeEnd(action.type + '耗时');
                     else if (actionType === Action.REMOVE) {
                         index = map[ shapeId ];
                         if (index >= 0) {
-                            list.splice(index, 1);
+                            list[ index ] = null;
                         }
                     }
 
                 }
             );
 
-            return list;
+            return list.filter(
+                function (item) {
+                    return item != null;
+                }
+            );
 
         },
 

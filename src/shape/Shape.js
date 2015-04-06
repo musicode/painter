@@ -17,6 +17,7 @@ define(function (require, exports, module) {
      * @property {string} options.strokeStyle
      * @property {string} options.fillStyle
      * @property {number} options.lineWidth
+     * @property {boolean} options.adaptive 是否自适应，默认是 true
      */
     function Shape(options) {
         extend(this, Shape.defaultOptions, options);
@@ -60,7 +61,14 @@ define(function (require, exports, module) {
 
             context.beginPath();
 
-            this.drawPath(context, canvas.width, canvas.height);
+            var width = canvas.width;
+            var height = canvas.height;
+
+            if (!this.adaptive) {
+                width = height = 1;
+            }
+
+            this.drawPath(context, width, height);
 
         },
 
@@ -90,9 +98,9 @@ define(function (require, exports, module) {
          * @param {Object} point
          * @return {boolean}
          */
-        pointInPath: function (context, point) {
+        isPointInPath: function (context, point) {
             this.createPath(context);
-            return context.pointInPath(point);
+            return context.isPointInPath(point.x, point.y);
         },
 
         /**
@@ -109,7 +117,7 @@ define(function (require, exports, module) {
             context.stroke();
 
             context.restore();
-console.log('stroke')
+
         },
 
         /**
@@ -129,28 +137,32 @@ console.log('stroke')
         },
 
         /**
-         * 显示边界
+         * 创建边界路径
          *
          * @param {CanvasRenderingContext2D} context
          */
-        showBoundary: function (context) {
+        createBoundaryPath: function (context) {
 
             var me = this;
             var canvas = context.canvas;
 
-            context.save();
-
-            context.fillStyle = me.boundaryColor;
             context.beginPath();
-            context.rect(
-                me.x * canvas.width,
-                me.y * canvas.height,
-                me.width * canvas.width,
-                me.height * canvas.height
-            );
-            context.fill();
 
-            context.restore();
+            var width = canvas.width;
+            var height = canvas.height;
+
+            if (!me.adaptive) {
+                width = height = 1;
+            }
+
+            var rect = me.getBoundaryRect();
+
+            context.rect(
+                rect.x * width,
+                rect.y * height,
+                rect.width * width,
+                rect.height * height
+            );
 
         }
 
@@ -158,7 +170,8 @@ console.log('stroke')
 
     Shape.defaultOptions = {
         lineWidth: 0.5,
-        strokeStyle: '#666'
+        strokeStyle: '#666',
+        adaptive: true
     };
 
     return Shape;

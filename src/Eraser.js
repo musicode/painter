@@ -7,7 +7,6 @@ define(function (require, exports, module) {
     'use strict';
 
     var extend = require('./util/extend');
-    var zoomOut = require('./util/zoomOut');
     var window2Canvas = require('./util/window2Canvas');
     var saveDrawingSurface = require('./util/saveDrawingSurface');
     var restoreDrawingSurface = require('./util/restoreDrawingSurface');
@@ -56,24 +55,24 @@ define(function (require, exports, module) {
 
                 var point = window2Canvas(canvas, e.clientX, e.clientY);
 
-                point = zoomOut(point, canvas.width, canvas.height);
-
                 restoreDrawingSurface(context, drawingSurface);
 
                 shape = null;
 
                 iterator(
                     function (shapeItem) {
-                        context.beginPath();
-                        shapeItem.createPath(context);
-                        if (context.pointInPath(point)) {
+                        if (shapeItem.isPointInPath(context, point)) {
                             shape = shapeItem;
                         }
                     }
                 );
 
                 if (shape) {
-                    shape.showBoundary(context);
+                    shape.createBoundaryPath(context);
+                    context.save();
+                    context.fillStyle = 'rgba(0,0,0,0.2)';
+                    context.fill();
+                    context.restore();
                 }
 
             };

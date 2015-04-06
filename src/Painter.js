@@ -13,6 +13,8 @@ define(function (require, exports, module) {
     var restoreDrawingSurface = require('./util/restoreDrawingSurface');
     var chaikinCurve = require('./algorithm/chaikinCurve');
 
+    var style = require('./style');
+
     /**
      *
      * @param {Object} options
@@ -30,20 +32,16 @@ define(function (require, exports, module) {
         /**
          * 开始画形状
          *
-         * @param {Object} options
-         * @property {string} options.name 形状名称
-         * @property {number=} options.lineWidth 粗细
-         * @property {string=} options.strokeStyle 描边色
-         * @property {string=} options.fillStyle 填充色
+         * @param {string} name 形状名称
          */
-        start: function (options) {
+        start: function (name) {
 
             var me = this;
 
             var context = me.context;
             var canvas = context.canvas;
 
-            var data = map[options.name];
+            var data = map[ name ];
             var Shape = data.shape;
             var dragging = data.dragging;
             var draggend = data.draggend;
@@ -53,16 +51,12 @@ define(function (require, exports, module) {
             var points;
             var drawingSurface;
 
-            var getPoint = function (e) {
-                var point = window2Canvas(canvas, e.clientX, e.clientY);
-                return zoomOut(point, canvas.width, canvas.height);
-            };
 
             var onmousemove = function (e) {
 
                 restoreDrawingSurface(context, drawingSurface);
 
-                points.push(getPoint(e));
+                points.push(getPoint(canvas, e));
 
                 extend(
                     shape,
@@ -102,14 +96,14 @@ define(function (require, exports, module) {
 
                 drawingSurface = saveDrawingSurface(context);
 
-                var point = getPoint(e);
+                var point = getPoint(canvas, e);
 
                 shape = new Shape({
                     x: point.x,
                     y: point.y,
-                    lineWidth: options.lineWidth,
-                    strokeStyle: options.strokeStyle,
-                    fillStyle: options.fillStyle
+                    lineWidth: style.getLineWidth(),
+                    strokeStyle: style.getStrokeStyle(),
+                    fillStyle: style.getFillStyle()
                 });
 
                 points = [ point ];
@@ -141,11 +135,11 @@ define(function (require, exports, module) {
         end: function () {
 
             var me = this;
+            var canvas = me.context.canvas;
+
             var onmousedown = me.onmousedown;
 
             if (onmousedown) {
-
-                var canvas = me.context.canvas;
 
                 canvas.removeEventListener(
                     'mousedown',
@@ -277,6 +271,12 @@ define(function (require, exports, module) {
 */
 
     };
+
+    function getPoint(canvas, e) {
+        var point = window2Canvas(canvas, e.clientX, e.clientY);
+        return zoomOut(point, canvas.width, canvas.height);
+    }
+
 
     return Painter;
 

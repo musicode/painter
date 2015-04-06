@@ -74,6 +74,19 @@ define(function (require, exports, module) {
                     context.rect(x, y, width, height);
                 }
 
+            },
+
+            getBoundaryRect: function () {
+
+                var me = this;
+
+                return {
+                    x: me.x,
+                    y: me.y,
+                    width: me.width,
+                    height: me.height
+                };
+
             }
 
         }

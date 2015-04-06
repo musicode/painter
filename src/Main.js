@@ -7,8 +7,9 @@ define(function (require, exports, module) {
     'use strict';
 
     var History = require('./History');
-    var Action = require('./Action');
     var Painter = require('./Painter');
+    var Action = require('./Action');
+    var Laser = require('./Laser');
     var Eraser = require('./Eraser');
 
     var each = require('./util/each');
@@ -36,7 +37,10 @@ define(function (require, exports, module) {
             var context = me.context;
 
             me.history = new History({
-                context: context
+                context: context,
+                onPush: function () {
+                    me.refresh();
+                }
             });
 
             me.clear();
@@ -60,12 +64,16 @@ define(function (require, exports, module) {
                 context: context,
                 onRemoveShape: function (shape) {
 
+                    me.removed[ shape.id ] = true;
+
                     var action = Action.removeAction(shape);
                     me.history.push(action);
 
-                    me.removed[ shape.id ] = true;
-
                 }
+            });
+
+            me.laser = new Laser({
+                context: context
             });
 
         },
@@ -101,7 +109,8 @@ define(function (require, exports, module) {
 
             me.clear();
 
-            me.history.iterator(
+            each(
+                me.history.getLiveActionList(),
                 function (action) {
                     action.do(context);
                 }
@@ -164,21 +173,39 @@ define(function (require, exports, module) {
         /**
          * 绘制
          *
-         * @param {Object} options
-         * @property {string} options.name 形状名称
-         * @property {number=} options.thickness 粗细
-         * @property {string=} options.strokeStyle 描边色
-         * @property {string=} options.fillStyle 填充色
+         * @param {string} name 形状名称
          */
-        paint: function (options) {
+        paint: function (name) {
 
             var me = this;
             var painter = me.painter;
 
+            me.laser.end();
             me.eraser.end();
             painter.end();
 
-            painter.start(options);
+            painter.start(name);
+
+        },
+
+        text: function () {
+
+            var me = this;
+
+            me.laser.end();
+            me.eraser.end();
+            me.painter.end();
+
+        },
+
+        pointer: function () {
+
+            var me = this;
+
+            me.eraser.end();
+            me.painter.end();
+
+            me.laser.start();
 
         },
 
@@ -188,6 +215,8 @@ define(function (require, exports, module) {
 
             me.history.undo(me.context);
 
+            me.refresh();
+
         },
 
         redo: function () {
@@ -195,6 +224,8 @@ define(function (require, exports, module) {
             var me = this;
 
             me.history.redo(me.context);
+
+            me.refresh();
 
         }
 

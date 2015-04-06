@@ -7,6 +7,7 @@ define(function (require, exports, module) {
     'use strict';
 
     var inherits = require('../util/inherits');
+    var rect = require('../util/rect');
 
     function getX(x, radius, angle) {
         return x + radius * Math.cos(angle);
@@ -67,6 +68,14 @@ define(function (require, exports, module) {
                 }
 
                 return points;
+
+            },
+
+            getBoundaryRect: function () {
+
+                var points = this.getPoints();
+
+                return rect(points);
 
             }
 

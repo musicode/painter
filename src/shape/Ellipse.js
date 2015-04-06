@@ -53,6 +53,22 @@ define(function (require, exports, module) {
                     }
                 }
 
+            },
+
+            getBoundaryRect: function () {
+
+                var me = this;
+
+                var width = me.width;
+                var height = me.height;
+
+                return {
+                    x: me.x - width / 2,
+                    y: me.y - height / 2,
+                    width: width,
+                    height: height
+                };
+
             }
 
         }
