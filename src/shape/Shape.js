@@ -6,7 +6,6 @@ define(function (require, exports, module) {
 
     'use strict';
 
-    var extend = require('../util/extend');
     var guid = require('../util/guid');
     var drawLines = require('../util/lines');
 
@@ -20,7 +19,7 @@ define(function (require, exports, module) {
      * @property {boolean} options.adaptive 是否自适应，默认是 true
      */
     function Shape(options) {
-        extend(this, Shape.defaultOptions, options);
+        $.extend(this, Shape.defaultOptions, options);
         this.init();
     }
 
@@ -155,7 +154,7 @@ define(function (require, exports, module) {
                 width = height = 1;
             }
 
-            var rect = me.getBoundaryRect();
+            var rect = me.getBoundaryRect(context);
 
             context.rect(
                 rect.x * width,

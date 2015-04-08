@@ -6,8 +6,6 @@ define(function (require, exports, module) {
 
     'use strict';
 
-    var extend = require('./extend');
-
     /**
      * 继承
      *
@@ -24,7 +22,7 @@ define(function (require, exports, module) {
         var superProto = superClass.prototype;
         var subProto = Class.prototype;
 
-        extend(subProto, superProto, subClass);
+        $.extend(subProto, superProto, subClass);
 
         return Class;
 

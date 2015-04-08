@@ -10,18 +10,17 @@ define(function (require, exports, module) {
      * 相对窗口坐标转换为相对 canvas 的坐标
      *
      * @param {HTMLElement} canvas
-     * @param {number} x
-     * @param {number} y
+     * @param {MouseEvent} event
      */
-    return function (canvas, x, y) {
+    return function (canvas, event) {
 
         var pos = canvas.getBoundingClientRect();
         var scaleX = canvas.width  / pos.width;
         var scaleY = canvas.height  / pos.height;
 
         return {
-            x: (x - pos.left) * scaleX,
-            y: (y - pos.top)  * scaleY
+            x: (event.clientX - pos.left) * scaleX,
+            y: (event.clientY - pos.top)  * scaleY
         };
 
     };

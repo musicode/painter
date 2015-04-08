@@ -7,23 +7,25 @@ define(function (require, exports, module) {
     'use strict';
 
     var History = require('./History');
-    var Painter = require('./Painter');
     var Action = require('./Action');
-    var Laser = require('./Laser');
-    var Eraser = require('./Eraser');
+    var eventEmitter = require('./eventEmitter');
 
-    var each = require('./util/each');
-    var extend = require('./util/extend');
     var retina = require('./util/retina');
 
+    var arrow = require('./action/arrow');
+    var eraser = require('./action/eraser');
+    var laser = require('./action/laser');
+    var painter = require('./action/painter');
+    var rect = require('./action/rect');
+    var text = require('./action/text');
+
     /**
-     *
      * @param {Object} options
      * @property {CanvasRenderingContext2D} options.context
      * @property {Function} options.stage
      */
     function Main(options) {
-        extend(this, options);
+        $.extend(this, options);
         this.init();
     }
 
@@ -45,36 +47,31 @@ define(function (require, exports, module) {
 
             me.clear();
 
-            me.painter = new Painter({
-                context: context,
-                onAddShape: function (shape, draw) {
 
-                    var action = Action.addAction(shape);
+            eventEmitter
+            .on(eventEmitter.SHAPE_ADD, function (e, data) {
 
-                    action.do = function (context) {
-                        draw(shape, context);
-                    };
+                var shape = data.shape;
+                var action = Action.addAction(shape);
 
-                    me.history.push(action);
+                action.do = function (context) {
+                    data.draw(context, shape);
+                };
 
-                }
+                me.history.push(action);
+
+            })
+            .on(eventEmitter.SHAPE_REMOVE, function (e, data) {
+
+                var shape = data.shape;
+
+                me.removed[ shape.id ] = true;
+
+                var action = Action.removeAction(shape);
+                me.history.push(action);
+
             });
 
-            me.eraser = new Eraser({
-                context: context,
-                onRemoveShape: function (shape) {
-
-                    me.removed[ shape.id ] = true;
-
-                    var action = Action.removeAction(shape);
-                    me.history.push(action);
-
-                }
-            });
-
-            me.laser = new Laser({
-                context: context
-            });
 
         },
 
@@ -109,9 +106,9 @@ define(function (require, exports, module) {
 
             me.clear();
 
-            each(
+            $.each(
                 me.history.getLiveActionList(),
-                function (action) {
+                function (index, action) {
                     action.do(context);
                 }
             );
@@ -120,8 +117,10 @@ define(function (require, exports, module) {
 
         /**
          * 清空画布
+         *
+         * @param {boolean} clearHistory 是否清空历史纪录
          */
-        clear: function () {
+        clear: function (clearHistory) {
 
             var me = this;
             var context = me.context;
@@ -131,30 +130,46 @@ define(function (require, exports, module) {
 
             me.stage(context);
 
+            if (clearHistory) {
+                me.history.clear();
+            }
+
         },
 
-        /**
-         * 擦除
-         */
-        erase: function () {
+        laser: function () {
+            this.changeAction(laser);
+        },
+
+        painter: function () {
+            this.changeAction(painter);
+        },
+
+        text: function () {
+            this.changeAction(text);
+        },
+
+        arrow: function () {
+            this.changeAction(arrow);
+        },
+
+        rect: function () {
+            this.changeAction(rect);
+        },
+
+        eraser: function () {
 
             var me = this;
-            var history = me.history;
-            var eraser = me.eraser;
-
-            me.painter.end();
-            eraser.end();
-
-            var list = history.getLiveActionList();
+            var list = me.history.getLiveActionList();
 
             me.removed = { };
 
-            eraser.start(
+            this.changeAction(
+                eraser,
                 function (fn) {
 
-                    each(
+                    $.each(
                         list,
-                        function (action) {
+                        function (index, action) {
 
                             var shape = action && action.shape;
 
@@ -170,62 +185,31 @@ define(function (require, exports, module) {
 
         },
 
-        /**
-         * 绘制
-         *
-         * @param {string} name 形状名称
-         */
-        paint: function (name) {
-
-            var me = this;
-            var painter = me.painter;
-
-            me.laser.end();
-            me.eraser.end();
-            painter.end();
-
-            painter.start(name);
-
-        },
-
-        text: function () {
-
-            var me = this;
-
-            me.laser.end();
-            me.eraser.end();
-            me.painter.end();
-
-        },
-
-        pointer: function () {
-
-            var me = this;
-
-            me.eraser.end();
-            me.painter.end();
-
-            me.laser.start();
-
-        },
-
         undo: function () {
-
             var me = this;
-
             me.history.undo(me.context);
-
             me.refresh();
-
         },
 
         redo: function () {
+            var me = this;
+            me.history.redo(me.context);
+            me.refresh();
+        },
+
+        changeAction: function (action, data) {
 
             var me = this;
+            var context = me.context;
 
-            me.history.redo(me.context);
+            var activeAction = me.activeAction;
+            if (activeAction) {
+                activeAction.end(context);
+            }
 
-            me.refresh();
+            action.start(context, data);
+
+            me.activeAction = action;
 
         }
 

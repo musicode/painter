@@ -10,18 +10,17 @@ define(function (require, exports, module) {
      * 相对 canvas 的坐标转换为相对窗口坐标
      *
      * @param {HTMLElement} canvas
-     * @param {number} x
-     * @param {number} y
+     * @param {Object} point
      */
-    return function (canvas, x, y) {
+    return function (canvas, point) {
 
         var pos = canvas.getBoundingClientRect();
         var scaleX = canvas.width  / pos.width;
         var scaleY = canvas.height  / pos.height;
 
         return {
-            x: x / scaleY + pos.left,
-            y: y / scaleY + pos.top
+            x: point.x / scaleY + pos.left,
+            y: point.y / scaleY + pos.top
         };
 
     };

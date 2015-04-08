@@ -6,8 +6,6 @@ define(function (require, exports, module) {
 
     'use strict';
 
-    var each = require('./util/each');
-    var extend = require('./util/extend');
     var saveDrawingSurface = require('./util/saveDrawingSurface');
     var restoreDrawingSurface = require('./util/restoreDrawingSurface');
 
@@ -18,7 +16,7 @@ define(function (require, exports, module) {
      * @param {Object} options
      */
     function History(options) {
-        extend(this, options);
+        $.extend(this, options);
         this.init();
     }
 
@@ -33,6 +31,15 @@ define(function (require, exports, module) {
             me.list = [ ];
 
             me.index = 0;
+
+        },
+
+        clear: function () {
+
+            var me = this;
+
+            me.index =
+            me.list.length = 0;
 
         },
 
