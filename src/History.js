@@ -10,6 +10,7 @@ define(function (require, exports, module) {
     var restoreDrawingSurface = require('./util/restoreDrawingSurface');
 
     var Action = require('./Action');
+    var eventEmitter = require('./eventEmitter');
 
     /**
      *
@@ -60,9 +61,12 @@ define(function (require, exports, module) {
 
             me.index = index;
 
-            if (me.onPush) {
-                me.onPush();
-            }
+            eventEmitter.trigger(
+                eventEmitter.ACTION_PUSH,
+                {
+                    action: action
+                }
+            );
 
         },
 
@@ -144,10 +148,6 @@ define(function (require, exports, module) {
 
     };
 
-
-    function noop() {
-
-    }
 
     return History;
 

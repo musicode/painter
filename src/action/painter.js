@@ -88,8 +88,7 @@ define(function (require, exports, module) {
                         eventEmitter.trigger(
                             eventEmitter.SHAPE_ADD,
                             {
-                                shape: shape,
-                                draw: exports.draw
+                                shape: shape
                             }
                         );
 
@@ -106,6 +105,7 @@ define(function (require, exports, module) {
     exports.end = function (context) {
 
         $(context.canvas).off(namespace);
+        $(document).off(namespace);
 
     };
 

@@ -19,6 +19,15 @@ define(function (require, exports, module) {
     var rect = require('./action/rect');
     var text = require('./action/text');
 
+    var actionMap = {
+        arrow: arrow,
+        eraser: eraser,
+        laser: laser,
+        doodle: painter,
+        rect: rect,
+        text: text
+    };
+
     /**
      * @param {Object} options
      * @property {CanvasRenderingContext2D} options.context
@@ -39,10 +48,7 @@ define(function (require, exports, module) {
             var context = me.context;
 
             me.history = new History({
-                context: context,
-                onPush: function () {
-                    me.refresh();
-                }
+                context: context
             });
 
             me.clear();
@@ -55,7 +61,7 @@ define(function (require, exports, module) {
                 var action = Action.addAction(shape);
 
                 action.do = function (context) {
-                    data.draw(context, shape);
+                    actionMap[shape.name.toLowerCase()].draw(context, shape);
                 };
 
                 me.history.push(action);
@@ -69,6 +75,11 @@ define(function (require, exports, module) {
 
                 var action = Action.removeAction(shape);
                 me.history.push(action);
+
+            })
+            .on(eventEmitter.ACTION_PUSH, function (e, data) {
+
+                me.refresh();
 
             });
 
@@ -156,7 +167,7 @@ define(function (require, exports, module) {
             this.changeAction(rect);
         },
 
-        eraser: function () {
+        erase: function () {
 
             var me = this;
             var list = me.history.getLiveActionList();

@@ -12,6 +12,8 @@ define(function (require, exports) {
 
     exports.SHAPE_REMOVE = 'shape_remove';
 
+    exports.ACTION_PUSH = 'action_push';
+
     return exports;
 
 });

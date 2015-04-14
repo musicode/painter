@@ -173,6 +173,7 @@ define(function (require, exports, module) {
         adaptive: true
     };
 
+
     return Shape;
 
 });

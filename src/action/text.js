@@ -76,8 +76,7 @@ define(function (require, exports, module) {
                                     eventEmitter.trigger(
                                         eventEmitter.SHAPE_ADD,
                                         {
-                                            shape: shape,
-                                            draw: exports.draw
+                                            shape: shape
                                         }
                                     );
 
