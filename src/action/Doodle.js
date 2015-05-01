@@ -1,5 +1,5 @@
 /**
- * @file 箭头
+ * @file 涂鸦
  * @author musicode
  */
 define(function (require, exports, module) {
@@ -11,15 +11,7 @@ define(function (require, exports, module) {
     return inherits(
         require('./Action'),
         {
-            name: 'arrow',
-
-            do: function (context) {
-
-                var shape = this.shape;
-
-                shape.createPath(context);
-                shape.fill(context);
-            }
+            name: 'doodle'
         }
     );
 

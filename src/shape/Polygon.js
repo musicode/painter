@@ -31,6 +31,19 @@ define(function (require, exports, module) {
 
             name: 'Polygon',
 
+            toAdaptiveExtend: function (adaptive, canvasWidth, canvasHeight) {
+
+                var me = this;
+
+                if (adaptive) {
+                    me.radius /= canvasWidth;
+                }
+                else {
+                    me.radius *= canvasWidth;
+                }
+
+            },
+
             getPoints: function () {
 
                 var me = this;

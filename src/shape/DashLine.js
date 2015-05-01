@@ -22,7 +22,24 @@ define(function (require, exports, module) {
 
             name: 'DashLine',
 
-            drawPath: function (context, canvasWidth, canvasHeight) {
+            toAdaptiveExtend: function (adaptive, canvasWidth, canvasHeight) {
+
+                var me = this;
+
+                if (adaptive) {
+                    me.endX /= canvasWidth;
+                    me.endY /= canvasHeight;
+                    me.dashLength /= canvasWidth;
+                }
+                else {
+                    me.endX *= canvasWidth;
+                    me.endY *= canvasHeight;
+                    me.dashLength *= canvasWidth;
+                }
+
+            },
+
+            createPathExtend: function (context, canvasWidth, canvasHeight) {
 
                 var x1 = me.x * canvasWidth;
                 var y1 = me.y * canvasHeight;

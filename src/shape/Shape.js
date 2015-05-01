@@ -16,6 +16,10 @@ define(function (require, exports, module) {
      * @property {string} options.strokeStyle
      * @property {string} options.fillStyle
      * @property {number} options.lineWidth
+     * @property {string=} options.shadowColor
+     * @property {number=} options.shadowOffsetX
+     * @property {number=} options.shadowOffsetY
+     * @property {number=} options.shadowBlur
      * @property {boolean} options.adaptive 是否自适应，默认是 true
      */
     function Shape(options) {
@@ -67,11 +71,11 @@ define(function (require, exports, module) {
                 width = height = 1;
             }
 
-            this.drawPath(context, width, height);
+            this.createPathExtend(context, width, height);
 
         },
 
-        drawPath: function (context, canvasWidth, canvasHeight) {
+        createPathExtend: function (context, canvasWidth, canvasHeight) {
 
             var points = this.getPoints();
 
@@ -109,10 +113,17 @@ define(function (require, exports, module) {
          */
         stroke: function (context) {
 
+            var me = this;
+
             context.save();
 
-            context.lineWidth = this.lineWidth;
-            context.strokeStyle = this.strokeStyle;
+            context.shadowColor = me.shadowColor;
+            context.shadowOffsetX = me.shadowOffsetX;
+            context.shadowOffsetY = me.shadowOffsetY;
+            context.shadowBlur = me.shadowBlur;
+
+            context.lineWidth = me.lineWidth;
+            context.strokeStyle = me.strokeStyle;
             context.stroke();
 
             context.restore();
@@ -126,12 +137,45 @@ define(function (require, exports, module) {
          */
         fill: function (context) {
 
+            var me = this;
+
             context.save();
 
-            context.fillStyle = this.fillStyle;
+            context.shadowColor = me.shadowColor;
+            context.shadowOffsetX = me.shadowOffsetX;
+            context.shadowOffsetY = me.shadowOffsetY;
+            context.shadowBlur = me.shadowBlur;
+
+            context.fillStyle = me.fillStyle;
             context.fill();
 
             context.restore();
+
+        },
+
+        /**
+         * 把非自适应的 Shape 改为自适应
+         *
+         * @param {boolean} adaptive
+         * @param {number} width
+         * @param {number} height
+         */
+        toAdaptive: function (adaptive, width, height) {
+
+            var me = this;
+
+            me.adaptive = adaptive;
+
+            if (adaptive) {
+                me.x /= width;
+                me.y /= height;
+            }
+            else {
+                me.x *= width;
+                me.y *= height;
+            }
+
+            me.toAdaptiveExtend(adaptive, width, height);
 
         },
 
@@ -168,9 +212,14 @@ define(function (require, exports, module) {
     };
 
     Shape.defaultOptions = {
+        adaptive: false,
         lineWidth: 0.5,
+        fillStyle: '#666',
         strokeStyle: '#666',
-        adaptive: true
+        shadowColor: undefined,
+        shadowOffsetX: 0,
+        shadowOffsetY: 0,
+        shadowBlur: 0
     };
 
 

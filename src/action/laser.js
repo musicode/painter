@@ -1,62 +1,26 @@
 /**
- * @file 使用激光笔
+ * @file 激光笔
  * @author musicode
  */
 define(function (require, exports, module) {
 
     'use strict';
 
-    var style = require('../style');
-    var window2Canvas = require('../util/window2Canvas');
-    var saveDrawingSurface = require('../util/saveDrawingSurface');
-    var restoreDrawingSurface = require('../util/restoreDrawingSurface');
+    var inherits = require('../util/inherits');
 
-    var Ellipse = require('../shape/Ellipse');
+    return inherits(
+        require('./Action'),
+        {
+            name: 'laser',
 
-    var namespace = '.painter_action_laser';
+            do: function (context) {
 
-    exports.start = function (context) {
+                var shape = this.shape;
 
-        var canvas = context.canvas;
-        var drawingSurface = saveDrawingSurface(context);
-
-        var circle = new Ellipse({
-            adaptive: false
-        });
-
-        $(document).on(
-
-            'mousemove' + namespace,
-
-            function (e) {
-
-                restoreDrawingSurface(context, drawingSurface);
-
-                var point = window2Canvas(canvas, e);
-                var radius = style.getLineWidth();
-
-                $.extend(
-                    circle,
-                    point,
-                    {
-                        width: radius,
-                        height: radius,
-                        fillStyle: style.getFillStyle()
-                    }
-                );
-
-                circle.createPath(context);
-                circle.fill(context);
-
+                shape.createPath(context);
+                shape.fill(context);
             }
-        );
-
-    };
-
-    exports.end = function () {
-
-        $(document).off(namespace);
-
-    };
+        }
+    );
 
 });

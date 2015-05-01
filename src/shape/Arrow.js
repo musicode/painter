@@ -21,7 +21,22 @@ define(function (require, exports, module) {
 
             name: 'Arrow',
 
-            drawPath: function (context, canvasWidth, canvasHeight) {
+            toAdaptiveExtend: function (adaptive, canvasWidth, canvasHeight) {
+
+                var me = this;
+
+                if (adaptive) {
+                    me.endX /= canvasWidth;
+                    me.endY /= canvasHeight;
+                }
+                else {
+                    me.endX *= canvasWidth;
+                    me.endY *= canvasHeight;
+                }
+
+            },
+
+            createPathExtend: function (context, canvasWidth, canvasHeight) {
 
                 var me = this;
 

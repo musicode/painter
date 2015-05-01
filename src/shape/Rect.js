@@ -22,7 +22,22 @@ define(function (require, exports, module) {
 
             name: 'Rect',
 
-            drawPath: function (context, canvasWidth, canvasHeight) {
+            toAdaptiveExtend: function (adaptive, canvasWidth, canvasHeight) {
+
+                var me = this;
+
+                if (adaptive) {
+                    me.width /= canvasWidth;
+                    me.height /= canvasHeight;
+                }
+                else {
+                    me.width *= canvasWidth;
+                    me.height *= canvasHeight;
+                }
+
+            },
+
+            createPathExtend: function (context, canvasWidth, canvasHeight) {
 
                 var me = this;
 

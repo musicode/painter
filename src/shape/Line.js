@@ -21,6 +21,21 @@ define(function (require, exports, module) {
 
             name: 'Line',
 
+            toAdaptiveExtend: function (adaptive, canvasWidth, canvasHeight) {
+
+                var me = this;
+
+                if (adaptive) {
+                    me.endX /= canvasWidth;
+                    me.endY /= canvasHeight;
+                }
+                else {
+                    me.endX *= canvasWidth;
+                    me.endY *= canvasHeight;
+                }
+
+            },
+
             getPoints: function () {
 
                 return [

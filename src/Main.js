@@ -6,27 +6,17 @@ define(function (require, exports, module) {
 
     'use strict';
 
-    var History = require('./History');
-    var Action = require('./Action');
     var eventEmitter = require('./eventEmitter');
+    var DrawingSurface = require('./DrawingSurface');
 
     var retina = require('./util/retina');
 
-    var arrow = require('./action/arrow');
-    var eraser = require('./action/eraser');
-    var laser = require('./action/laser');
-    var painter = require('./action/painter');
-    var rect = require('./action/rect');
-    var text = require('./action/text');
-
-    var actionMap = {
-        arrow: arrow,
-        eraser: eraser,
-        laser: laser,
-        doodle: painter,
-        rect: rect,
-        text: text
-    };
+    var Arrow = require('./processor/Arrow');
+    var Doodle = require('./processor/Doodle');
+    var Eraser = require('./processor/Eraser');
+    var Laser = require('./processor/Laser');
+    var Rect = require('./processor/Rect');
+    var Text = require('./processor/Text');
 
     /**
      * @param {Object} options
@@ -47,42 +37,82 @@ define(function (require, exports, module) {
             var me = this;
             var context = me.context;
 
-            me.history = new History({
+            me.drawingSurface = new DrawingSurface({
                 context: context
             });
 
             me.clear();
 
-
             eventEmitter
-            .on(eventEmitter.SHAPE_ADD, function (e, data) {
+                .on(
+                    eventEmitter.SAVE_DRAWING_SURFACE_ACTION,
+                    function () {
+                        me.save();
+                    }
+                )
+                .on(
+                    eventEmitter.RESTORE_DRAWING_SURFACE_ACTION,
+                    function () {
+                        me.restore();
+                    }
+                );
 
-                var shape = data.shape;
-                var action = Action.addAction(shape);
+        },
 
-                action.do = function (context) {
-                    actionMap[shape.name.toLowerCase()].draw(context, shape);
-                };
+        add: function (action) {
 
-                me.history.push(action);
+            var me = this;
 
-            })
-            .on(eventEmitter.SHAPE_REMOVE, function (e, data) {
+            me.list.push(action);
 
-                var shape = data.shape;
+            action.do(
+                me.context
+            );
 
-                me.removed[ shape.id ] = true;
+            me.save();
 
-                var action = Action.removeAction(shape);
-                me.history.push(action);
+            eventEmitter.trigger(
+                eventEmitter.SHAPE_ADD,
+                {
+                    shape: action.shape
+                }
+            );
+        },
 
-            })
-            .on(eventEmitter.ACTION_PUSH, function (e, data) {
+        remove: function (shapeId) {
+
+            var me = this;
+            var list = me.list;
+
+            // 要删除的 shape 索引
+            var index;
+
+            $.each(
+                list,
+                function (i, action) {
+                    if (action.shape.id === shapeId) {
+                        index = i;
+                        return false;
+                    }
+                }
+            );
+
+            if (index >= 0) {
+
+                var shape = list[ index ];
+
+                list.splice(index, 1);
 
                 me.refresh();
 
-            });
+                eventEmitter.trigger(
+                    eventEmitter.SHAPE_REMOVE,
+                    {
+                        shape: shape
+                    }
+                );
 
+            }
 
         },
 
@@ -98,10 +128,10 @@ define(function (require, exports, module) {
             var context = me.context;
             var canvas = context.canvas;
 
-            var style = 'width:' + width + 'px;'
-                      + 'height:' + height + 'px';
-
-            canvas.style.cssText = style;
+            $(canvas).css({
+                width: width,
+                height: height
+            });
 
             retina(canvas);
 
@@ -110,28 +140,34 @@ define(function (require, exports, module) {
 
         },
 
+        /**
+         * 刷新画布
+         */
         refresh: function () {
 
             var me = this;
-            var context = me.context;
 
-            me.clear();
+            me.clear(true);
 
             $.each(
-                me.history.getLiveActionList(),
+                me.list,
                 function (index, action) {
-                    action.do(context);
+                    action.do(
+                        me.context
+                    );
                 }
             );
+
+            me.save();
 
         },
 
         /**
          * 清空画布
          *
-         * @param {boolean} clearHistory 是否清空历史纪录
+         * @param {boolean} noClearData
          */
-        clear: function (clearHistory) {
+        clear: function (noClearData) {
 
             var me = this;
             var context = me.context;
@@ -141,86 +177,96 @@ define(function (require, exports, module) {
 
             me.stage(context);
 
-            if (clearHistory) {
-                me.history.clear();
+            if (!noClearData) {
+
+                me.list = [ ];
+
+                me.save();
             }
 
         },
 
         laser: function () {
-            this.changeAction(laser);
+            this.changeAction(Laser);
         },
 
-        painter: function () {
-            this.changeAction(painter);
+        doodle: function () {
+            this.changeAction(Doodle);
         },
 
         text: function () {
-            this.changeAction(text);
+            this.changeAction(Text);
         },
 
         arrow: function () {
-            this.changeAction(arrow);
+            this.changeAction(Arrow);
         },
 
         rect: function () {
-            this.changeAction(rect);
+            this.changeAction(Rect);
         },
 
-        erase: function () {
+        eraser: function () {
 
             var me = this;
-            var list = me.history.getLiveActionList();
 
-            me.removed = { };
+            me.changeAction(
+                Eraser,
+                {
+                    iterator: function (fn) {
 
-            this.changeAction(
-                eraser,
-                function (fn) {
-
-                    $.each(
-                        list,
-                        function (index, action) {
-
-                            var shape = action && action.shape;
-
-                            if (shape && !me.removed[ shape.id ]) {
-                                fn(shape);
+                        $.each(
+                            me.list,
+                            function (index, action) {
+                                fn(action.shape);
                             }
+                        );
 
-                        }
-                    );
-
+                    }
                 }
             );
 
         },
 
-        undo: function () {
-            var me = this;
-            me.history.undo(me.context);
-            me.refresh();
-        },
-
-        redo: function () {
-            var me = this;
-            me.history.redo(me.context);
-            me.refresh();
-        },
-
-        changeAction: function (action, data) {
+        changeAction: function (Action, extra) {
 
             var me = this;
             var context = me.context;
 
             var activeAction = me.activeAction;
             if (activeAction) {
-                activeAction.end(context);
+                activeAction.dispose();
             }
 
-            action.start(context, data);
+            var options = {
+                context: context
+            };
 
-            me.activeAction = action;
+            if (extra) {
+                $.extend(options, extra);
+            }
+
+            me.activeAction = new Action(options);
+
+        },
+
+        save: function () {
+
+            this.drawingSurface.save();
+
+            eventEmitter.trigger(
+                eventEmitter.SAVE_DRAWING_SURFACE
+            );
+
+        },
+
+        restore: function () {
+
+            this.drawingSurface.restore();
+
+            eventEmitter.trigger(
+                eventEmitter.RESTORE_DRAWING_SURFACE
+            );
 
         }
 

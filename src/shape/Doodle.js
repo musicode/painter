@@ -21,6 +21,30 @@ define(function (require, exports, module) {
 
             name: 'Doodle',
 
+            toAdaptiveExtend: function (adaptive, canvasWidth, canvasHeight) {
+
+                var fn;
+
+                if (adaptive) {
+                    fn = function (index, point) {
+                        point.x /= canvasWidth;
+                        point.y /= canvasHeight;
+                    };
+                }
+                else {
+                    fn = function (index, point) {
+                        point.x *= canvasWidth;
+                        point.y *= canvasHeight;
+                    };
+                }
+
+                $.each(
+                    this.points,
+                    fn
+                );
+
+            },
+
             getBoundaryRect: function () {
 
                 var points = this.getPoints();
