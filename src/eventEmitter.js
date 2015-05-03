@@ -8,21 +8,33 @@ define(function (require, exports) {
 
     exports = $({});
 
-    exports.ACTION_ADD = 'action_add';
+    /**
+     * 触发添加形状
+     *
+     * @type {string}
+     */
+    exports.SHAPE_ADD_TRIGGER = 'shape_add_trigger';
 
-    exports.ACTION_REMOVE = 'action_REMOVE';
+    /**
+     * 触发删除形状
+     *
+     * @type {string}
+     */
+    exports.SHAPE_REMOVE_TRIGGER = 'shape_remove_trigger';
 
+    /**
+     * 添加形状
+     *
+     * @type {string}
+     */
     exports.SHAPE_ADD = 'shape_add';
 
+    /**
+     * 删除形状
+     *
+     * @type {string}
+     */
     exports.SHAPE_REMOVE = 'shape_remove';
-
-    exports.SAVE_DRAWING_SURFACE_ACTION = 'save_drawing_surface_action';
-
-    exports.SAVE_DRAWING_SURFACE = 'save_drawing_surface';
-
-    exports.RESTORE_DRAWING_SURFACE_ACTION = 'restore_drawing_surface_action';
-
-    exports.RESTORE_DRAWING_SURFACE = 'restore_drawing_surface';
 
     /**
      * 画笔线条粗细改变时触发

@@ -6,9 +6,9 @@ define(function (require, exports, module) {
 
     'use strict';
 
-    var Shape = require('../shape/Rect');
-    var Action = require('../action/Rect');
+    var style = require('../style');
 
+    var Shape = require('../shape/Rect');
     var inherits = require('../util/inherits');
 
     return inherits(
@@ -24,17 +24,24 @@ define(function (require, exports, module) {
 
                 me.startPoint = point;
 
-                me.action = new Action({
-                    shape: me.createShape(Shape)
+                me.shape = new Shape({
+                    x: point.x,
+                    y: point.y,
+                    shadowColor: 'rgba(0,0,0,0.2)',
+                    shadowOffsetX: 1,
+                    shadowOffsetY: 1,
+                    shadowBlur: 1,
+                    lineWidth: style.getLineWidth(),
+                    strokeStyle: style.getStrokeStyle()
                 });
 
             },
             move: function (e, point) {
 
                 var me = this;
-                var action = me.action;
+                var shape = me.shape;
 
-                if (action) {
+                if (shape) {
 
                     me.restore();
 
@@ -45,14 +52,12 @@ define(function (require, exports, module) {
                     var endX = Math.max(startPoint.x, point.x);
                     var endY = Math.max(startPoint.y, point.y);
 
-                    me.updateAction({
-                        x: startX,
-                        y: startY,
-                        width: endX - startX,
-                        height: endY - startY
-                    });
+                    shape.x = startX;
+                    shape.y = startY;
+                    shape.width = endX - startX;
+                    shape.height = endY - startY;
 
-                    me.doAction();
+                    shape.draw(me.context);
 
                 }
 
@@ -61,13 +66,15 @@ define(function (require, exports, module) {
 
                 var me = this;
 
-                if (me.action) {
+                var shape = me.shape;
+
+                if (shape && shape.width > 0 && shape.height > 0) {
 
                     me.restore();
 
                     me.commit();
 
-                    me.action = null;
+                    me.shape = null;
                 }
 
             }

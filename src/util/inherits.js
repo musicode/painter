@@ -24,6 +24,8 @@ define(function (require, exports, module) {
 
         $.extend(subProto, superProto, subClass);
 
+        subProto.constructor = Class;
+
         return Class;
 
     };

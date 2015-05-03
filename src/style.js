@@ -8,9 +8,11 @@ define(function (require, exports, module) {
 
     var eventEmitter = require('./eventEmitter');
 
-    var fontSize = 12;
+    var fontSize = 20;
 
-    var lineWidth = 0.5;
+    var fontFamily = 'PingHei, "Hiragino Sans GB", "Microsoft YaHei"';
+
+    var lineWidth = 1;
 
     var fillStyle = '#333';
 
@@ -36,6 +38,28 @@ define(function (require, exports, module) {
         }
     };
 
+
+    exports.getFontFamily = function () {
+        return fontFamily;
+    };
+
+    exports.setFontFamily = function (value) {
+        if (fontFamily !== value) {
+
+            fontFamily = value;
+
+            eventEmitter.trigger(
+                eventEmitter.FONT_FAMILY_CHANGE,
+                {
+                    fontFamily: value
+                }
+            );
+
+        }
+    };
+
+
+
     exports.getLineWidth = function () {
         return lineWidth;
     };
@@ -54,6 +78,8 @@ define(function (require, exports, module) {
 
         }
     };
+
+
 
     exports.getFillStyle = function () {
         return fillStyle;
@@ -74,6 +100,8 @@ define(function (require, exports, module) {
         }
     };
 
+
+
     exports.getStrokeStyle = function () {
         return strokeStyle;
     };
@@ -91,5 +119,7 @@ define(function (require, exports, module) {
             );
         }
     };
+
+
 
 });

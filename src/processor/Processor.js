@@ -6,75 +6,120 @@ define(function (require, exports, module) {
 
     'use strict';
 
-    var style = require('../style');
     var eventEmitter = require('../eventEmitter');
+    var DrawingSurface = require('../DrawingSurface');
 
-    var window2Canvas = require('../util/window2Canvas');
+    var namespace = '.painter_processor';
+
+    function getGlobalPoint(e) {
+        return {
+            x: e.pageX,
+            y: e.pageY
+        };
+    }
+
+    function getLocalPoint(globalPoint, canvas) {
+
+        var pos = canvas.getBoundingClientRect();
+        var scaleX = canvas.width  / pos.width;
+        var scaleY = canvas.height  / pos.height;
+
+        return {
+            x: (globalPoint.x - pos.left) * scaleX,
+            y: (globalPoint.y - pos.top)  * scaleY
+        };
+
+    }
 
     /**
      * @param {Object} options
      * @property {CanvasRenderingContext2D} context
      */
-    function Action(options) {
+    function Processor(options) {
         $.extend(this, options);
         this.init();
     }
 
-    Action.prototype = {
+    Processor.prototype = {
 
-        constructor: Action,
+        constructor: Processor,
 
         init: function () {
 
             var me = this;
+
+            me.drawingSurface = new DrawingSurface();
+
             var canvas = me.context.canvas;
 
-            var getPoint = function (e) {
-                return window2Canvas(canvas, e);
+            var downHandler = function (e) {
+
+                var globalPoint = getGlobalPoint(e);
+
+                me.down(
+                    e,
+                    getLocalPoint(globalPoint, canvas),
+                    globalPoint
+                );
+
             };
 
-            $(canvas)
+            var moveHandler = function (e) {
+
+                var globalPoint = getGlobalPoint(e);
+
+                me.move(
+                    e,
+                    getLocalPoint(globalPoint, canvas),
+                    globalPoint
+                );
+
+            };
+
+            var upHandler = function (e) {
+
+                var globalPoint = getGlobalPoint(e);
+
+                me.up(
+                    e,
+                    getLocalPoint(globalPoint, canvas),
+                    globalPoint
+                );
+
+            };
+
+            var $canvas = $(canvas);
+
+            if ('ontouchend' in window) {
+                $canvas
+                    .on(
+                        'touchstart' + namespace,
+                        downHandler
+                    )
+                    .on(
+                        'touchmove' + namespace,
+                        moveHandler
+                    )
+                    .on(
+                        'touchend' + namespace,
+                        upHandler
+                    );
+            }
+
+            $canvas
                 .on(
                     'mousedown' + namespace,
-                    function (e) {
-                        me.down(e, getPoint(e));
-                    }
+                    downHandler
                 );
 
             $(document)
                 .on(
                     'mousemove' + namespace,
-                    function (e) {
-                        me.move(e, getPoint(e));
-                    }
+                    moveHandler
                 )
                 .on(
                     'mouseup' + namespace,
-                    function (e) {
-                        me.up(e, getPoint(e));
-                    }
-                );
-
-            var updateAction = function (e, data) {
-                me.updateAction(data);
-            };
-
-            eventEmitter
-                .on(
-                    eventEmitter.FONT_SIZE_CHANGE,
-                    updateAction
-                )
-                .on(
-                    eventEmitter.STROKE_STYLE_CHANGE,
-                    updateAction
-                )
-                .on(
-                    eventEmitter.FILL_STYLE_CHANGE,
-                    updateAction
-                )
-                .on(
-                    eventEmitter.LINE_WIDTH_CHANGE,
-                    updateAction
+                    upHandler
                 );
 
             me.initExtend();
@@ -82,24 +127,6 @@ define(function (require, exports, module) {
         },
 
         initExtend: $.noop,
-
-        updateAction: function (data) {
-
-            var action = this.action;
-
-            if (action) {
-                action.update(data);
-            }
-        },
-
-        doAction: function () {
-
-            var action = this.action;
-
-            if (action) {
-                action.do(this.context);
-            }
-        },
 
         dispose: function () {
 
@@ -112,18 +139,18 @@ define(function (require, exports, module) {
 
             var me = this;
 
-            var action = me.action;
+            var shape = me.shape;
 
-            if (action) {
+            if (shape) {
 
                 eventEmitter.trigger(
 
                     isRemove
-                    ? eventEmitter.ACTION_REMOVE
-                    : eventEmitter.ACTION_ADD,
+                    ? eventEmitter.SHAPE_REMOVE_TRIGGER
+                    : eventEmitter.SHAPE_ADD_TRIGGER,
 
                     {
-                        action: action
+                        shape: shape
                     }
 
                 );
@@ -134,39 +161,21 @@ define(function (require, exports, module) {
 
         save: function () {
 
-            eventEmitter.trigger(
-                eventEmitter.SAVE_DRAWING_SURFACE_ACTION
+            var me = this;
+
+            me.drawingSurface.save(
+                me.context
             );
 
         },
 
         restore: function () {
 
-            eventEmitter.trigger(
-                eventEmitter.RESTORE_DRAWING_SURFACE_ACTION
-            );
-
-        },
-
-        createShape: function (Shape, params) {
-
             var me = this;
 
-            var options = {
-                shadowColor: 'rgba(0,0,0,0.2)',
-                shadowOffsetX: 1,
-                shadowOffsetY: 1,
-                shadowBlur: 1,
-                lineWidth: style.getLineWidth(),
-                strokeStyle: style.getStrokeStyle(),
-                fillStyle: style.getFillStyle()
-            };
-
-            if (params) {
-                $.extend(options, params);
-            };
-
-            return new Shape(options);
+            me.drawingSurface.restore(
+                me.context
+            );
 
         },
 
@@ -178,8 +187,7 @@ define(function (require, exports, module) {
 
     };
 
-    var namespace = '.painter_processor';
 
-    return Action;
+    return Processor;
 
 });

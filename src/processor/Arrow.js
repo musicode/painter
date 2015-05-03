@@ -6,9 +6,9 @@ define(function (require, exports, module) {
 
     'use strict';
 
-    var Shape = require('../shape/Arrow');
-    var Action = require('../action/Arrow');
+    var style = require('../style');
 
+    var Shape = require('../shape/Arrow');
     var inherits = require('../util/inherits');
 
     return inherits(
@@ -22,8 +22,15 @@ define(function (require, exports, module) {
 
                 me.save();
 
-                me.action = new Action({
-                    shape: me.createShape(Shape, point)
+                me.shape = new Shape({
+                    x: point.x,
+                    y: point.y,
+                    shadowColor: 'rgba(0,0,0,0.2)',
+                    shadowOffsetX: 1,
+                    shadowOffsetY: 1,
+                    shadowBlur: 1,
+                    thickness: style.getLineWidth(),
+                    fillStyle: style.getFillStyle()
                 });
 
             },
@@ -31,18 +38,16 @@ define(function (require, exports, module) {
             move: function (e, point) {
 
                 var me = this;
-                var action = me.action;
+                var shape = me.shape;
 
-                if (action) {
+                if (shape) {
 
                     me.restore();
 
-                    me.updateAction({
-                        endX: point.x,
-                        endY: point.y
-                    });
+                    shape.endX = point.x;
+                    shape.endY = point.y;
 
-                    me.doAction();
+                    shape.draw(me.context);
 
                 }
 
@@ -51,18 +56,14 @@ define(function (require, exports, module) {
             up: function () {
 
                 var me = this;
-                var action = me.action;
+                var shape = me.shape;
 
-                if (action) {
-
-                    if (action.shape.endX == null) {
-                        return;
-                    }
+                if (shape && shape.endX != null) {
 
                     me.restore();
                     me.commit();
 
-                    me.action = null;
+                    me.shape = null;
 
                 }
 

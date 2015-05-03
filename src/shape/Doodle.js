@@ -21,20 +21,58 @@ define(function (require, exports, module) {
 
             name: 'Doodle',
 
-            toAdaptiveExtend: function (adaptive, canvasWidth, canvasHeight) {
+            /**
+             * createPath 的扩展，方便子类覆写
+             *
+             * @param {CanvasRenderingContext2D} context
+             */
+            createPathExtend: function (context) {
+
+                var points = this.points;
+
+                if (points.length > 0) {
+
+                    var point = points[0];
+
+                    context.moveTo(
+                        point.x,
+                        point.y
+                    );
+
+                    for (var i = 1, len = points.length; i < len; i++) {
+
+                        point = points[i];
+
+                        context.lineTo(
+                            point.x,
+                            point.y
+                        );
+                    }
+
+                }
+
+            },
+
+            getBoundaryRect: function () {
+
+                return rect(this.points);
+
+            },
+
+            toAdaptiveExtend: function (adaptive, width, height) {
 
                 var fn;
 
                 if (adaptive) {
                     fn = function (index, point) {
-                        point.x /= canvasWidth;
-                        point.y /= canvasHeight;
+                        point.x /= width;
+                        point.y /= height;
                     };
                 }
                 else {
                     fn = function (index, point) {
-                        point.x *= canvasWidth;
-                        point.y *= canvasHeight;
+                        point.x *= width;
+                        point.y *= height;
                     };
                 }
 
@@ -42,14 +80,6 @@ define(function (require, exports, module) {
                     this.points,
                     fn
                 );
-
-            },
-
-            getBoundaryRect: function () {
-
-                var points = this.getPoints();
-
-                return rect(points);
 
             }
 

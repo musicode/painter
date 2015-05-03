@@ -7,7 +7,6 @@ define(function (require, exports, module) {
     'use strict';
 
     var eventEmitter = require('../eventEmitter');
-    var Action = require('../action/Eraser');
 
     var inherits = require('../util/inherits');
 
@@ -25,7 +24,7 @@ define(function (require, exports, module) {
 
                 eventEmitter.on(
                     eventEmitter.SHAPE_REMOVE,
-                    function (e, data) {
+                    function () {
                         me.save();
                     }
                 );
@@ -40,13 +39,9 @@ define(function (require, exports, module) {
 
                 if (shape) {
 
-                    me.action = new Action({
-                        shape: shape
-                    });
-
                     me.commit(true);
 
-                    me.action = null;
+                    me.shape = null;
 
                 }
 
@@ -56,12 +51,23 @@ define(function (require, exports, module) {
                 var me = this;
                 var context = me.context;
 
+                var canvas = context.canvas;
+                var width = canvas.width;
+                var height = canvas.height;
+
                 me.restore();
 
                 var target = null;
 
-                me.iterator(
-                    function (shape) {
+                $.each(
+                    me.shapes,
+                    function (index, shape) {
+
+                        if (shape.adaptive) {
+                            shape = shape.clone();
+                            shape.toAdaptive(false, width, height);
+                        }
+
                         if (shape.isPointInPath(context, point)) {
                             target = shape;
                         }

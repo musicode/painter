@@ -21,33 +21,12 @@ define(function (require, exports, module) {
 
             name: 'Line',
 
-            toAdaptiveExtend: function (adaptive, canvasWidth, canvasHeight) {
+            createPathExtend: function (context) {
 
                 var me = this;
 
-                if (adaptive) {
-                    me.endX /= canvasWidth;
-                    me.endY /= canvasHeight;
-                }
-                else {
-                    me.endX *= canvasWidth;
-                    me.endY *= canvasHeight;
-                }
-
-            },
-
-            getPoints: function () {
-
-                return [
-                    {
-                        x: me.x,
-                        y: me.y
-                    },
-                    {
-                        x: me.endX,
-                        y: me.endY
-                    }
-                ];
+                context.moveTo(me.x, me.y);
+                context.lineTo(me.endX, me.endY);
 
             },
 
@@ -55,12 +34,33 @@ define(function (require, exports, module) {
 
                 var me = this;
 
+                var startX = Math.min(me.x, me.endX);
+                var startY = Math.min(me.y, me.endY);
+
+                var endX = Math.max(me.x, me.endX);
+                var endY = Math.max(me.y, me.endY);
+
                 return {
-                    x: me.x,
-                    y: me.y,
-                    width: me.endX - me.x,
-                    height: me.endY - me.y
+                    x: startX,
+                    y: startY,
+                    width: endX - startX,
+                    height: endY - startY
                 };
+
+            },
+
+            toAdaptiveExtend: function (adaptive, width, height) {
+
+                var me = this;
+
+                if (adaptive) {
+                    me.endX /= width;
+                    me.endY /= height;
+                }
+                else {
+                    me.endX *= width;
+                    me.endY *= height;
+                }
 
             }
 

@@ -10,12 +10,10 @@ define(function (require, exports, module) {
     var eventEmitter = require('../eventEmitter');
 
     var Shape = require('../shape/Text');
-    var Action = require('../action/Text');
 
-    var canvas2Window = require('../util/canvas2Window');
     var inherits = require('../util/inherits');
 
-    function createTextarea(x, y, fontSize, color) {
+    function createTextarea(x, y, fontSize, fontFamily, color) {
         return $(
             '<textarea class="canvas-textarea" '
           + 'style="position:absolute;left:' + x + 'px;top:' + y + 'px;'
@@ -31,7 +29,7 @@ define(function (require, exports, module) {
         {
             name: 'text',
 
-            down: function (e, point) {
+            down: function (e, point, globalPoint) {
 
                 var me = this;
 
@@ -42,15 +40,21 @@ define(function (require, exports, module) {
                 }
 
                 var fontSize = style.getFontSize();
+                var fontFamily = style.getFontFamily();
                 var fillStyle = style.getFillStyle();
 
                 var canvas = me.context.canvas;
-
-                var raw = canvas2Window(canvas, point);
-
+console.log('local', point);
+console.log('global', globalPoint);
                 var textarea =
 
-                me.textarea = createTextarea(raw.x, raw.y, fontSize, fillStyle);
+                me.textarea = createTextarea(
+                    globalPoint.x,
+                    globalPoint.y,
+                    fontSize,
+                    fontFamily,
+                    fillStyle
+                );
 
                 textarea.appendTo('body');
 
@@ -66,20 +70,24 @@ define(function (require, exports, module) {
 
                                 if (text) {
 
-                                    var options = {
+                                    me.shape = new Shape({
                                         x: point.x,
                                         y: point.y,
                                         text: text,
                                         fontSize: fontSize,
-                                        align: 'start',
-                                        baseLine: 'top'
-                                    };
-
-                                    me.action = new Action({
-                                        shape: me.createShape(Shape, options)
+                                        fontFamily: fontFamily,
+                                        textAlign: 'start',
+                                        textBaseLine: 'top',
+                                        shadowColor: 'rgba(0,0,0,0.2)',
+                                        shadowOffsetX: 1,
+                                        shadowOffsetY: 1,
+                                        shadowBlur: 1,
+                                        fillStyle: fillStyle
                                     });
 
                                     me.commit();
+
+                                    me.shape = null;
 
                                 }
 

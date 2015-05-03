@@ -21,29 +21,14 @@ define(function (require, exports, module) {
 
             name: 'Ellipse',
 
-            toAdaptiveExtend: function (adaptive, canvasWidth, canvasHeight) {
+            createPathExtend: function (context) {
 
                 var me = this;
 
-                if (adaptive) {
-                    me.width /= canvasWidth;
-                    me.height /= canvasHeight;
-                }
-                else {
-                    me.width *= canvasWidth;
-                    me.height *= canvasHeight;
-                }
-
-            },
-
-            createPathExtend: function (context, canvasWidth, canvasHeight) {
-
-                var me = this;
-
-                var x = me.x * canvasWidth;
-                var y = me.y * canvasHeight;
-                var width = me.width * canvasWidth;
-                var height = me.height * canvasHeight;
+                var x = me.x;
+                var y = me.y;
+                var width = me.width;
+                var height = me.height;
 
                 if (width > 0 && height > 0) {
 
@@ -83,6 +68,21 @@ define(function (require, exports, module) {
                     width: width,
                     height: height
                 };
+
+            },
+
+            toAdaptiveExtend: function (adaptive, width, height) {
+
+                var me = this;
+
+                if (adaptive) {
+                    me.width /= width;
+                    me.height /= height;
+                }
+                else {
+                    me.width *= width;
+                    me.height *= height;
+                }
 
             }
 

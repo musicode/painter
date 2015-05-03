@@ -31,19 +31,6 @@ define(function (require, exports, module) {
 
             name: 'Polygon',
 
-            toAdaptiveExtend: function (adaptive, canvasWidth, canvasHeight) {
-
-                var me = this;
-
-                if (adaptive) {
-                    me.radius /= canvasWidth;
-                }
-                else {
-                    me.radius *= canvasWidth;
-                }
-
-            },
-
             getPoints: function () {
 
                 var me = this;
@@ -84,11 +71,51 @@ define(function (require, exports, module) {
 
             },
 
+            createPathExtend: function () {
+
+                var points = this.getPoints;
+
+                if (points.length > 0) {
+
+                    var point = points[0];
+
+                    context.moveTo(
+                        point.x,
+                        point.y
+                    );
+
+                    for (var i = 1, len = points.length; i < len; i++) {
+
+                        point = points[i];
+
+                        context.lineTo(
+                            point.x,
+                            point.y
+                        );
+                    }
+
+                }
+
+            },
+
             getBoundaryRect: function () {
 
-                var points = this.getPoints();
+                return rect(
+                    this.getPoints()
+                );
 
-                return rect(points);
+            },
+
+            toAdaptiveExtend: function (adaptive, width) {
+
+                var me = this;
+
+                if (adaptive) {
+                    me.radius /= width;
+                }
+                else {
+                    me.radius *= width;
+                }
 
             }
 

@@ -8,12 +8,17 @@ define(function (require, exports, module) {
 
     var inherits = require('../util/inherits');
 
+    var devicePixelRatio = window.devicePixelRatio || 1;
+
     /**
      * 构造函数新增参数
      *
      * @param {Object} options
      * @property {string} options.text
      * @property {string} options.fontSize
+     * @property {string} options.fontFamily
+     * @property {string} options.textAlign
+     * @property {string} options.textBaseLine
      */
     return inherits(
         require('./Shape'),
@@ -21,17 +26,7 @@ define(function (require, exports, module) {
 
             name: 'Text',
 
-            toAdaptiveExtend: function (adaptive, canvasWidth, canvasHeight) {
-
-                var me = this;
-
-                if (adaptive) {
-                    me.fontSize /= canvasWidth;
-                }
-                else {
-                    me.fontSize *= canvasWidth;
-                }
-            },
+            createPath: $.noop,
 
             getBoundaryRect: function (context) {
 
@@ -49,70 +44,41 @@ define(function (require, exports, module) {
 
             },
 
-            fill: function (context) {
+            toAdaptiveExtend: function (adaptive, width) {
 
                 var me = this;
 
-                var width;
-                var height;
-
-                if (me.adaptive) {
-                    var canvas = context.canvas;
-                    width = canvas.width;
-                    height = canvas.height;
+                if (adaptive) {
+                    me.fontSize /= width;
                 }
                 else {
-                    width = height = 1;
+                    me.fontSize *= width;
                 }
+            },
 
-                context.save();
+            fillExtend: function (context) {
 
-                context.shadowColor = me.shadowColor;
-                context.shadowOffsetX = me.shadowOffsetX;
-                context.shadowOffsetY = me.shadowOffsetY;
-                context.shadowBlur = me.shadowBlur;
+                var me = this;
 
-                context.font = me.fontSize * width + 'px PingHei, "Hiragino Sans GB", "Microsoft YaHei"';
-                context.textAlign = me.align;
-                context.textBaseLine = me.baseLine;
-
-                context.fillStyle = me.fillStyle;
-                context.fillText(me.text, me.x * width, me.y * height);
-
-                context.restore();
+                context.font = me.fontSize * devicePixelRatio + 'px '
+                             + me.fontFamily;
+                context.textAlign = me.textAlign;
+                context.textBaseLine = me.textBaseLine;
+console.log(me.x, me.y)
+                context.fillText(me.text, me.x, me.y);
 
             },
 
-            stroke: function (context) {
+            strokeExtend: function (context) {
 
                 var me = this;
 
-                var width;
-                var height;
+                context.font = me.fontSize * devicePixelRatio + 'px '
+                             + me.fontFamily;
+                context.textAlign = me.textAlign;
+                context.textBaseLine = me.textBaseLine;
 
-                if (me.adaptive) {
-                    var canvas = context.canvas;
-                    width = canvas.width;
-                    height = canvas.height;
-                }
-                else {
-                    width = height = 1;
-                }
-                context.save();
-
-                context.shadowColor = me.shadowColor;
-                context.shadowOffsetX = me.shadowOffsetX;
-                context.shadowOffsetY = me.shadowOffsetY;
-                context.shadowBlur = me.shadowBlur;
-
-                context.font = me.fontSize * width + 'px ';
-                context.textAlign = me.align;
-                context.textBaseLine = me.baseLine;
-
-                context.strokeStyle = me.strokeStyle;
-                context.strokeText(me.text, me.x * width, me.y * height);
-
-                context.restore();
+                context.strokeText(me.text, me.x, me.y);
 
             }
 

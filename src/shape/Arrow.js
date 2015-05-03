@@ -12,6 +12,7 @@ define(function (require, exports, module) {
      * 构造函数新增参数
      *
      * @param {Object} options
+     * @property {number} options.thickness 箭头粗细
      * @property {number} options.endX 结束点 x 坐标
      * @property {number} options.endY 结束点 y 坐标
      */
@@ -21,46 +22,36 @@ define(function (require, exports, module) {
 
             name: 'Arrow',
 
-            toAdaptiveExtend: function (adaptive, canvasWidth, canvasHeight) {
+            createPathExtend: function (context) {
 
                 var me = this;
 
-                if (adaptive) {
-                    me.endX /= canvasWidth;
-                    me.endY /= canvasHeight;
-                }
-                else {
-                    me.endX *= canvasWidth;
-                    me.endY *= canvasHeight;
-                }
-
-            },
-
-            createPathExtend: function (context, canvasWidth, canvasHeight) {
-
-                var me = this;
-
-                var startX = me.x * canvasWidth;
-                var startY = me.y * canvasHeight;
-                var endX = me.endX * canvasWidth;
-                var endY = me.endY * canvasHeight;
+                var startX = me.x;
+                var startY = me.y;
+                var endX = me.endX;
+                var endY = me.endY;
 
                 var dy = endY - startY;
                 var dx = endX - startX;
-
-                // 转换坐标
-                context.save();
-                context.translate(startX, startY);
-                context.rotate(
-                    Math.atan2(dy, dx)
-                );
 
                 // 箭头长度
                 var distance = Math.sqrt(
                     dx * dx + dy * dy
                 );
 
-                var thickness = me.lineWidth;
+                if (distance < 5) {
+                    return;
+                }
+
+                context.save();
+
+                // 转换坐标
+                context.translate(startX, startY);
+                context.rotate(
+                    Math.atan2(dy, dx)
+                );
+
+                var thickness = me.thickness;
 
                 // 实现尖部圆角效果的半径
                 var radius = thickness * 0.5;
@@ -96,7 +87,6 @@ define(function (require, exports, module) {
 
                 context.arc(startX, 0, radius, 0.5 * Math.PI, -0.5 * Math.PI, false);
 
-
                 context.restore();
 
             },
@@ -105,12 +95,33 @@ define(function (require, exports, module) {
 
                 var me = this;
 
+                var startX = Math.min(me.x, me.endX);
+                var startY = Math.min(me.y, me.endY);
+
+                var endX = Math.max(me.x, me.endX);
+                var endY = Math.max(me.y, me.endY);
+
                 return {
-                    x: me.x,
-                    y: me.y,
-                    width: me.endX - me.x,
-                    height: me.endY - me.y
+                    x: startX,
+                    y: startY,
+                    width: endX - startX,
+                    height: endY - startY
                 };
+
+            },
+
+            toAdaptiveExtend: function (adaptive, width, height) {
+
+                var me = this;
+
+                if (adaptive) {
+                    me.endX /= width;
+                    me.endY /= height;
+                }
+                else {
+                    me.endX *= width;
+                    me.endY *= height;
+                }
 
             }
 

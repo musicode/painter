@@ -20,29 +20,16 @@ define(function (require, exports, module) {
 
             name: 'Circle',
 
-            toAdaptiveExtend: function (adaptive, canvasWidth, canvasHeight) {
+            createPathExtend: function (context) {
 
                 var me = this;
 
-                if (adaptive) {
-                    me.radius /= canvasWidth;
-                }
-                else {
-                    me.radius *= canvasWidth;
-                }
-
-            },
-
-            createPathExtend: function (context, canvasWidth, canvasHeight) {
-
-                var me = this;
-
-                var radius = me.radius * canvasWidth;
+                var radius = me.radius;
 
                 if (radius > 0) {
 
-                    var x = me.x * canvasWidth;
-                    var y = me.y * canvasHeight;
+                    var x = me.x;
+                    var y = me.y;
 
                     context.moveTo(x + radius, y);
                     context.arc(x, y, radius, 0, 2 * Math.PI, true);
@@ -62,6 +49,19 @@ define(function (require, exports, module) {
                     width: 2 * radius,
                     height: 2 * radius
                 };
+
+            },
+
+            toAdaptiveExtend: function (adaptive, width) {
+
+                var me = this;
+
+                if (adaptive) {
+                    me.radius /= width;
+                }
+                else {
+                    me.radius *= width;
+                }
 
             }
 

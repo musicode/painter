@@ -10,7 +10,7 @@
         canvas {
             background-color: #FFF;
             width: 1000px;
-            height: 600px;
+            height: 300px;
         }
     </style>
 </head>
@@ -25,7 +25,11 @@
         <input id="input-color" type="color" />
     </div>
     <div>
-        shape:
+        action:
+        <label>
+            <input type="radio" name="shape" value="laser" />
+            laser
+        </label>
         <label>
             <input type="radio" name="shape" value="line" />
             line
@@ -54,28 +58,115 @@
             <input type="radio" name="shape" value="text" />
             text
         </label>
-    </div>
-    <div>
-        eraser:
         <label>
-            <input type="radio" name="eraser" value="0" />
-            point
-        </label>
-        <label>
-            <input type="radio" name="eraser" value="1" />
-            block
+            <input type="radio" name="shape" value="eraser" />
+            eraser
         </label>
     </div>
 
     <script src="tool/esl.js"></script>
+    <script src="tool/jquery.js"></script>
     <script>
         require.config({
             baseUrl: './src'
         });
 
-        require(['test/dial'], function (test) {
-            test.init();
-        });
+        require(
+            [
+                'Main',
+                'eventEmitter',
+                'processor/Arrow',
+                'processor/Doodle',
+                'processor/Rect',
+                'processor/Text',
+                'processor/Eraser'
+            ],
+            function (Painter, eventEmitter, Arrow, Doodle, Rect, Text, Eraser) {
+
+                var canvas = $('#canvas');
+                var context = canvas[0].getContext('2d');
+
+                var painter = new Painter({
+                    context: context,
+                    stage: function (context) {
+                        var canvas = context.canvas;
+                        context.lineCap = 'round';
+                        context.clearRect(0, 0, canvas.width, canvas.height);
+                    }
+                });
+
+                painter.resize(
+                    canvas.width(),
+                    canvas.height()
+                );
+
+                eventEmitter
+                    .on(
+                        eventEmitter.SHAPE_ADD_TRIGGER,
+                        function (e, data) {
+
+                            var shape = data.shape;
+                            var canvas = context.canvas;
+
+                            shape.toAdaptive(true, canvas.width, canvas.height);
+
+                            painter.addShape(shape);
+
+                        }
+                    )
+                    .on(
+                        eventEmitter.SHAPE_REMOVE_TRIGGER,
+                        function (e, data) {
+
+                            var shape = data.shape;
+
+                            painter.removeShape(shape.id);
+
+                        }
+                    );
+
+                var map = {
+                    arrow: function () {
+                        return new Arrow({
+                            context: context
+                        });
+                    },
+                    doodle: function () {
+                        return new Doodle({
+                            context: context
+                        });
+                    },
+                    rect: function () {
+                        return new Rect({
+                            context: context
+                        });
+                    },
+                    text: function () {
+                        return new Text({
+                            context: context
+                        });
+                    },
+                    eraser: function () {
+                        return new Eraser({
+                            context: context,
+                            shapes: painter.list
+                        });
+                    }
+                };
+
+                var activeProcessor;
+
+                $('body').on('change', ':radio', function () {
+
+                    if (activeProcessor) {
+                        activeProcessor.dispose();
+                    }
+
+                    activeProcessor = map[this.value]();
+
+                });
+            }
+        );
     </script>
 </body>
 </html>

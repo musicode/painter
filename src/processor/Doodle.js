@@ -6,9 +6,9 @@ define(function (require, exports, module) {
 
     'use strict';
 
-    var Shape = require('../shape/Doodle');
-    var Action = require('../action/Doodle');
+    var style = require('../style');
 
+    var Shape = require('../shape/Doodle');
     var inherits = require('../util/inherits');
 
     return inherits(
@@ -22,35 +22,31 @@ define(function (require, exports, module) {
 
                 me.save();
 
-                var options = {
+                me.shape = new Shape({
                     x: point.x,
                     y: point.y,
-                    points: me.points =  [ point ]
-                };
-
-                me.action = new Action({
-                    shape: me.createShape(Shape, options)
+                    points: [ point ],
+                    shadowColor: 'rgba(0,0,0,0.2)',
+                    shadowOffsetX: 1,
+                    shadowOffsetY: 1,
+                    shadowBlur: 1,
+                    lineWidth: style.getLineWidth(),
+                    strokeStyle: style.getStrokeStyle()
                 });
 
             },
             move: function (e, point) {
 
                 var me = this;
-                var action = me.action;
+                var shape = me.shape;
 
-                if (action) {
+                if (shape) {
 
                     me.restore();
 
-                    var points = me.points;
+                    shape.points.push(point);
 
-                    points.push(point);
-
-                    me.updateAction({
-                        points: points
-                    });
-
-                    me.doAction();
+                    shape.draw(me.context);
 
                 }
 
@@ -59,13 +55,13 @@ define(function (require, exports, module) {
 
                 var me = this;
 
-                if (me.action) {
+                if (me.shape) {
 
                     me.restore();
 
                     me.commit();
 
-                    me.action = null;
+                    me.shape = null;
 
                 }
 

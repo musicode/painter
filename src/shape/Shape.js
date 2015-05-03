@@ -7,7 +7,9 @@ define(function (require, exports, module) {
     'use strict';
 
     var guid = require('../util/guid');
-    var drawLines = require('../util/lines');
+
+    var enableShadow = require('../util/enableShadow');
+    var disableShadow = require('../util/disableShadow');
 
     /**
      * @param {Object} options
@@ -20,7 +22,7 @@ define(function (require, exports, module) {
      * @property {number=} options.shadowOffsetX
      * @property {number=} options.shadowOffsetY
      * @property {number=} options.shadowBlur
-     * @property {boolean} options.adaptive 是否自适应，默认是 true
+     * @property {boolean} options.adaptive 是否自适应，默认是 false
      */
     function Shape(options) {
         $.extend(this, Shape.defaultOptions, options);
@@ -30,6 +32,8 @@ define(function (require, exports, module) {
     Shape.prototype = {
 
         constructor: Shape,
+
+        name: 'Shape',
 
         init: function () {
 
@@ -43,54 +47,60 @@ define(function (require, exports, module) {
         },
 
         /**
-         * 某些不规则 Shape 需要点的数组，比如涂鸦
+         * 绘制图形
          *
-         * @return {Array}
+         * @param {CanvasRenderingContext2D} context
          */
-        getPoints: function () {
+        draw: function (context) {
 
-            var points = this.points;
+            var me = this;
 
-            return Array.isArray(points) ? points : [ ];
+            if (me.adaptive) {
+                throw new Error('shape must be un-adaptive');
+            }
+
+            me.createPath(context);
+
+            if (me.lineWidth > 0) {
+                me.stroke(context);
+            }
+
+            if (me.fillStyle) {
+                me.fill(context);
+            }
 
         },
 
         /**
          * 创建绘制路径
+         *
+         * @param {CanvasRenderingContext2D} context
          */
         createPath: function (context) {
 
-            var canvas = context.canvas;
-
             context.beginPath();
 
-            var width = canvas.width;
-            var height = canvas.height;
-
-            if (!this.adaptive) {
-                width = height = 1;
-            }
-
-            this.createPathExtend(context, width, height);
+            this.createPathExtend(context);
 
         },
 
-        createPathExtend: function (context, canvasWidth, canvasHeight) {
+        /**
+         * 创建边界路径
+         *
+         * @param {CanvasRenderingContext2D} context
+         */
+        createBoundaryPath: function (context) {
 
-            var points = this.getPoints();
+            var rect = this.getBoundaryRect(context);
 
-            if (points.length > 0) {
+            context.beginPath();
 
-                points = points.map(function (point) {
-                    return {
-                        x: point.x * canvasWidth,
-                        y: point.y * canvasHeight
-                    };
-                });
-
-                drawLines(context, points);
-
-            }
+            context.rect(
+                rect.x,
+                rect.y,
+                rect.width,
+                rect.height
+            );
 
         },
 
@@ -117,14 +127,28 @@ define(function (require, exports, module) {
 
             context.save();
 
-            context.shadowColor = me.shadowColor;
-            context.shadowOffsetX = me.shadowOffsetX;
-            context.shadowOffsetY = me.shadowOffsetY;
-            context.shadowBlur = me.shadowBlur;
+            if (me.shadowColor == null) {
+                disableShadow(context);
+            }
+            else {
+                enableShadow(
+                    context,
+                    me.shadowColor,
+                    me.shadowOffsetX,
+                    me.shadowOffsetY,
+                    me.shadowBlur
+                );
+            }
 
             context.lineWidth = me.lineWidth;
             context.strokeStyle = me.strokeStyle;
-            context.stroke();
+
+            if (me.strokeExtend) {
+                me.strokeExtend(context);
+            }
+            else {
+                context.stroke();
+            }
 
             context.restore();
 
@@ -141,13 +165,27 @@ define(function (require, exports, module) {
 
             context.save();
 
-            context.shadowColor = me.shadowColor;
-            context.shadowOffsetX = me.shadowOffsetX;
-            context.shadowOffsetY = me.shadowOffsetY;
-            context.shadowBlur = me.shadowBlur;
+            if (me.shadowColor == null) {
+                disableShadow(context);
+            }
+            else {
+                enableShadow(
+                    context,
+                    me.shadowColor,
+                    me.shadowOffsetX,
+                    me.shadowOffsetY,
+                    me.shadowBlur
+                );
+            }
 
             context.fillStyle = me.fillStyle;
-            context.fill();
+
+            if (me.fillExtend) {
+                me.fillExtend(context);
+            }
+            else {
+                context.fill();
+            }
 
             context.restore();
 
@@ -156,13 +194,17 @@ define(function (require, exports, module) {
         /**
          * 把非自适应的 Shape 改为自适应
          *
-         * @param {boolean} adaptive
-         * @param {number} width
-         * @param {number} height
+         * @param {boolean} adaptive 是否自适应
+         * @param {number} width 画布宽度
+         * @param {number} height 画布高度
          */
         toAdaptive: function (adaptive, width, height) {
 
             var me = this;
+
+            if (me.adaptive === adaptive) {
+                return;
+            }
 
             me.adaptive = adaptive;
 
@@ -179,47 +221,28 @@ define(function (require, exports, module) {
 
         },
 
-        /**
-         * 创建边界路径
-         *
-         * @param {CanvasRenderingContext2D} context
-         */
-        createBoundaryPath: function (context) {
+        clone: function () {
 
             var me = this;
-            var canvas = context.canvas;
 
-            context.beginPath();
+            var Class = me.constructor;
+            var instance = new Class();
 
-            var width = canvas.width;
-            var height = canvas.height;
+            $.extend(instance, me);
 
-            if (!me.adaptive) {
-                width = height = 1;
-            }
+            return instance;
 
-            var rect = me.getBoundaryRect(context);
+        },
 
-            context.rect(
-                rect.x * width,
-                rect.y * height,
-                rect.width * width,
-                rect.height * height
-            );
-
-        }
+        // 留给子类覆写
+        createPathExtend: $.noop,
+        toAdaptiveExtend: $.noop,
+        getBoundaryRect: $.noop
 
     };
 
     Shape.defaultOptions = {
-        adaptive: false,
-        lineWidth: 0.5,
-        fillStyle: '#666',
-        strokeStyle: '#666',
-        shadowColor: undefined,
-        shadowOffsetX: 0,
-        shadowOffsetY: 0,
-        shadowBlur: 0
+        adaptive: false
     };
 
 

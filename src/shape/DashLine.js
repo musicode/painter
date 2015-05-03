@@ -22,33 +22,16 @@ define(function (require, exports, module) {
 
             name: 'DashLine',
 
-            toAdaptiveExtend: function (adaptive, canvasWidth, canvasHeight) {
+            createPathExtend: function (context) {
 
-                var me = this;
+                var startX = me.x;
+                var startY = me.y;
 
-                if (adaptive) {
-                    me.endX /= canvasWidth;
-                    me.endY /= canvasHeight;
-                    me.dashLength /= canvasWidth;
-                }
-                else {
-                    me.endX *= canvasWidth;
-                    me.endY *= canvasHeight;
-                    me.dashLength *= canvasWidth;
-                }
+                var endX = me.endX;
+                var endY = me.endY;
 
-            },
-
-            createPathExtend: function (context, canvasWidth, canvasHeight) {
-
-                var x1 = me.x * canvasWidth;
-                var y1 = me.y * canvasHeight;
-
-                var x2 = me.endX * canvasWidth;
-                var y2 = me.endY * canvasHeight;
-
-                var dy = y2 - y1;
-                var dx = x2 - x1;
+                var dy = endY - startY;
+                var dx = endX - startX;
 
                 var length = Math.floor(
                     Math.sqrt(dx * dx + dy * dy) / me.dashLength
@@ -58,8 +41,8 @@ define(function (require, exports, module) {
 
                     context[ i % 2 === 0 ? 'moveTo' : 'lineTo' ](
 
-                        x1 + dx * (i / length),
-                        y1 + dy * (i / length)
+                        startX + dx * (i / length),
+                        startY + dy * (i / length)
 
                     );
 
@@ -70,12 +53,35 @@ define(function (require, exports, module) {
 
                 var me = this;
 
+                var startX = Math.min(me.x, me.endX);
+                var startY = Math.min(me.y, me.endY);
+
+                var endX = Math.max(me.x, me.endX);
+                var endY = Math.max(me.y, me.endY);
+
                 return {
-                    x: me.x,
-                    y: me.y,
-                    width: me.endX - me.x,
-                    height: me.endY - me.y
+                    x: startX,
+                    y: startY,
+                    width: endX - startX,
+                    height: endY - startY
                 };
+
+            },
+
+            toAdaptiveExtend: function (adaptive, width, height) {
+
+                var me = this;
+
+                if (adaptive) {
+                    me.endX /= width;
+                    me.endY /= height;
+                    me.dashLength /= width;
+                }
+                else {
+                    me.endX *= width;
+                    me.endY *= height;
+                    me.dashLength *= width;
+                }
 
             }
 

@@ -22,29 +22,14 @@ define(function (require, exports, module) {
 
             name: 'Rect',
 
-            toAdaptiveExtend: function (adaptive, canvasWidth, canvasHeight) {
+            createPathExtend: function (context) {
 
                 var me = this;
 
-                if (adaptive) {
-                    me.width /= canvasWidth;
-                    me.height /= canvasHeight;
-                }
-                else {
-                    me.width *= canvasWidth;
-                    me.height *= canvasHeight;
-                }
-
-            },
-
-            createPathExtend: function (context, canvasWidth, canvasHeight) {
-
-                var me = this;
-
-                var x = me.x * canvasWidth;
-                var y = me.y * canvasHeight;
-                var width = me.width * canvasWidth;
-                var height = me.height * canvasHeight;
+                var x = me.x;
+                var y = me.y;
+                var width = me.width;
+                var height = me.height;
 
                 var roundCorner = me.roundCorner;
 
@@ -101,6 +86,21 @@ define(function (require, exports, module) {
                     width: me.width,
                     height: me.height
                 };
+
+            },
+
+            toAdaptiveExtend: function (adaptive, width, height) {
+
+                var me = this;
+
+                if (adaptive) {
+                    me.width /= width;
+                    me.height /= height;
+                }
+                else {
+                    me.width *= width;
+                    me.height *= height;
+                }
 
             }
 

@@ -9,32 +9,28 @@ define(function (require, exports, module) {
     var saveDrawingSurface = require('./util/saveDrawingSurface');
     var restoreDrawingSurface = require('./util/restoreDrawingSurface');
 
-    /**
-     * @param {Object} options
-     * @property {CanvasRenderingContext2D} context
-     */
-    function DrawingSurface(options) {
-        $.extend(this, options);
+    function DrawingSurface() {
+
     }
 
     DrawingSurface.prototype = {
 
         constructor: DrawingSurface,
 
-        save: function () {
+        save: function (context) {
 
-            var me = this;
-
-            me.imageData = saveDrawingSurface(me.context);
+            this.imageData = saveDrawingSurface(context);
 
         },
 
-        restore: function () {
+        restore: function (context) {
 
-            var me = this;
+            restoreDrawingSurface(context, this.imageData);
 
-            restoreDrawingSurface(me.context, me.imageData);
+        },
 
+        getImageData: function () {
+            return this.imageData;
         }
 
     };
