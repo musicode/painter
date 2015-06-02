@@ -22,7 +22,6 @@ define(function (require, exports, module) {
      * @property {number=} options.shadowOffsetX
      * @property {number=} options.shadowOffsetY
      * @property {number=} options.shadowBlur
-     * @property {boolean} options.adaptive 是否自适应，默认是 false
      */
     function Shape(options) {
         $.extend(this, Shape.defaultOptions, options);
@@ -35,14 +34,67 @@ define(function (require, exports, module) {
 
         name: 'Shape',
 
+        xPropertyList: [ 'x' ],
+
+        yPropertyList: [ 'y' ],
+
+        serializablePropertyList: [
+            'name', 'x', 'y',
+            'lineWidth', 'strokeStyle', 'fillStyle'
+        ],
+
         init: function () {
+
+            var me = this;
 
             /**
              * 形状全局唯一的 ID
              *
              * @type {string}
              */
-            this.id = guid();
+            me.id = guid();
+
+            me.initExtend();
+
+        },
+
+        /**
+         * 更新尺寸
+         *
+         * @param {number} xFactor
+         * @param {number} yFactor
+         */
+        updateSize: function (xFactor, yFactor) {
+
+            var me = this;
+
+            $.each(
+                me.xPropertyList,
+                function (index, name) {
+                    if (me[name] > 0) {
+                        me[name] *= xFactor;
+                    }
+                }
+            );
+
+            $.each(
+                me.yPropertyList,
+                function (index, name) {
+                    if (me[name] > 0) {
+                        me[name] *= yFactor;
+                    }
+                }
+            );
+
+            if ($.isArray(me.points)) {
+                $.each(
+                    me.points,
+                    function (index, point) {
+                        point.x *= xFactor;
+                        point.y *= yFactor;
+                    }
+                );
+            }
 
         },
 
@@ -54,10 +106,6 @@ define(function (require, exports, module) {
         draw: function (context) {
 
             var me = this;
-
-            if (me.adaptive) {
-                throw new Error('shape must be un-adaptive');
-            }
 
             me.createPath(context);
 
@@ -105,15 +153,34 @@ define(function (require, exports, module) {
         },
 
         /**
-         * 点是否是否在路径中
+         * 测试点是否在图形的矩形范围内
          *
-         * @param {CanvasRenderingContext2D} context
          * @param {Object} point
          * @return {boolean}
          */
-        isPointInPath: function (context, point) {
-            this.createPath(context);
-            return context.isPointInPath(point.x, point.y);
+        testPoint: function (point) {
+
+            var me = this;
+            var rect = me.getBoundaryRect();
+
+            var left = rect.x;
+            var top = rect.y;
+            var right = left + rect.width;
+            var bottom = top + rect.height;
+
+            var lineWidth = me.lineWidth;
+            if (lineWidth > 0) {
+                var half = lineWidth / 2;
+                left -= half;
+                top -= half;
+                right += half;
+                bottom += half;
+            }
+
+            return point.x >= left
+                && point.x <= right
+                && point.y >= top
+                && point.y <= bottom;
         },
 
         /**
@@ -192,59 +259,39 @@ define(function (require, exports, module) {
         },
 
         /**
-         * 把非自适应的 Shape 改为自适应
-         *
-         * @param {boolean} adaptive 是否自适应
-         * @param {number} width 画布宽度
-         * @param {number} height 画布高度
+         * 序列化
          */
-        toAdaptive: function (adaptive, width, height) {
+        serialize: function () {
 
             var me = this;
+            var result = { };
 
-            if (me.adaptive === adaptive) {
-                return;
-            }
+            $.each(
+                me.serializablePropertyList,
+                function (index, name) {
+                    if (me[name] != null) {
+                        result[name] = me[name];
+                    }
+                }
+            );
 
-            me.adaptive = adaptive;
-
-            if (adaptive) {
-                me.x /= width;
-                me.y /= height;
-            }
-            else {
-                me.x *= width;
-                me.y *= height;
-            }
-
-            me.toAdaptiveExtend(adaptive, width, height);
-
-        },
-
-        clone: function () {
-
-            var me = this;
-
-            var Class = me.constructor;
-            var instance = new Class();
-
-            $.extend(instance, me);
-
-            return instance;
+            return result;
 
         },
 
         // 留给子类覆写
+        initExtend: $.noop,
         createPathExtend: $.noop,
-        toAdaptiveExtend: $.noop,
         getBoundaryRect: $.noop
 
     };
 
     Shape.defaultOptions = {
-        adaptive: false
+        shadowColor: 'rgba(0,0,0,0.2)',
+        shadowOffsetX: 1,
+        shadowOffsetY: 1,
+        shadowBlur: 1
     };
-
 
     return Shape;
 

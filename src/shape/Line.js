@@ -21,6 +21,15 @@ define(function (require, exports, module) {
 
             name: 'Line',
 
+            xPropertyList: [ 'x', 'endX' ],
+
+            yPropertyList: [ 'y', 'endY' ],
+
+            serializablePropertyList: [
+                'name', 'x', 'y', 'lineWidth',
+                'strokeStyle', 'fillStyle', 'endX', 'endY'
+            ],
+
             createPathExtend: function (context) {
 
                 var me = this;
@@ -46,21 +55,6 @@ define(function (require, exports, module) {
                     width: endX - startX,
                     height: endY - startY
                 };
-
-            },
-
-            toAdaptiveExtend: function (adaptive, width, height) {
-
-                var me = this;
-
-                if (adaptive) {
-                    me.endX /= width;
-                    me.endY /= height;
-                }
-                else {
-                    me.endX *= width;
-                    me.endY *= height;
-                }
 
             }
 

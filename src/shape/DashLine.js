@@ -22,6 +22,15 @@ define(function (require, exports, module) {
 
             name: 'DashLine',
 
+            xPropertyList: [ 'x', 'endX', 'dashLength' ],
+
+            yPropertyList: [ 'y', 'endY' ],
+
+            serializablePropertyList: [
+                'name', 'x', 'y', 'lineWidth', 'strokeStyle', 'fillStyle',
+                'endX', 'endY', 'dashLength'
+            ],
+
             createPathExtend: function (context) {
 
                 var startX = me.x;
@@ -65,23 +74,6 @@ define(function (require, exports, module) {
                     width: endX - startX,
                     height: endY - startY
                 };
-
-            },
-
-            toAdaptiveExtend: function (adaptive, width, height) {
-
-                var me = this;
-
-                if (adaptive) {
-                    me.endX /= width;
-                    me.endY /= height;
-                    me.dashLength /= width;
-                }
-                else {
-                    me.endX *= width;
-                    me.endY *= height;
-                    me.dashLength *= width;
-                }
 
             }
 

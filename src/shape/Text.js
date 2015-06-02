@@ -8,7 +8,48 @@ define(function (require, exports, module) {
 
     var inherits = require('../util/inherits');
 
-    var devicePixelRatio = window.devicePixelRatio || 1;
+    function drawText(shape, context, method) {
+
+        context.font = shape.fontSize + 'px '
+                     + shape.fontFamily;
+
+        context.textAlign = shape.textAlign;
+        context.textBaseline = shape.textBaseline;
+
+
+        var x = shape.x;
+        var y = shape.y;
+
+        var width = 0;
+
+        var lineCount = 0;
+        var lineHeight = shape.lineHeight;
+
+        $.each(
+            shape.text.split('\n'),
+            function (index, text) {
+
+                var textWidth = context.measureText(text).width;
+
+                if (textWidth > width) {
+                    width = textWidth;
+                }
+
+                lineCount++;
+
+                context[method](
+                    text,
+                    x,
+                    y + index * lineHeight
+                );
+
+            }
+        );
+
+        shape.width = width;
+        shape.height = lineCount * lineHeight;
+
+    }
 
     /**
      * 构造函数新增参数
@@ -18,7 +59,8 @@ define(function (require, exports, module) {
      * @property {string} options.fontSize
      * @property {string} options.fontFamily
      * @property {string} options.textAlign
-     * @property {string} options.textBaseLine
+     * @property {string} options.textBaseline
+     * @property {number} options.lineHeight 单位是像素，如 18
      */
     return inherits(
         require('./Shape'),
@@ -26,60 +68,46 @@ define(function (require, exports, module) {
 
             name: 'Text',
 
+            xPropertyList: [ 'x', 'fontSize', 'width' ],
+
+            yPropertyList: [ 'y', 'lineHeight', 'height' ],
+
+            serializablePropertyList: [
+                'name', 'x', 'y', 'lineWidth', 'strokeStyle',
+                'fillStyle', 'text', 'fontSize', 'fontFamily',
+                'lineHeight', 'textAlign', 'textBaseline'
+            ],
+
             createPath: $.noop,
 
-            getBoundaryRect: function (context) {
+            initExtend: function () {
 
                 var me = this;
 
-                var width = context.measureText(me.text).width;
-                var height = 10;
+                me.width =
+                me.height = 0;
+
+            },
+
+            getBoundaryRect: function () {
+
+                var me = this;
 
                 return {
                     x: me.x,
                     y: me.y,
-                    width: width,
-                    height: height
+                    width: me.width,
+                    height: me.height
                 };
 
             },
 
-            toAdaptiveExtend: function (adaptive, width) {
-
-                var me = this;
-
-                if (adaptive) {
-                    me.fontSize /= width;
-                }
-                else {
-                    me.fontSize *= width;
-                }
-            },
-
             fillExtend: function (context) {
-
-                var me = this;
-
-                context.font = me.fontSize * devicePixelRatio + 'px '
-                             + me.fontFamily;
-                context.textAlign = me.textAlign;
-                context.textBaseLine = me.textBaseLine;
-console.log(me.x, me.y)
-                context.fillText(me.text, me.x, me.y);
-
+                drawText(this, context, 'fillText');
             },
 
             strokeExtend: function (context) {
-
-                var me = this;
-
-                context.font = me.fontSize * devicePixelRatio + 'px '
-                             + me.fontFamily;
-                context.textAlign = me.textAlign;
-                context.textBaseLine = me.textBaseLine;
-
-                context.strokeText(me.text, me.x, me.y);
-
+                drawText(this, context, 'strokeText');
             }
 
         }

@@ -21,6 +21,15 @@ define(function (require, exports, module) {
 
             name: 'Doodle',
 
+            xPropertyList: [ 'x' ],
+
+            yPropertyList: [ 'y' ],
+
+            serializablePropertyList: [
+                'name', 'x', 'y', 'lineWidth',
+                'strokeStyle', 'fillStyle', 'points'
+            ],
+
             /**
              * createPath 的扩展，方便子类覆写
              *
@@ -56,30 +65,6 @@ define(function (require, exports, module) {
             getBoundaryRect: function () {
 
                 return rect(this.points);
-
-            },
-
-            toAdaptiveExtend: function (adaptive, width, height) {
-
-                var fn;
-
-                if (adaptive) {
-                    fn = function (index, point) {
-                        point.x /= width;
-                        point.y /= height;
-                    };
-                }
-                else {
-                    fn = function (index, point) {
-                        point.x *= width;
-                        point.y *= height;
-                    };
-                }
-
-                $.each(
-                    this.points,
-                    fn
-                );
 
             }
 

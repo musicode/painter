@@ -20,6 +20,15 @@ define(function (require, exports, module) {
 
             name: 'Circle',
 
+            xPropertyList: [ 'x', 'radius' ],
+
+            yPropertyList: [ 'y' ],
+
+            serializablePropertyList: [
+                'name', 'x', 'y', 'lineWidth',
+                'strokeStyle', 'fillStyle', 'radius'
+            ],
+
             createPathExtend: function (context) {
 
                 var me = this;
@@ -49,19 +58,6 @@ define(function (require, exports, module) {
                     width: 2 * radius,
                     height: 2 * radius
                 };
-
-            },
-
-            toAdaptiveExtend: function (adaptive, width) {
-
-                var me = this;
-
-                if (adaptive) {
-                    me.radius /= width;
-                }
-                else {
-                    me.radius *= width;
-                }
 
             }
 

@@ -8,6 +8,7 @@ define(function (require, exports, module) {
 
     var eventEmitter = require('./eventEmitter');
     var DrawingSurface = require('./DrawingSurface');
+    var config = require('./config');
 
     var retina = require('./util/retina');
 
@@ -29,6 +30,34 @@ define(function (require, exports, module) {
 
             var me = this;
 
+            /**
+             * 图形列表
+             *
+             * @type {Array}
+             */
+            me.list = [ ];
+
+            var canvas = me.context.canvas;
+
+            /**
+             * 画布的宽度
+             *
+             * @type {number}
+             */
+            me.width = canvas.width;
+
+            /**
+             * 画布的高度
+             *
+             * @type {number}
+             */
+            me.height = canvas.height;
+
+            /**
+             * 绘图表面
+             *
+             * @type {DrawingSurface}
+             */
             me.drawingSurface = new DrawingSurface();
 
             me.clear();
@@ -41,7 +70,7 @@ define(function (require, exports, module) {
 
             me.list.push(shape);
 
-            me.drawShape(shape);
+            shape.draw(me.context);
 
             me.save();
 
@@ -91,50 +120,54 @@ define(function (require, exports, module) {
 
         },
 
-        drawShape: function (shape) {
-
-            var context = this.context;
-            var canvas = context.canvas;
-            var width = canvas.width;
-            var height = canvas.height;
-
-            if (shape.adaptive) {
-                shape.toAdaptive(false, width, height);
-            }
-
-            shape.draw(context);
-
-            // 必须要存为自适应的版本，否则 resize 无法正确重绘
-            shape.toAdaptive(true, width, height);
-
-        },
-
         /**
          * 改变画布大小
          *
-         * @param {number} width 显示宽度
-         * @param {number} height 显示高度
+         * @param {number} viewWidth 显示宽度
+         * @param {number} viewHeight 显示高度
          */
-        resize: function (width, height) {
+        resize: function (viewWidth, viewHeight) {
+
+            if (!viewWidth && !viewHeight) {
+                return;
+            }
 
             var me = this;
-            var context = me.context;
-            var canvas = context.canvas;
 
-            if (me.width !== width || me.height !== height) {
+            var oldWidth = me.width;
+            var oldHeight = me.height;
 
-                me.width = width;
-                me.height = height;
+            var devicePixelRatio = config.devicePixelRatio;
 
-                $(canvas).css({
-                    width: width,
-                    height: height
+            var newWidth = viewWidth * devicePixelRatio;
+            var newHeight = viewHeight * devicePixelRatio;
+
+            if (oldWidth !== newWidth || oldHeight !== newHeight) {
+
+                var canvas = me.getCanvas();
+
+                canvas.css({
+                    width: viewWidth,
+                    height: viewHeight
                 });
 
                 retina(canvas);
 
+                me.width = newWidth;
+                me.height = newHeight;
+
+                // x 坐标转换因数
+                var xFactor = oldWidth > 0
+                            ? (newWidth / oldWidth)
+                            : 0;
+
+                // y 坐标转换因数
+                var yFactor = oldHeight > 0
+                            ? (newHeight / oldHeight)
+                            : 0;
+
                 // 改变大小会清空画布，所以要重绘
-                me.refresh();
+                me.refresh(xFactor, yFactor);
 
             }
 
@@ -143,7 +176,7 @@ define(function (require, exports, module) {
         /**
          * 刷新画布
          */
-        refresh: function () {
+        refresh: function (xFactor, yFactor) {
 
             var me = this;
 
@@ -152,12 +185,27 @@ define(function (require, exports, module) {
             $.each(
                 me.list,
                 function (index, shape) {
-                    me.drawShape(shape);
+
+                    if (xFactor > 0 && yFactor > 0) {
+                        shape.updateSize(xFactor, yFactor);
+                    }
+
+                    shape.draw(me.context);
+
                 }
             );
 
             me.save();
 
+        },
+
+        /**
+         * 获取 canvas 元素（jQuery对象）
+         *
+         * @return {jQuery}
+         */
+        getCanvas: function () {
+            return $(this.context.canvas);
         },
 
         /**
@@ -171,8 +219,12 @@ define(function (require, exports, module) {
 
             if (arguments[0] !== true) {
 
-                me.list = [ ];
+                me.list.length = 0;
                 me.save();
+
+                eventEmitter.trigger(
+                    eventEmitter.SHAPE_CLEAR
+                );
 
             }
 
@@ -181,18 +233,16 @@ define(function (require, exports, module) {
         save: function () {
 
             var me = this;
-            var context = me.context;
 
-            me.drawingSurface.save(context);
+            me.drawingSurface.save(me);
 
         },
 
         restore: function () {
 
             var me = this;
-            var context = me.context;
 
-            me.drawingSurface.restore(context);
+            me.drawingSurface.restore(me);
 
         }
 

@@ -7,6 +7,28 @@ define(function (require, exports, module) {
     'use strict';
 
     var inherits = require('../util/inherits');
+    var lines = require('../util/lines');
+    var rect = require('../util/rect');
+
+    function restorePoint(point, offsetX, offsetY, radian) {
+
+        var x = point.x;
+        var y = point.y;
+
+        var pointRadian = Math.atan2(y, x);
+
+        pointRadian += radian;
+
+        var length = Math.sqrt(
+            x * x + y * y
+        );
+
+        point.x = offsetX + Math.cos(pointRadian) * length;
+        point.y = offsetY + Math.sin(pointRadian) * length;
+
+        return point;
+
+    }
 
     /**
      * 构造函数新增参数
@@ -21,6 +43,15 @@ define(function (require, exports, module) {
         {
 
             name: 'Arrow',
+
+            xPropertyList: [ 'x', 'endX', 'thickness' ],
+
+            yPropertyList: [ 'y', 'endY' ],
+
+            serializablePropertyList: [
+                'name', 'x', 'y', 'lineWidth', 'strokeStyle', 'fillStyle',
+                'endX', 'endY', 'thickness'
+            ],
 
             createPathExtend: function (context) {
 
@@ -39,18 +70,17 @@ define(function (require, exports, module) {
                     dx * dx + dy * dy
                 );
 
-                if (distance < 5) {
-                    return;
-                }
+                var translateX = startX;
+                var translateY = startY;
+                var rotateRadian = Math.atan2(dy, dx);
 
                 context.save();
 
                 // 转换坐标
-                context.translate(startX, startY);
-                context.rotate(
-                    Math.atan2(dy, dx)
-                );
+                context.translate(translateX, translateY);
+                context.rotate(rotateRadian);
 
+                // 计算关键坐标点
                 var thickness = me.thickness;
 
                 // 实现尖部圆角效果的半径
@@ -62,67 +92,78 @@ define(function (require, exports, module) {
                 // 翼角度
                 var wingAngle = Math.PI / 4;
 
-                // 几个关键点
-
-                var startX = radius;
-                var startY = thickness * -0.5;
+                var arcX = radius;
+                var arcY = thickness * 0.5;
 
                 var breakX = distance - headLength;
-                var breakY = startY;
+                var breakY = arcY;
 
                 var wingX = breakX - wingLength / Math.tan(wingAngle);
-                var wingY = breakY - wingLength;
+                var wingY = breakY + wingLength;
 
-                context.moveTo(startX, startY);
+                var headPoint = {
+                    x: distance,
+                    y: 0
+                };
 
-                context.lineTo(breakX, breakY);
-                context.lineTo(wingX, wingY);
+                var topWingPoint = {
+                    x: wingX,
+                    y: -1 * wingY
+                };
 
-                context.lineTo(distance, 0);
+                var bottomWingPoint = {
+                    x: wingX,
+                    y: wingY
+                };
 
-                context.lineTo(wingX, -1 * wingY);
-                context.lineTo(breakX, -1 * breakY);
+                var topBreakPoint = {
+                    x: breakX,
+                    y: -1 * breakY
+                };
 
-                context.lineTo(startX, -1 * startY);
+                var bottomBreakPoint = {
+                    x: breakX,
+                    y: breakY
+                };
 
-                context.arc(startX, 0, radius, 0.5 * Math.PI, -0.5 * Math.PI, false);
+                var topStartPoint = {
+                    x: arcX,
+                    y: -1 * arcY
+                };
+
+                var bottomStartPoint = {
+                    x: arcX,
+                    y: arcY
+                };
+
+                lines(
+                    context,
+                    [
+                        topStartPoint,
+                        topBreakPoint,
+                        topWingPoint,
+                        headPoint,
+                        bottomWingPoint,
+                        bottomBreakPoint,
+                        bottomStartPoint
+                    ]
+                );
+
+                context.arc(arcX, 0, radius, 0.5 * Math.PI, -0.5 * Math.PI, false);
 
                 context.restore();
+
+                me.rectPoints = [
+                    { x: startX, y: startY },
+                    { x: endX, y: endY },
+                    restorePoint(topWingPoint, translateX, translateY, rotateRadian),
+                    restorePoint(bottomWingPoint, translateX, translateY, rotateRadian)
+                ];
 
             },
 
             getBoundaryRect: function () {
-
-                var me = this;
-
-                var startX = Math.min(me.x, me.endX);
-                var startY = Math.min(me.y, me.endY);
-
-                var endX = Math.max(me.x, me.endX);
-                var endY = Math.max(me.y, me.endY);
-
-                return {
-                    x: startX,
-                    y: startY,
-                    width: endX - startX,
-                    height: endY - startY
-                };
-
-            },
-
-            toAdaptiveExtend: function (adaptive, width, height) {
-
-                var me = this;
-
-                if (adaptive) {
-                    me.endX /= width;
-                    me.endY /= height;
-                }
-                else {
-                    me.endX *= width;
-                    me.endY *= height;
-                }
-
+                return rect(this.rectPoints);
             }
 
         }

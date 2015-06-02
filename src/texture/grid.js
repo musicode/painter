@@ -19,6 +19,8 @@ define(function (require, exports, module) {
         var width = canvas.width;
         var height = canvas.height;
 
+        context.beginPath();
+
         for (var i = stepX + 0.5; i < width; i += stepX) {
             context.moveTo(i, 0);
             context.lineTo(i, height);

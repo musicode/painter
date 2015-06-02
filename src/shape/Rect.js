@@ -22,6 +22,15 @@ define(function (require, exports, module) {
 
             name: 'Rect',
 
+            xPropertyList: [ 'x', 'width', 'roundCorner' ],
+
+            yPropertyList: [ 'y', 'height' ],
+
+            serializablePropertyList: [
+                'name', 'x', 'y', 'lineWidth', 'strokeStyle',
+                'fillStyle', 'width', 'height', 'roundCorner'
+            ],
+
             createPathExtend: function (context) {
 
                 var me = this;
@@ -86,21 +95,6 @@ define(function (require, exports, module) {
                     width: me.width,
                     height: me.height
                 };
-
-            },
-
-            toAdaptiveExtend: function (adaptive, width, height) {
-
-                var me = this;
-
-                if (adaptive) {
-                    me.width /= width;
-                    me.height /= height;
-                }
-                else {
-                    me.width *= width;
-                    me.height *= height;
-                }
 
             }
 

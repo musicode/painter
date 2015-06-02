@@ -16,7 +16,7 @@ define(function (require, exports, module) {
         {
             name: 'arrow',
 
-            down: function (e, point) {
+            down: function (point) {
 
                 var me = this;
 
@@ -25,17 +25,13 @@ define(function (require, exports, module) {
                 me.shape = new Shape({
                     x: point.x,
                     y: point.y,
-                    shadowColor: 'rgba(0,0,0,0.2)',
-                    shadowOffsetX: 1,
-                    shadowOffsetY: 1,
-                    shadowBlur: 1,
                     thickness: style.getLineWidth(),
                     fillStyle: style.getFillStyle()
                 });
 
             },
 
-            move: function (e, point) {
+            move: function (point) {
 
                 var me = this;
                 var shape = me.shape;
@@ -58,10 +54,13 @@ define(function (require, exports, module) {
                 var me = this;
                 var shape = me.shape;
 
-                if (shape && shape.endX != null) {
+                if (shape) {
 
                     me.restore();
-                    me.commit();
+
+                    if (shape.endX != null) {
+                        me.commit();
+                    }
 
                     me.shape = null;
 

@@ -7,6 +7,7 @@ define(function (require, exports, module) {
     'use strict';
 
     var eventEmitter = require('../eventEmitter');
+    var config = require('../config');
 
     var inherits = require('../util/inherits');
 
@@ -22,64 +23,79 @@ define(function (require, exports, module) {
 
                 me.save();
 
+                var saveHandler = function () {
+                    me.save();
+                };
+
                 eventEmitter.on(
                     eventEmitter.SHAPE_REMOVE,
-                    function () {
-                        me.save();
-                    }
+                    saveHandler
+                );
+
+                eventEmitter.on(
+                    eventEmitter.SHAPE_CLEAR,
+                    saveHandler
                 );
 
             },
 
 
-            down: function (e) {
+            down: function () {
 
                 var me = this;
                 var shape = me.shape;
 
                 if (shape) {
-
                     me.commit(true);
-
                     me.shape = null;
-
                 }
 
             },
-            move: function (e, point) {
+            move: function (point, e) {
+
+                var target = $(e.target);
+
+                var selector = [ 'canvas' ];
+
+                var customCursorSelector = config.customCursorSelector;
+                if (customCursorSelector) {
+                    selector.push(customCursorSelector);
+                }
+
+                if (!target.is(selector.join(','))) {
+                    return;
+                }
 
                 var me = this;
-                var context = me.context;
+                var shapes = me.shapes;
 
-                var canvas = context.canvas;
-                var width = canvas.width;
-                var height = canvas.height;
+                if (shapes.length === 0) {
+                    return;
+                }
 
                 me.restore();
 
                 var target = null;
 
                 $.each(
-                    me.shapes,
+                    shapes,
                     function (index, shape) {
-
-                        if (shape.adaptive) {
-                            shape = shape.clone();
-                            shape.toAdaptive(false, width, height);
-                        }
-
-                        if (shape.isPointInPath(context, point)) {
+                        if (shape.testPoint(point)) {
                             target = shape;
                         }
                     }
                 );
 
                 if (target) {
+
+                    var context = me.context;
+
                     target.createBoundaryPath(context);
                     context.save();
-                    context.fillStyle = 'rgba(0,0,0,0.2)';
+                    context.fillStyle = 'rgba(255,123,0,0.3)';
                     context.fill();
                     context.restore();
+
                 }
 
                 me.shape = target;

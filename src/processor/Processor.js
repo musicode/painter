@@ -7,33 +7,12 @@ define(function (require, exports, module) {
     'use strict';
 
     var eventEmitter = require('../eventEmitter');
-    var DrawingSurface = require('../DrawingSurface');
 
     var namespace = '.painter_processor';
 
-    function getGlobalPoint(e) {
-        return {
-            x: e.pageX,
-            y: e.pageY
-        };
-    }
-
-    function getLocalPoint(globalPoint, canvas) {
-
-        var pos = canvas.getBoundingClientRect();
-        var scaleX = canvas.width  / pos.width;
-        var scaleY = canvas.height  / pos.height;
-
-        return {
-            x: (globalPoint.x - pos.left) * scaleX,
-            y: (globalPoint.y - pos.top)  * scaleY
-        };
-
-    }
-
     /**
      * @param {Object} options
-     * @property {CanvasRenderingContext2D} context
+     * @property {Painter} options.painter
      */
     function Processor(options) {
         $.extend(this, options);
@@ -47,51 +26,41 @@ define(function (require, exports, module) {
         init: function () {
 
             var me = this;
+            var painter = me.painter;
 
-            me.drawingSurface = new DrawingSurface();
+            me.context = painter.context;
 
-            var canvas = me.context.canvas;
+            var canvas = painter.getCanvas();
 
             var downHandler = function (e) {
 
-                var globalPoint = getGlobalPoint(e);
-
                 me.down(
-                    e,
-                    getLocalPoint(globalPoint, canvas),
-                    globalPoint
+                    Processor.getPoint(e, canvas),
+                    e
                 );
 
             };
 
             var moveHandler = function (e) {
 
-                var globalPoint = getGlobalPoint(e);
-
                 me.move(
-                    e,
-                    getLocalPoint(globalPoint, canvas),
-                    globalPoint
+                    Processor.getPoint(e, canvas),
+                    e
                 );
 
             };
 
             var upHandler = function (e) {
 
-                var globalPoint = getGlobalPoint(e);
-
                 me.up(
-                    e,
-                    getLocalPoint(globalPoint, canvas),
-                    globalPoint
+                    Processor.getPoint(e, canvas),
+                    e
                 );
 
             };
 
-            var $canvas = $(canvas);
-
             if ('ontouchend' in window) {
-                $canvas
+                canvas
                     .on(
                         'touchstart' + namespace,
                         downHandler
@@ -106,7 +75,7 @@ define(function (require, exports, module) {
                     );
             }
 
-            $canvas
+            canvas
                 .on(
                     'mousedown' + namespace,
                     downHandler
@@ -130,7 +99,9 @@ define(function (require, exports, module) {
 
         dispose: function () {
 
-            $(this.context.canvas).off(namespace);
+            var canvas = this.painter.getCanvas();
+
+            canvas.off(namespace);
             $(document).off(namespace);
 
         },
@@ -150,6 +121,7 @@ define(function (require, exports, module) {
                     : eventEmitter.SHAPE_ADD_TRIGGER,
 
                     {
+                        tool: me.name,
                         shape: shape
                     }
 
@@ -160,23 +132,11 @@ define(function (require, exports, module) {
         },
 
         save: function () {
-
-            var me = this;
-
-            me.drawingSurface.save(
-                me.context
-            );
-
+            this.painter.save();
         },
 
         restore: function () {
-
-            var me = this;
-
-            me.drawingSurface.restore(
-                me.context
-            );
-
+            this.painter.restore();
         },
 
         down: $.noop,
@@ -187,6 +147,30 @@ define(function (require, exports, module) {
 
     };
 
+    /**
+     * 鼠标相对于 canvas 的坐标（可根据业务需求改写）
+     *
+     * @param {Event} e
+     * @param {jQuery} canvas
+     * @return {Object}
+     */
+    Processor.getPoint = function (e, canvas) {
+
+        var x = e.x || e.clientX;
+        var y = e.y || e.clientY;
+
+        var offset = canvas.offset();
+
+        x -= offset.left;
+        y -= offset.top;
+
+        var devicePixelRatio = window.devicePixelRatio || 1;
+
+        return {
+            x: x * devicePixelRatio,
+            y: y * devicePixelRatio
+        }
+    };
 
     return Processor;
 

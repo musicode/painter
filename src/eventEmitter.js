@@ -37,6 +37,13 @@ define(function (require, exports) {
     exports.SHAPE_REMOVE = 'shape_remove';
 
     /**
+     * 清空形状
+     *
+     * @type {string}
+     */
+    exports.SHAPE_CLEAR = 'shape_clear';
+
+    /**
      * 画笔线条粗细改变时触发
      *
      * @type {string}

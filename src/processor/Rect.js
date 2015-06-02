@@ -16,7 +16,7 @@ define(function (require, exports, module) {
         {
             name: 'rect',
 
-            down: function (e, point) {
+            down: function (point) {
 
                 var me = this;
 
@@ -36,7 +36,7 @@ define(function (require, exports, module) {
                 });
 
             },
-            move: function (e, point) {
+            move: function (point) {
 
                 var me = this;
                 var shape = me.shape;
@@ -68,13 +68,16 @@ define(function (require, exports, module) {
 
                 var shape = me.shape;
 
-                if (shape && shape.width > 0 && shape.height > 0) {
+                if (shape) {
 
                     me.restore();
 
-                    me.commit();
+                    if (shape.width > 0 && shape.height > 0) {
+                        me.commit();
+                    }
 
                     me.shape = null;
+
                 }
 
             }

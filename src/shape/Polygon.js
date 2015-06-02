@@ -31,7 +31,16 @@ define(function (require, exports, module) {
 
             name: 'Polygon',
 
-            getPoints: function () {
+            xPropertyList: [ 'x', 'radius' ],
+
+            yPropertyList: [ 'y' ],
+
+            serializablePropertyList: [
+                'name', 'x', 'y', 'lineWidth', 'strokeStyle',
+                'fillStyle', 'startAngle', 'radius', 'sides'
+            ],
+
+            initExtend: function () {
 
                 var me = this;
 
@@ -67,13 +76,13 @@ define(function (require, exports, module) {
 
                 }
 
-                return points;
+                me.points = points;
 
             },
 
             createPathExtend: function () {
 
-                var points = this.getPoints;
+                var points = this.points;
 
                 if (points.length > 0) {
 
@@ -99,24 +108,7 @@ define(function (require, exports, module) {
             },
 
             getBoundaryRect: function () {
-
-                return rect(
-                    this.getPoints()
-                );
-
-            },
-
-            toAdaptiveExtend: function (adaptive, width) {
-
-                var me = this;
-
-                if (adaptive) {
-                    me.radius /= width;
-                }
-                else {
-                    me.radius *= width;
-                }
-
+                return rect(this.points);
             }
 
         }

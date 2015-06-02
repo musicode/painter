@@ -16,7 +16,7 @@ define(function (require, exports, module) {
         {
             name: 'doodle',
 
-            down: function (e, point) {
+            down: function (point) {
 
                 var me = this;
 
@@ -35,7 +35,7 @@ define(function (require, exports, module) {
                 });
 
             },
-            move: function (e, point) {
+            move: function (point) {
 
                 var me = this;
                 var shape = me.shape;
@@ -51,18 +51,20 @@ define(function (require, exports, module) {
                 }
 
             },
-            up: function (e) {
+            up: function () {
 
                 var me = this;
+                var shape = me.shape;
 
-                if (me.shape) {
+                if (shape) {
 
                     me.restore();
 
-                    me.commit();
+                    if (shape.points.length > 3) {
+                        me.commit();
+                    }
 
                     me.shape = null;
-
                 }
 
             }

@@ -21,6 +21,15 @@ define(function (require, exports, module) {
 
             name: 'Ellipse',
 
+            xPropertyList: [ 'x', 'width' ],
+
+            yPropertyList: [ 'y', 'height' ],
+
+            serializablePropertyList: [
+                'name', 'x', 'y', 'lineWidth', 'strokeStyle',
+                'fillStyle', 'width', 'height'
+            ],
+
             createPathExtend: function (context) {
 
                 var me = this;
@@ -68,21 +77,6 @@ define(function (require, exports, module) {
                     width: width,
                     height: height
                 };
-
-            },
-
-            toAdaptiveExtend: function (adaptive, width, height) {
-
-                var me = this;
-
-                if (adaptive) {
-                    me.width /= width;
-                    me.height /= height;
-                }
-                else {
-                    me.width *= width;
-                    me.height *= height;
-                }
 
             }
 

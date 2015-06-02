@@ -10,53 +10,101 @@ define(function (require, exports, module) {
     var eventEmitter = require('../eventEmitter');
 
     var Shape = require('../shape/Text');
-
     var inherits = require('../util/inherits');
 
-    function createTextarea(x, y, fontSize, fontFamily, color) {
-        return $(
-            '<textarea class="canvas-textarea" '
-          + 'style="position:absolute;left:' + x + 'px;top:' + y + 'px;'
-          + 'font-size:' + fontSize + 'px;'
-          + 'color:' + color + ';'
-          + '">'
-          + '</textarea>'
-        );
+    var devicePixelRatio = require('../config').devicePixelRatio;
+
+    function parseLineHeight(textarea) {
+        var lineHeight = textarea.css('line-height');
+        if (lineHeight === 'normal') {
+            lineHeight = textarea.css('font-size');
+        }
+        return parseInt(lineHeight, 10);
     }
 
-    return inherits(
+    /**
+     * 因为每次都会在 processor 对象上绑定一个 textarea 属性
+     * 所以不能直接从属性上取，因为这个 textarea 是会变化的
+     */
+    function submitText(processor, textarea) {
+
+        // 已删除
+        if (textarea.isRemove) {
+            return;
+        }
+
+        var text = $.trim(textarea.val());
+
+        if (text) {
+
+            var point = processor.point;
+
+            processor.shape = new Shape({
+                x: point.x,
+                y: point.y,
+                text: text,
+                fontSize: processor.fontSize * devicePixelRatio,
+                fontFamily: processor.fontFamily,
+                textAlign: 'left',
+                textBaseline: 'top',
+                shadowColor: 'rgba(0,0,0,0.2)',
+                shadowOffsetX: 1,
+                shadowOffsetY: 1,
+                shadowBlur: 1,
+                lineHeight: processor.lineHeight * devicePixelRatio,
+                fillStyle: processor.fillStyle
+            });
+
+            processor.commit();
+
+            processor.shape = null;
+
+        }
+
+        textarea.remove();
+        textarea.isRemove = true;
+
+        processor.textarea = null;
+
+    }
+
+    var Text = inherits(
         require('./Processor'),
         {
             name: 'text',
 
-            down: function (e, point, globalPoint) {
+            down: function (point) {
 
                 var me = this;
 
-                if (me.textarea) {
-                    // click 会先于 blur 触发
-                    // 这里让 blur 去处理
-                    return;
+                var textarea = me.textarea;
+
+                if (textarea) {
+                    submitText(me, textarea);
                 }
 
-                var fontSize = style.getFontSize();
-                var fontFamily = style.getFontFamily();
-                var fillStyle = style.getFillStyle();
+                var fontSize =
+                me.fontSize = style.getFontSize();
 
-                var canvas = me.context.canvas;
-console.log('local', point);
-console.log('global', globalPoint);
-                var textarea =
+                var fontFamily =
+                me.fontFamily = style.getFontFamily();
 
-                me.textarea = createTextarea(
-                    globalPoint.x,
-                    globalPoint.y,
+                var fillStyle =
+                me.fillStyle = style.getFillStyle();
+
+
+                textarea =
+
+                me.textarea = Text.createTextarea(
+                    point.x / devicePixelRatio,
+                    point.y / devicePixelRatio,
                     fontSize,
                     fontFamily,
                     fillStyle
                 );
 
-                textarea.appendTo('body');
+                me.point = point;
+                me.lineHeight = parseLineHeight(textarea);
 
                 setTimeout(
                     function () {
@@ -65,36 +113,7 @@ console.log('global', globalPoint);
 
                         textarea.blur(
                             function () {
-
-                                var text = $.trim(textarea.val());
-
-                                if (text) {
-
-                                    me.shape = new Shape({
-                                        x: point.x,
-                                        y: point.y,
-                                        text: text,
-                                        fontSize: fontSize,
-                                        fontFamily: fontFamily,
-                                        textAlign: 'start',
-                                        textBaseLine: 'top',
-                                        shadowColor: 'rgba(0,0,0,0.2)',
-                                        shadowOffsetX: 1,
-                                        shadowOffsetY: 1,
-                                        shadowBlur: 1,
-                                        fillStyle: fillStyle
-                                    });
-
-                                    me.commit();
-
-                                    me.shape = null;
-
-                                }
-
-                                textarea.remove();
-
-                                me.textarea = null;
-
+                                submitText(me, textarea);
                             }
                         );
 
@@ -104,5 +123,8 @@ console.log('global', globalPoint);
             }
         }
     );
+
+
+    return Text;
 
 });

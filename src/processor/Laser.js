@@ -17,7 +17,7 @@ define(function (require, exports, module) {
             name: 'laser',
 
             move: debounce(
-                    function (e, point) {
+                    function (point) {
 
                         var me = this;
 
@@ -26,7 +26,7 @@ define(function (require, exports, module) {
                         me.commit();
 
                     },
-                    100
+                    300
                 )
 
         }
