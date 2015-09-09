@@ -6,82 +6,101 @@ define(function (require, exports, module) {
 
     'use strict';
 
-    var guid = require('../util/guid');
+    var guid = require('../function/guid');
 
-    var enableShadow = require('../util/enableShadow');
-    var disableShadow = require('../util/disableShadow');
+    var enableShadow = require('../function/enableShadow');
+    var disableShadow = require('../function/disableShadow');
 
     /**
      * @param {Object} options
      * @property {number} options.x
      * @property {number} options.y
-     * @property {string} options.strokeStyle
-     * @property {string} options.fillStyle
-     * @property {number} options.lineWidth
-     * @property {string=} options.shadowColor
-     * @property {number=} options.shadowOffsetX
-     * @property {number=} options.shadowOffsetY
-     * @property {number=} options.shadowBlur
+     * @property {string} options.strokeStyle 描边样式
+     * @property {string} options.fillStyle 填充样式
+     * @property {number} options.lineWidth 线条粗细
+     * @property {string=} options.shadowColor 阴影色
+     * @property {number=} options.shadowOffsetX 阴影水平偏移量
+     * @property {number=} options.shadowOffsetY 阴影垂直偏移量
+     * @property {number=} options.shadowBlur 阴影模糊值
      */
     function Shape(options) {
-        $.extend(this, Shape.defaultOptions, options);
-        this.init();
+
+        var me = this;
+
+        $.extend(me, Shape.defaultOptions, options);
+
+        /**
+         * 本地唯一的编号，当和服务器产生交互时，这个字段很有用
+         *
+         * @type {string}
+         */
+        if (me.number == null) {
+            me.number = guid();
+        }
+
+        me.init();
+
     }
 
     Shape.prototype = {
 
         constructor: Shape,
 
-        name: 'Shape',
+        init: $.noop,
 
-        xPropertyList: [ 'x' ],
-
-        yPropertyList: [ 'y' ],
-
-        serializablePropertyList: [
-            'name', 'x', 'y',
-            'lineWidth', 'strokeStyle', 'fillStyle'
-        ],
-
-        init: function () {
+        /**
+         * 平移
+         *
+         * @param {number} dx
+         * @param {number} dy
+         */
+        translate: function (dx, dy) {
 
             var me = this;
 
-            /**
-             * 形状全局唯一的 ID
-             *
-             * @type {string}
-             */
-            me.id = guid();
-
-            me.initExtend();
+            me.x += dx;
+            me.y += dy;
 
         },
 
         /**
-         * 更新尺寸
+         * 缩放
          *
-         * @param {number} xFactor
-         * @param {number} yFactor
+         * @param {number} sx
+         * @param {number} sy
          */
-        updateSize: function (xFactor, yFactor) {
+        scale: function (sx, sy) {
+
+            if (sx < 1 || sx > 1) { }
+            else {
+                sx = 1;
+            }
+
+            if (sy < 1 || sy > 1) { }
+            else {
+                sy = 1;
+            }
+
+            if (sx === 1 && sy === 1) {
+                return;
+            }
 
             var me = this;
 
             $.each(
-                me.xPropertyList,
+                me.xProperties,
                 function (index, name) {
-                    if (me[name] > 0) {
-                        me[name] *= xFactor;
+                    if ($.type(me[name]) === 'number') {
+                        me[name] *= sx;
                     }
                 }
             );
 
             $.each(
-                me.yPropertyList,
+                me.yProperties,
                 function (index, name) {
-                    if (me[name] > 0) {
-                        me[name] *= yFactor;
+                    if ($.type(me[name]) === 'number') {
+                        me[name] *= sy;
                     }
                 }
             );
@@ -90,45 +109,11 @@ define(function (require, exports, module) {
                 $.each(
                     me.points,
                     function (index, point) {
-                        point.x *= xFactor;
-                        point.y *= yFactor;
+                        point.x *= sx;
+                        point.y *= sy;
                     }
                 );
             }
-
-        },
-
-        /**
-         * 绘制图形
-         *
-         * @param {CanvasRenderingContext2D} context
-         */
-        draw: function (context) {
-
-            var me = this;
-
-            me.createPath(context);
-
-            if (me.lineWidth > 0) {
-                me.stroke(context);
-            }
-
-            if (me.fillStyle) {
-                me.fill(context);
-            }
-
-        },
-
-        /**
-         * 创建绘制路径
-         *
-         * @param {CanvasRenderingContext2D} context
-         */
-        createPath: function (context) {
-
-            context.beginPath();
-
-            this.createPathExtend(context);
 
         },
 
@@ -152,6 +137,14 @@ define(function (require, exports, module) {
 
         },
 
+        isPointInPath: function (x, y) {
+            // [TODO] Non Zero Winding Rule
+        },
+
+        isPointInStroke: function (x, y) {
+            // [TODO] 求点到线段和曲线的距离
+        },
+
         /**
          * 测试点是否在图形的矩形范围内
          *
@@ -161,12 +154,16 @@ define(function (require, exports, module) {
         testPoint: function (point) {
 
             var me = this;
-            var rect = me.getBoundaryRect();
 
-            var left = rect.x;
-            var top = rect.y;
-            var right = left + rect.width;
-            var bottom = top + rect.height;
+            var boundaryRect = me.getBoundaryRect();
+            if (!boundaryRect) {
+                return false;
+            }
+
+            var left = boundaryRect.x;
+            var top = boundaryRect.y;
+            var right = left + boundaryRect.width;
+            var bottom = top + boundaryRect.height;
 
             var lineWidth = me.lineWidth;
             if (lineWidth > 0) {
@@ -182,6 +179,49 @@ define(function (require, exports, module) {
                 && point.y >= top
                 && point.y <= bottom;
         },
+
+        /**
+         * 获取图形的矩形区域
+         *
+         * @return {Object}
+         */
+        getBoundaryRect: $.noop,
+
+        /**
+         * 绘制图形
+         *
+         * @param {CanvasRenderingContext2D} context
+         */
+        draw: function (context) {
+
+            var me = this;
+
+            me.createPath(context);
+
+            if (me.lineWidth > 0 && me.strokeStyle) {
+                me.stroke(context);
+            }
+
+            if (me.fillStyle) {
+                me.fill(context);
+            }
+
+        },
+
+        /**
+         * 通过开始结束点更新图形
+         *
+         * @param {Object} startPoint
+         * @param {Object} endPoint
+         */
+        updatePoint: $.noop,
+
+        /**
+         * 创建绘制路径
+         *
+         * @param {CanvasRenderingContext2D} context
+         */
+        createPath: $.noop,
 
         /**
          * 描边
@@ -210,15 +250,19 @@ define(function (require, exports, module) {
             context.lineWidth = me.lineWidth;
             context.strokeStyle = me.strokeStyle;
 
-            if (me.strokeExtend) {
-                me.strokeExtend(context);
-            }
-            else {
-                context.stroke();
-            }
+            me.strokeShape(context);
 
             context.restore();
 
+        },
+
+        /**
+         * 执行描边动作
+         *
+         * @param {CanvasRenderingContext2D} context
+         */
+        strokeShape: function (context) {
+            context.stroke();
         },
 
         /**
@@ -247,14 +291,42 @@ define(function (require, exports, module) {
 
             context.fillStyle = me.fillStyle;
 
-            if (me.fillExtend) {
-                me.fillExtend(context);
-            }
-            else {
-                context.fill();
-            }
+            me.fillShape(context);
 
             context.restore();
+
+        },
+
+        /**
+         * 执行填充动作
+         *
+         * @param {CanvasRenderingContext2D} context
+         */
+        fillShape: function (context) {
+            context.fill();
+        },
+
+        /**
+         * 判断图形是否符合要求
+         *
+         * @return {boolean}
+         */
+        validate: function () {
+            return true;
+        },
+
+        /**
+         * 克隆图形
+         *
+         * @return {Object}
+         */
+        clone: function () {
+
+            var properties = { };
+
+            $.extend(true, properties, this);
+
+            return new this.constructor(properties);
 
         },
 
@@ -267,7 +339,7 @@ define(function (require, exports, module) {
             var result = { };
 
             $.each(
-                me.serializablePropertyList,
+                me.serializableProperties,
                 function (index, name) {
                     if (me[name] != null) {
                         result[name] = me[name];
@@ -277,12 +349,7 @@ define(function (require, exports, module) {
 
             return result;
 
-        },
-
-        // 留给子类覆写
-        initExtend: $.noop,
-        createPathExtend: $.noop,
-        getBoundaryRect: $.noop
+        }
 
     };
 

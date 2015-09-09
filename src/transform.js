@@ -13,34 +13,15 @@ define(function (require, exports, module) {
         Ellipse: require('./shape/Ellipse'),
         Circle: require('./shape/Circle'),
         Rect: require('./shape/Rect'),
-        Text: require('./shape/Text')
-    };
-
-
-    exports.shape2Object = function (shape) {
-
-        var data = { };
-
-        $.each(
-            shape,
-            function (key, value) {
-
-                if (!$.isFunction(shape[ key ])) {
-                    data[ key ] = value;
-                }
-
-            }
-        );
-
-        return data;
-
+        Text: require('./shape/Text'),
+        Point: require('./shape/Point')
     };
 
     exports.object2Shape = function (shape) {
 
         var Shape = shapeMap[ shape.name ];
 
-        return $.extend(new Shape(), shape);
+        return new Shape(shape);
 
     };
 

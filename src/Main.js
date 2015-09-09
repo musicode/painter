@@ -6,11 +6,9 @@ define(function (require, exports, module) {
 
     'use strict';
 
-    var eventEmitter = require('./eventEmitter');
-    var DrawingSurface = require('./DrawingSurface');
     var config = require('./config');
 
-    var retina = require('./util/retina');
+    var retina = require('./function/retina');
 
     /**
      * @param {Object} options
@@ -35,7 +33,7 @@ define(function (require, exports, module) {
              *
              * @type {Array}
              */
-            me.list = [ ];
+            me.shapes = [ ];
 
             var canvas = me.context.canvas;
 
@@ -54,69 +52,260 @@ define(function (require, exports, module) {
             me.height = canvas.height;
 
             /**
-             * 绘图表面
+             * 封装成 jQuery 对象
              *
-             * @type {DrawingSurface}
+             * @type {jQuery}
              */
-            me.drawingSurface = new DrawingSurface();
+            me.canvas = $(canvas);
+
+            /**
+             * 离屏 canvas
+             *
+             * @type {jQuery}
+             */
+            me.fakeCanvas = me.canvas.clone();
+
+            me.on('selectstart', function () {
+                return false;
+            });
 
             me.clear();
 
         },
 
-        addShape: function (shape) {
+        dispose: function () {
 
             var me = this;
 
-            me.list.push(shape);
+            me.off();
 
-            shape.draw(me.context);
+            me.shapes.length = 0;
 
-            me.save();
+            me.imageData = null;
 
-            eventEmitter.trigger(
-                eventEmitter.SHAPE_ADD,
+        },
+
+        addTrigger: function (shapes) {
+
+            var me = this;
+
+            if (!$.isArray(shapes)) {
+                shapes = [ shapes ];
+            }
+
+            me.trigger(
+                me.SHAPE_ADD_TRIGGER,
                 {
-                    shape: shape
+                    shapes: shapes
                 }
             );
 
         },
 
-        removeShape: function (shapeId) {
+        removeTrigger: function (shapes) {
 
             var me = this;
-            var list = me.list;
 
-            // 要删除的 shape 索引
-            var index;
+            if (!$.isArray(shapes)) {
+                shapes = [ shapes ];
+            }
+
+            me.trigger(
+                me.SHAPE_REMOVE_TRIGGER,
+                {
+                    shapes: shapes
+                }
+            );
+
+        },
+
+        updateTrigger: function (shapes) {
+
+            var me = this;
+
+            if (!$.isArray(shapes)) {
+                shapes = [ shapes ];
+            }
+
+            me.trigger(
+                me.SHAPE_UPDATE_TRIGGER,
+                {
+                    shapes: shapes
+                }
+            );
+
+        },
+
+        /**
+         * 添加 shape
+         *
+         * @param {Object|Array} shapes
+         */
+        addShape: function (shapes) {
+
+            if (!$.isArray(shapes)) {
+                shapes = [ shapes ];
+            }
+
+            var me = this;
+
+            $.each(shapes, function (index, shape) {
+
+                me.shapes.push(shape);
+
+                shape.draw(me.context);
+
+            });
+
+            me.save();
+
+            me.trigger(
+                me.SHAPE_ADD,
+                {
+                    shapes: shapes
+                }
+            );
+
+        },
+
+        /**
+         * 删除一个 shape
+         *
+         * @param {string|Array} shapeIds
+         */
+        removeShape: function (shapeIds) {
+
+            if (!$.isArray(shapeIds)) {
+                shapeIds = [ shapeIds ];
+            }
+
+            var me = this;
+            var result = [ ];
+
+            $.each(shapeIds, function (index, shapeId) {
+
+                index = me.getShapeIndex('id', shapeId);
+
+                if (index >= 0) {
+
+                    var shapes = me.shapes;
+
+                    result.push(shapes[ index ]);
+
+                    shapes.splice(index, 1);
+
+                }
+
+            });
+
+            if (result.length > 0) {
+
+                me.refresh();
+
+                me.trigger(
+                    me.SHAPE_REMOVE,
+                    {
+                        shapes: result
+                    }
+                );
+
+            }
+
+        },
+
+        /**
+         * 更新 shape
+         *
+         * @param {Object|Array} shapes
+         */
+        updateShape: function (shapes) {
+
+            if (!$.isArray(shapes)) {
+                shapes = [ shapes ];
+            }
+
+            var me = this;
+            var result = [ ];
+
+            $.each(shapes, function (index, shape) {
+                var target = me.getShapeByNumber(shape.number);
+                if (target) {
+                    $.extend(target, shape);
+                    result.push(shape);
+                }
+            });
+
+            if (result.length > 0) {
+
+                me.refresh();
+
+                me.trigger(
+                    me.SHAPE_UPDATE,
+                    {
+                        shapes: result
+                    }
+                );
+
+            }
+
+        },
+
+        /**
+         * 获取 shape 的索引
+         *
+         * @param {string} name 查找的字段名
+         * @param {string|number} value 查找的字段值
+         * @return {number}
+         */
+        getShapeIndex: function (name, value) {
+
+            var me = this;
+
+            var result = -1;
 
             $.each(
-                list,
-                function (i, shape) {
-                    if (shape.id === shapeId) {
-                        index = i;
+                me.shapes,
+                function (index, shape) {
+                    if (shape[name] === value) {
+                        result = index;
                         return false;
                     }
                 }
             );
 
-            if (index >= 0) {
+            return result;
 
-                var shape = list[ index ];
+        },
 
-                list.splice(index, 1);
+        /**
+         * 通过 id 查找 shape
+         *
+         * @param {string} id
+         * @return {Object?}
+         */
+        getShapeById: function (id) {
 
-                me.refresh();
+            var me = this;
 
-                eventEmitter.trigger(
-                    eventEmitter.SHAPE_REMOVE,
-                    {
-                        shape: shape
-                    }
-                );
+            var index = me.getShapeIndex('id', id);
 
-            }
+            return me.shapes[index];
+
+        },
+
+        /**
+         * 通过 number 查找 shape
+         *
+         * @param {string} number
+         * @return {Object?}
+         */
+        getShapeByNumber: function (number) {
+
+            var me = this;
+
+            var index = me.getShapeIndex('number', number);
+
+            return me.shapes[index];
 
         },
 
@@ -128,7 +317,7 @@ define(function (require, exports, module) {
          */
         resize: function (viewWidth, viewHeight) {
 
-            if (!viewWidth && !viewHeight) {
+            if (!viewWidth || !viewHeight) {
                 return;
             }
 
@@ -144,14 +333,19 @@ define(function (require, exports, module) {
 
             if (oldWidth !== newWidth || oldHeight !== newHeight) {
 
-                var canvas = me.getCanvas();
-
-                canvas.css({
+                var style = {
                     width: viewWidth,
                     height: viewHeight
-                });
+                };
 
+                var canvas = me.getCanvas();
+                var fakeCanvas = me.getFakeCanvas();
+
+                canvas.css(style);
                 retina(canvas);
+
+                fakeCanvas.css(style);
+                retina(fakeCanvas);
 
                 me.width = newWidth;
                 me.height = newHeight;
@@ -159,12 +353,12 @@ define(function (require, exports, module) {
                 // x 坐标转换因数
                 var xFactor = oldWidth > 0
                             ? (newWidth / oldWidth)
-                            : 0;
+                            : 1;
 
                 // y 坐标转换因数
                 var yFactor = oldHeight > 0
                             ? (newHeight / oldHeight)
-                            : 0;
+                            : 1;
 
                 // 改变大小会清空画布，所以要重绘
                 me.refresh(xFactor, yFactor);
@@ -179,33 +373,20 @@ define(function (require, exports, module) {
         refresh: function (xFactor, yFactor) {
 
             var me = this;
+            var context = me.context;
 
             me.clear(true);
 
             $.each(
-                me.list,
+                me.shapes,
                 function (index, shape) {
-
-                    if (xFactor > 0 && yFactor > 0) {
-                        shape.updateSize(xFactor, yFactor);
-                    }
-
-                    shape.draw(me.context);
-
+                    shape.scale(xFactor, yFactor);
+                    shape.draw(context);
                 }
             );
 
             me.save();
 
-        },
-
-        /**
-         * 获取 canvas 元素（jQuery对象）
-         *
-         * @return {jQuery}
-         */
-        getCanvas: function () {
-            return $(this.context.canvas);
         },
 
         /**
@@ -219,32 +400,172 @@ define(function (require, exports, module) {
 
             if (arguments[0] !== true) {
 
-                me.list.length = 0;
+                me.shapes.length = 0;
                 me.save();
 
-                eventEmitter.trigger(
-                    eventEmitter.SHAPE_CLEAR
+                me.trigger(
+                    me.SHAPE_CLEAR
                 );
 
             }
 
         },
 
+        /**
+         * 保存绘图表面
+         */
         save: function () {
 
             var me = this;
 
-            me.drawingSurface.save(me);
+            var context = me.context;
+
+            var width = me.width;
+            var height = me.height;
+
+            if (context.getImageData && width > 0 && height > 0) {
+                me.imageData = context.getImageData(0, 0, width, height);
+            }
 
         },
 
+        /**
+         * 恢复绘图表面
+         */
         restore: function () {
 
             var me = this;
 
-            me.drawingSurface.restore(me);
+            var context = me.context;
+            var imageData = me.imageData;
 
-        }
+            if (context.putImageData && imageData) {
+                context.putImageData(imageData, 0, 0);
+            }
+
+        },
+
+        /**
+         * 获取 canvas
+         *
+         * @returns {jQuery}
+         */
+        getCanvas: function () {
+            return this.canvas;
+        },
+
+        /**
+         * 获取离屏 canvas
+         *
+         * @returns {jQuery}
+         */
+        getFakeCanvas: function () {
+            return this.fakeCanvas;
+        },
+
+        /**
+         * 监听事件
+         *
+         * @param {string} type 事件名称
+         * @param {Function} handler 事件处理函数
+         */
+        on: function (type, handler) {
+
+            var me = this;
+
+            me.canvas.on(type, handler);
+
+            return me;
+
+        },
+
+        /**
+         * 取消监听事件
+         *
+         * @param {string} type 事件名称
+         * @param {Function} handler 事件处理函数
+         */
+        off: function (type, handler) {
+
+            var me = this;
+
+            me.canvas.off(type, handler);
+
+            return me;
+
+        },
+
+        /**
+         * 触发事件
+         *
+         * @param {string} type 事件名称
+         * @param {Object?} data 事件数据
+         */
+        trigger: function (type, data) {
+
+            var me = this;
+
+            me.canvas.trigger(type, data);
+
+            return me;
+
+        },
+
+        /**
+         * 事件 - 触发添加形状
+         *
+         * @type {string}
+         */
+        SHAPE_ADD_TRIGGER: 'shape_add_trigger',
+
+        /**
+         * 事件 - 触发删除形状
+         *
+         * @type {string}
+         */
+        SHAPE_REMOVE_TRIGGER: 'shape_remove_trigger',
+
+        /**
+         * 事件 - 触发更新形状
+         *
+         * @type {string}
+         */
+        SHAPE_UPDATE_TRIGGER: 'shape_update_trigger',
+
+        /**
+         * 事件 - 添加形状
+         *
+         * @type {string}
+         */
+        SHAPE_ADD: 'shape_add',
+
+        /**
+         * 事件 - 删除形状
+         *
+         * @type {string}
+         */
+        SHAPE_REMOVE: 'shape_remove',
+
+        /**
+         * 事件 - 更新形状
+         *
+         * @type {string}
+         */
+        SHAPE_UPDATE: 'shape_update',
+
+        /**
+         * 事件 - 鼠标指针移动
+         *
+         * @type {string}
+         */
+        CURSOR_MOVE: 'cursor_move',
+
+        /**
+         * 事件 - 清空形状
+         *
+         * @type {string}
+         */
+        SHAPE_CLEAR: 'shape_clear'
 
     };
 

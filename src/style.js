@@ -6,8 +6,6 @@ define(function (require, exports, module) {
 
     'use strict';
 
-    var eventEmitter = require('./eventEmitter');
-
     var fontSize = 20;
 
     var fontFamily = 'PingHei, "Hiragino Sans GB", "Microsoft YaHei"';
@@ -25,16 +23,7 @@ define(function (require, exports, module) {
 
     exports.setFontSize = function (value) {
         if (fontSize !== value) {
-
             fontSize = value;
-
-            eventEmitter.trigger(
-                eventEmitter.FONT_SIZE_CHANGE,
-                {
-                    fontSize: value
-                }
-            );
-
         }
     };
 
@@ -45,16 +34,7 @@ define(function (require, exports, module) {
 
     exports.setFontFamily = function (value) {
         if (fontFamily !== value) {
-
             fontFamily = value;
-
-            eventEmitter.trigger(
-                eventEmitter.FONT_FAMILY_CHANGE,
-                {
-                    fontFamily: value
-                }
-            );
-
         }
     };
 
@@ -66,16 +46,7 @@ define(function (require, exports, module) {
 
     exports.setLineWidth = function (value) {
         if (lineWidth !== value) {
-
             lineWidth = value;
-
-            eventEmitter.trigger(
-                eventEmitter.LINE_WIDTH_CHANGE,
-                {
-                    lineWidth: value
-                }
-            );
-
         }
     };
 
@@ -87,16 +58,7 @@ define(function (require, exports, module) {
 
     exports.setFillStyle = function (value) {
         if (fillStyle !== value) {
-
             fillStyle = value;
-
-            eventEmitter.trigger(
-                eventEmitter.FILL_STYLE_CHANGE,
-                {
-                    fillStyle: value
-                }
-            );
-
         }
     };
 
@@ -108,15 +70,7 @@ define(function (require, exports, module) {
 
     exports.setStrokeStyle = function (value) {
         if (strokeStyle !== value) {
-
             strokeStyle = value;
-
-            eventEmitter.trigger(
-                eventEmitter.STROKE_STYLE_CHANGE,
-                {
-                    strokeStyle: value
-                }
-            );
         }
     };
 

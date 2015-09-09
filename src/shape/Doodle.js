@@ -6,8 +6,10 @@ define(function (require, exports, module) {
 
     'use strict';
 
-    var inherits = require('../util/inherits');
-    var rect = require('../util/rect');
+    var inherits = require('../function/inherits');
+    var rect = require('../function/rect');
+
+    var chaikinCurve = require('../algorithm/chaikinCurve');
 
     /**
      * 构造函数新增参数
@@ -21,27 +23,89 @@ define(function (require, exports, module) {
 
             name: 'Doodle',
 
-            xPropertyList: [ 'x' ],
+            xProperties: [ 'x' ],
 
-            yPropertyList: [ 'y' ],
+            yProperties: [ 'y' ],
 
-            serializablePropertyList: [
-                'name', 'x', 'y', 'lineWidth',
-                'strokeStyle', 'fillStyle', 'points'
+            serializableProperties: [
+                'id', 'number', 'name', 'x', 'y', 'lineWidth',
+                'strokeStyle', 'fillStyle', 'points', 'smooth'
             ],
 
+            init: function () {
+
+                var me = this;
+
+                var points = me.points;
+                var len = points.length;
+
+                if (!me.smooth && len > 2) {
+
+                    // 用插值算法平滑曲线
+                    for (var i = 0; i < 3; i++) {
+                        points = chaikinCurve(points);
+                    }
+
+                    me.points = points;
+
+                    me.smooth = true;
+
+                }
+
+
+            },
+
             /**
-             * createPath 的扩展，方便子类覆写
+             * 平移
+             *
+             * @param {number} dx
+             * @param {number} dy
+             */
+            translate: function (dx, dy) {
+
+                var me = this;
+
+                me.x += dx;
+                me.y += dy;
+
+                $.each(me.points, function (index, point) {
+                    point.x += dx;
+                    point.y += dy;
+                });
+
+            },
+
+            /**
+             * 通过开始结束点更新图形
+             *
+             * @override
+             * @param {Object} startPoint
+             * @param {Object} endPoint
+             */
+            updatePoint: function (startPoint, endPoint) {
+
+                var me = this;
+
+                me.x = startPoint.x;
+                me.y = startPoint.y;
+
+                me.points.push(endPoint);
+
+            },
+
+            /**
              *
              * @param {CanvasRenderingContext2D} context
              */
-            createPathExtend: function (context) {
+            createPath: function (context) {
 
                 var points = this.points;
 
                 if (points.length > 0) {
 
                     var point = points[0];
+
+                    context.beginPath();
 
                     context.moveTo(
                         point.x,
@@ -62,10 +126,24 @@ define(function (require, exports, module) {
 
             },
 
+            /**
+             * 获取图形矩形区域
+             *
+             * @override
+             * @return {Object}
+             */
             getBoundaryRect: function () {
-
                 return rect(this.points);
+            },
 
+            /**
+             * 验证图形是否符合要求
+             *
+             * @override
+             * @return {boolean}
+             */
+            validate: function () {
+                return this.points.length > 3;
             }
 
         }

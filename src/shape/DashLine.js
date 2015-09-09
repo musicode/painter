@@ -6,7 +6,8 @@ define(function (require, exports, module) {
 
     'use strict';
 
-    var inherits = require('../util/inherits');
+    var inherits = require('../function/inherits');
+    var distance = require('../function/distance');
 
     /**
      * 构造函数新增参数
@@ -22,16 +23,55 @@ define(function (require, exports, module) {
 
             name: 'DashLine',
 
-            xPropertyList: [ 'x', 'endX', 'dashLength' ],
+            xProperties: [ 'x', 'endX', 'dashLength' ],
 
-            yPropertyList: [ 'y', 'endY' ],
+            yProperties: [ 'y', 'endY' ],
 
-            serializablePropertyList: [
-                'name', 'x', 'y', 'lineWidth', 'strokeStyle', 'fillStyle',
-                'endX', 'endY', 'dashLength'
+            serializableProperties: [
+                'id', 'number', 'name', 'x', 'y', 'lineWidth', 'strokeStyle',
+                'fillStyle', 'endX', 'endY', 'dashLength'
             ],
 
-            createPathExtend: function (context) {
+            /**
+             * 平移
+             *
+             * @param {number} dx
+             * @param {number} dy
+             */
+            translate: function (dx, dy) {
+
+                var me = this;
+
+                me.x += dx;
+                me.y += dy;
+
+                me.endX += dx;
+                me.endY += dy;
+
+            },
+
+            /**
+             * 通过开始结束点更新图形
+             *
+             * @override
+             * @param {Object} startPoint
+             * @param {Object} endPoint
+             */
+            updatePoint: function (startPoint, endPoint) {
+
+                var me = this;
+
+                me.x = startPoint.x;
+                me.y = startPoint.y;
+
+                me.endX = endPoint.x;
+                me.endY = endPoint.y;
+
+            },
+
+            createPath: function (context) {
+
+                var me = this;
 
                 var startX = me.x;
                 var startY = me.y;
@@ -46,18 +86,31 @@ define(function (require, exports, module) {
                     Math.sqrt(dx * dx + dy * dy) / me.dashLength
                 );
 
-                for (var i = 0; i < length; i++) {
+                if (length > 0) {
 
-                    context[ i % 2 === 0 ? 'moveTo' : 'lineTo' ](
+                    context.beginPath();
 
-                        startX + dx * (i / length),
-                        startY + dy * (i / length)
+                    for (var i = 0; i < length; i++) {
 
-                    );
+                        context[ i % 2 === 0 ? 'moveTo' : 'lineTo' ](
+
+                            startX + dx * (i / length),
+                            startY + dy * (i / length)
+
+                        );
+
+                    }
 
                 }
+
             },
 
+            /**
+             * 获取图形矩形区域
+             *
+             * @override
+             * @return {Object}
+             */
             getBoundaryRect: function () {
 
                 var me = this;
@@ -74,6 +127,30 @@ define(function (require, exports, module) {
                     width: endX - startX,
                     height: endY - startY
                 };
+
+            },
+
+            /**
+             * 验证图形是否符合要求
+             *
+             * @override
+             * @return {boolean}
+             */
+            validate: function () {
+
+                var me = this;
+
+                var startPoint = {
+                    x: me.x,
+                    y: me.y
+                };
+
+                var endPoint = {
+                    x: me.endX,
+                    y: me.endY
+                };
+
+                return distance(startPoint, endPoint) > 5;
 
             }
 

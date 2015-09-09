@@ -21,12 +21,14 @@ define(function (require, exports, module) {
 
         context.beginPath();
 
-        for (var i = stepX + 0.5; i < width; i += stepX) {
+        var i;
+
+        for (i = stepX + 0.5; i < width; i += stepX) {
             context.moveTo(i, 0);
             context.lineTo(i, height);
         }
 
-        for (var i = stepY + 0.5; i < height; i += stepY) {
+        for (i = stepY + 0.5; i < height; i += stepY) {
             context.moveTo(0, i);
             context.lineTo(width, i);
         }

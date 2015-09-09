@@ -6,7 +6,8 @@ define(function (require, exports, module) {
 
     'use strict';
 
-    var inherits = require('../util/inherits');
+    var inherits = require('../function/inherits');
+    var distance = require('../function/distance');
 
     /**
      * 构造函数新增参数
@@ -20,16 +21,34 @@ define(function (require, exports, module) {
 
             name: 'Circle',
 
-            xPropertyList: [ 'x', 'radius' ],
+            xProperties: [ 'x', 'radius' ],
 
-            yPropertyList: [ 'y' ],
+            yProperties: [ 'y' ],
 
-            serializablePropertyList: [
-                'name', 'x', 'y', 'lineWidth',
-                'strokeStyle', 'fillStyle', 'radius'
+            serializableProperties: [
+                'id', 'number', 'name', 'x', 'y',
+                'lineWidth', 'strokeStyle', 'fillStyle', 'radius'
             ],
 
-            createPathExtend: function (context) {
+            /**
+             * 通过开始结束点更新图形
+             *
+             * @override
+             * @param {Object} startPoint
+             * @param {Object} endPoint
+             */
+            updatePoint: function (startPoint, endPoint) {
+
+                var me = this;
+
+                me.x = startPoint.x;
+                me.y = startPoint.y;
+
+                me.radius = distance(startPoint, endPoint);
+
+            },
+
+            createPath: function (context) {
 
                 var me = this;
 
@@ -40,6 +59,8 @@ define(function (require, exports, module) {
                     var x = me.x;
                     var y = me.y;
 
+                    context.beginPath();
+
                     context.moveTo(x + radius, y);
                     context.arc(x, y, radius, 0, 2 * Math.PI, true);
 
@@ -47,6 +68,12 @@ define(function (require, exports, module) {
 
             },
 
+            /**
+             * 获取图形矩形区域
+             *
+             * @override
+             * @return {Object}
+             */
             getBoundaryRect: function () {
 
                 var me = this;
@@ -59,6 +86,16 @@ define(function (require, exports, module) {
                     height: 2 * radius
                 };
 
+            },
+
+            /**
+             * 验证图形是否符合要求
+             *
+             * @override
+             * @return {boolean}
+             */
+            validate: function () {
+                return this.radius > 5;
             }
 
         }

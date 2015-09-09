@@ -6,7 +6,7 @@ define(function (require, exports, module) {
 
     'use strict';
 
-    var inherits = require('../util/inherits');
+    var inherits = require('../function/inherits');
 
     function drawText(shape, context, method) {
 
@@ -68,19 +68,17 @@ define(function (require, exports, module) {
 
             name: 'Text',
 
-            xPropertyList: [ 'x', 'fontSize', 'width' ],
+            xProperties: [ 'x', 'fontSize', 'width' ],
 
-            yPropertyList: [ 'y', 'lineHeight', 'height' ],
+            yProperties: [ 'y', 'lineHeight', 'height' ],
 
-            serializablePropertyList: [
-                'name', 'x', 'y', 'lineWidth', 'strokeStyle',
-                'fillStyle', 'text', 'fontSize', 'fontFamily',
+            serializableProperties: [
+                'id', 'number', 'name', 'x', 'y', 'text', 'lineWidth',
+                'strokeStyle', 'fillStyle', 'fontSize', 'fontFamily',
                 'lineHeight', 'textAlign', 'textBaseline'
             ],
 
-            createPath: $.noop,
-
-            initExtend: function () {
+            init: function () {
 
                 var me = this;
 
@@ -89,6 +87,12 @@ define(function (require, exports, module) {
 
             },
 
+            /**
+             * 获取文字的矩形区域
+             *
+             * @override
+             * @return {Object}
+             */
             getBoundaryRect: function () {
 
                 var me = this;
@@ -102,12 +106,32 @@ define(function (require, exports, module) {
 
             },
 
-            fillExtend: function (context) {
+            /**
+             *
+             * @override
+             * @param {CanvasRenderingContext2D} context
+             */
+            fillShape: function (context) {
                 drawText(this, context, 'fillText');
             },
 
-            strokeExtend: function (context) {
+            /**
+             *
+             * @override
+             * @param {CanvasRenderingContext2D} context
+             */
+            strokeShape: function (context) {
                 drawText(this, context, 'strokeText');
+            },
+
+            /**
+             * 验证图形是否符合要求
+             *
+             * @override
+             * @return {boolean}
+             */
+            validate: function () {
+                return this.text.length > 0;
             }
 
         }

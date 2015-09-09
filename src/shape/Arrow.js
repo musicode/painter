@@ -6,9 +6,12 @@ define(function (require, exports, module) {
 
     'use strict';
 
-    var inherits = require('../util/inherits');
-    var lines = require('../util/lines');
-    var rect = require('../util/rect');
+    var inherits = require('../function/inherits');
+    var lines = require('../function/lines');
+    var rect = require('../function/rect');
+
+    var getDistance = require('../function/distance');
+    var getRadian = require('../function/radian');
 
     function restorePoint(point, offsetX, offsetY, radian) {
 
@@ -44,16 +47,54 @@ define(function (require, exports, module) {
 
             name: 'Arrow',
 
-            xPropertyList: [ 'x', 'endX', 'thickness' ],
+            xProperties: [ 'x', 'endX', 'thickness' ],
 
-            yPropertyList: [ 'y', 'endY' ],
+            yProperties: [ 'y', 'endY' ],
 
-            serializablePropertyList: [
-                'name', 'x', 'y', 'lineWidth', 'strokeStyle', 'fillStyle',
+            serializableProperties: [
+                'id', 'number', 'name', 'x', 'y',
+                'lineWidth', 'strokeStyle', 'fillStyle',
                 'endX', 'endY', 'thickness'
             ],
 
-            createPathExtend: function (context) {
+            /**
+             * 平移
+             *
+             * @param {number} dx
+             * @param {number} dy
+             */
+            translate: function (dx, dy) {
+
+                var me = this;
+
+                me.x += dx;
+                me.y += dy;
+
+                me.endX += dx;
+                me.endY += dy;
+
+            },
+
+            /**
+             * 通过开始结束点更新图形
+             *
+             * @override
+             * @param {Object} startPoint
+             * @param {Object} endPoint
+             */
+            updatePoint: function (startPoint, endPoint) {
+
+                var me = this;
+
+                me.x = startPoint.x;
+                me.y = startPoint.y;
+
+                me.endX = endPoint.x;
+                me.endY = endPoint.y;
+
+            },
+
+            createPath: function (context) {
 
                 var me = this;
 
@@ -62,18 +103,23 @@ define(function (require, exports, module) {
                 var endX = me.endX;
                 var endY = me.endY;
 
-                var dy = endY - startY;
-                var dx = endX - startX;
+                var startPoint = {
+                    x: startX,
+                    y: startY
+                };
+                var endPoint = {
+                    x: endX,
+                    y: endY
+                };
 
                 // 箭头长度
-                var distance = Math.sqrt(
-                    dx * dx + dy * dy
-                );
+                var distance = getDistance(startPoint, endPoint);
+                var rotateRadian = getRadian(startPoint, endPoint);
 
                 var translateX = startX;
                 var translateY = startY;
-                var rotateRadian = Math.atan2(dy, dx);
 
+                context.beginPath();
                 context.save();
 
                 // 转换坐标
@@ -162,8 +208,27 @@ define(function (require, exports, module) {
 
             },
 
+
+            /**
+             * 获取图形矩形区域
+             *
+             * @override
+             * @return {Object}
+             */
             getBoundaryRect: function () {
                 return rect(this.rectPoints);
+            },
+
+            /**
+             * 验证图形是否符合要求
+             *
+             * @override
+             * @return {boolean}
+             */
+            validate: function () {
+                var me = this;
+                return $.type(me.endX) === 'number'
+                    && $.type(me.endY) === 'number';
             }
 
         }

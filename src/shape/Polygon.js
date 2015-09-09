@@ -6,8 +6,11 @@ define(function (require, exports, module) {
 
     'use strict';
 
-    var inherits = require('../util/inherits');
-    var rect = require('../util/rect');
+    var inherits = require('../function/inherits');
+    var rect = require('../function/rect');
+
+    var distance = require('../function/distance');
+    var radian = require('../function/radian');
 
     function getX(x, radius, angle) {
         return x + radius * Math.cos(angle);
@@ -31,16 +34,35 @@ define(function (require, exports, module) {
 
             name: 'Polygon',
 
-            xPropertyList: [ 'x', 'radius' ],
+            xProperties: [ 'x', 'radius' ],
 
-            yPropertyList: [ 'y' ],
+            yProperties: [ 'y' ],
 
-            serializablePropertyList: [
-                'name', 'x', 'y', 'lineWidth', 'strokeStyle',
+            serializableProperties: [
+                'id', 'number', 'name', 'x', 'y', 'lineWidth', 'strokeStyle',
                 'fillStyle', 'startAngle', 'radius', 'sides'
             ],
 
-            initExtend: function () {
+            /**
+             * 通过开始结束点更新图形
+             *
+             * @override
+             * @param {Object} startPoint
+             * @param {Object} endPoint
+             */
+            updatePoint: function (startPoint, endPoint) {
+
+                var me = this;
+
+                me.x = startPoint.x;
+                me.y = startPoint.y;
+
+                me.startAngle = radian(startPoint, endPoint);
+                me.radius = distance(startPoint, endPoint);
+
+            },
+
+            init: function () {
 
                 var me = this;
 
@@ -80,13 +102,15 @@ define(function (require, exports, module) {
 
             },
 
-            createPathExtend: function () {
+            createPath: function () {
 
                 var points = this.points;
 
                 if (points.length > 0) {
 
                     var point = points[0];
+
+                    context.beginPath();
 
                     context.moveTo(
                         point.x,
@@ -107,8 +131,24 @@ define(function (require, exports, module) {
 
             },
 
+            /**
+             * 获取图形矩形范围
+             *
+             * @override
+             * @return {Object}
+             */
             getBoundaryRect: function () {
                 return rect(this.points);
+            },
+
+            /**
+             * 验证图形是否符合要求
+             *
+             * @override
+             * @return {boolean}
+             */
+            validate: function () {
+                return this.radius > 5;
             }
 
         }

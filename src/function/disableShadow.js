@@ -14,8 +14,8 @@ define(function (require, exports, module) {
     return function (context) {
 
         context.shadowColor = undefined;
-        context.shadowOffsetX
-        context.shadowOffsetY
+        context.shadowOffsetX =
+        context.shadowOffsetY =
         context.shadowBlur = 0;
 
     };
