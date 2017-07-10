@@ -9,60 +9,14 @@
         }
         canvas {
             background-color: #FFF;
-            width: 1000px;
-            height: 300px;
+            width: 1400px;
+            height: 650px;
         }
     </style>
 </head>
 <body>
     <canvas id="canvas"></canvas>
-    <div>
-        thickness:
-        <input id="input-thickness" type="range" min="0.5" max="20" step="0.5" value="0.5" />
-    </div>
-    <div>
-        color:
-        <input id="input-color" type="color" />
-    </div>
-    <div>
-        action:
-        <label>
-            <input type="radio" name="shape" value="laser" />
-            laser
-        </label>
-        <label>
-            <input type="radio" name="shape" value="line" />
-            line
-        </label>
-        <label>
-            <input type="radio" name="shape" value="dashLine" />
-            dashLine
-        </label>
-        <label>
-            <input type="radio" name="shape" value="rect" />
-            rect
-        </label>
-        <label>
-            <input type="radio" name="shape" value="arrow" />
-            arrow
-        </label>
-        <label>
-            <input type="radio" name="shape" value="ellipse" />
-            ellipse
-        </label>
-        <label>
-            <input type="radio" name="shape" value="doodle" />
-            doodle
-        </label>
-        <label>
-            <input type="radio" name="shape" value="text" />
-            text
-        </label>
-        <label>
-            <input type="radio" name="shape" value="eraser" />
-            eraser
-        </label>
-    </div>
+
 
     <script src="tool/esl.js"></script>
     <script src="tool/jquery.js"></script>
@@ -74,12 +28,7 @@
         require(
             [
                 'Main',
-                'eventEmitter',
-                'processor/Arrow',
-                'processor/Doodle',
-                'processor/Rect',
-                'processor/Text',
-                'processor/Eraser'
+                'eventEmitter'
             ],
             function (Painter, eventEmitter, Arrow, Doodle, Rect, Text, Eraser) {
 
@@ -100,71 +49,7 @@
                     canvas.height()
                 );
 
-                eventEmitter
-                    .on(
-                        eventEmitter.SHAPE_ADD_TRIGGER,
-                        function (e, data) {
 
-                            var shape = data.shape;
-                            var canvas = context.canvas;
-
-                            shape.toAdaptive(true, canvas.width, canvas.height);
-
-                            painter.addShape(shape);
-
-                        }
-                    )
-                    .on(
-                        eventEmitter.SHAPE_REMOVE_TRIGGER,
-                        function (e, data) {
-
-                            var shape = data.shape;
-
-                            painter.removeShape(shape.id);
-
-                        }
-                    );
-
-                var map = {
-                    arrow: function () {
-                        return new Arrow({
-                            context: context
-                        });
-                    },
-                    doodle: function () {
-                        return new Doodle({
-                            context: context
-                        });
-                    },
-                    rect: function () {
-                        return new Rect({
-                            context: context
-                        });
-                    },
-                    text: function () {
-                        return new Text({
-                            context: context
-                        });
-                    },
-                    eraser: function () {
-                        return new Eraser({
-                            context: context,
-                            shapes: painter.list
-                        });
-                    }
-                };
-
-                var activeProcessor;
-
-                $('body').on('change', ':radio', function () {
-
-                    if (activeProcessor) {
-                        activeProcessor.dispose();
-                    }
-
-                    activeProcessor = map[this.value]();
-
-                });
             }
         );
     </script>

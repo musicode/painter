@@ -12,16 +12,19 @@ define(function (require, exports, module) {
     var disableShadow = require('../function/disableShadow');
 
     /**
+     * @constructor
      * @param {Object} options
      * @property {number} options.x
      * @property {number} options.y
      * @property {string} options.strokeStyle 描边样式
      * @property {string} options.fillStyle 填充样式
      * @property {number} options.lineWidth 线条粗细
-     * @property {string=} options.shadowColor 阴影色
-     * @property {number=} options.shadowOffsetX 阴影水平偏移量
-     * @property {number=} options.shadowOffsetY 阴影垂直偏移量
-     * @property {number=} options.shadowBlur 阴影模糊值
+     *
+     * @property {Object} options.shadow 阴影
+     * @property {number=} options.shadow.blur 阴影模糊值
+     * @property {string=} options.shadow.color 阴影色
+     * @property {number=} options.shadow.offsetX 阴影水平偏移量
+     * @property {number=} options.shadow.offsetY 阴影垂直偏移量
      */
     function Shape(options) {
 
@@ -234,16 +237,18 @@ define(function (require, exports, module) {
 
             context.save();
 
-            if (me.shadowColor == null) {
+            var shadow = me.shadow || { };
+
+            if (shadow.color == null) {
                 disableShadow(context);
             }
             else {
                 enableShadow(
                     context,
-                    me.shadowColor,
-                    me.shadowOffsetX,
-                    me.shadowOffsetY,
-                    me.shadowBlur
+                    shadow.color,
+                    shadow.offsetX,
+                    shadow.offsetY,
+                    shadow.blur
                 );
             }
 
@@ -276,16 +281,18 @@ define(function (require, exports, module) {
 
             context.save();
 
-            if (me.shadowColor == null) {
+            var shadow = me.shadow || { };
+
+            if (shadow.color == null) {
                 disableShadow(context);
             }
             else {
                 enableShadow(
                     context,
-                    me.shadowColor,
-                    me.shadowOffsetX,
-                    me.shadowOffsetY,
-                    me.shadowBlur
+                    shadow.color,
+                    shadow.offsetX,
+                    shadow.offsetY,
+                    shadow.blur
                 );
             }
 
@@ -353,12 +360,7 @@ define(function (require, exports, module) {
 
     };
 
-    Shape.defaultOptions = {
-        shadowColor: 'rgba(0,0,0,0.2)',
-        shadowOffsetX: 1,
-        shadowOffsetY: 1,
-        shadowBlur: 1
-    };
+    Shape.defaultOptions = { };
 
     return Shape;
 
