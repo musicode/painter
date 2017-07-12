@@ -4,7 +4,7 @@
  */
 define(function () {
 
-  return function (shape, context) {
+  return function (context, shape) {
 
     const thickness = 4
 

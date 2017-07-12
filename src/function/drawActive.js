@@ -5,38 +5,38 @@
 define(function () {
 
   function drawThumb(context, left, top, size) {
-    let gradient = context.createLinearGradient(left, top + size, left, top)
+    const gradient = context.createLinearGradient(left, top + size, left, top)
     gradient.addColorStop(0, '#ddd')
     gradient.addColorStop(1, '#f9f9f9')
     context.beginPath()
     context.fillStyle = gradient
-    context.strokeStyle = '#A2A2A2'
+    context.strokeStyle = '#a2a2a2'
     context.rect(left, top, size, size)
     context.stroke()
     context.fill()
   }
 
-  return function (shape, context) {
+  return function (context, shape) {
 
     const thumbSize = 12
 
     context.lineWidth = 1
-    context.strokeStyle = '#DDD'
+    context.strokeStyle = '#ddd'
 
-    let { x, y, width, height } = shape.getRect()
+    const { x, y, width, height } = shape.getRect()
 
     // 矩形线框
     context.beginPath()
     context.rect(x, y, width, height)
     context.stroke()
 
-    let left = x - thumbSize / 2
-    let center = x + (width - thumbSize) / 2
-    let right = x + width - thumbSize / 2
+    const left = x - thumbSize / 2
+    const center = x + (width - thumbSize) / 2
+    const right = x + width - thumbSize / 2
 
-    let top = y - thumbSize / 2
-    let middle = y + (height - thumbSize) / 2
-    let bottom = y + height - thumbSize / 2
+    const top = y - thumbSize / 2
+    const middle = y + (height - thumbSize) / 2
+    const bottom = y + height - thumbSize / 2
 
     // 周围的 8 个方块
     drawThumb(context, left, top, thumbSize)

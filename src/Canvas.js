@@ -4,6 +4,9 @@
  */
 define(function (require, exports, module) {
 
+  let drawHover = require('./function/drawHover')
+  let drawActive = require('./function/drawActive')
+
   let { devicePixelRatio } = window
 
   class Canvas {
@@ -99,13 +102,20 @@ define(function (require, exports, module) {
     }
 
     refresh() {
-      let { context, shapes } = this
+      let { context, shapes, hoverIndex, activeIndex } = this
       this.clear()
       shapes.forEach(
         function (shape) {
           shape.draw(context)
         }
       )
+
+      if (activeIndex >= 0) {
+        drawActive(context, shapes[ activeIndex ])
+      }
+      if (hoverIndex >= 0 && hoverIndex !== activeIndex) {
+        drawHover(context, shapes[ hoverIndex ])
+      }
     }
 
     clear() {

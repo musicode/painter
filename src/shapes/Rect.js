@@ -6,8 +6,6 @@ define(function (require) {
 
   var Shape = require('./Shape')
   var constant = require('../constant')
-  var drawHover = require('../function/drawHover')
-  var drawActive = require('../function/drawActive')
 
   class Rect extends Shape {
 
@@ -101,13 +99,6 @@ define(function (require) {
 
       if (this.strokeThickness && this.strokeColor) {
         this.stroke(context)
-      }
-
-      if (this.active) {
-        drawActive(this, context)
-      }
-      else if (this.hover) {
-        drawHover(this, context)
       }
 
     }
