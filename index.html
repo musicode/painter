@@ -10,14 +10,12 @@
         canvas {
             background-color: #FFF;
             width: 300px;
-            height: 300px;
+            height: 150px;
         }
     </style>
 </head>
 <body>
     <canvas id="canvas"></canvas>
-
-    <img id="img" src="http://img0.imgtn.bdimg.com/it/u=3066621857,2651727941&fm=26&gp=0.jpg">
 
     <script src="tool/esl.js"></script>
     <script>
@@ -26,17 +24,6 @@
         var context = canvas.getContext('2d');
 
         var img = document.getElementById('img');
-        var fadeIn = true;
-        function drawScreen() {
-
-            context.globalAlpha = 1;
-            context.fillStyle = '#000000';
-            context.fillRect(0, 0, 300, 300);
-
-            context.globalAlpha = 0.25;
-            context.drawImage(img, 0, 0);
-
-        }
 
         require.config({
             baseUrl: './src'
@@ -45,46 +32,30 @@
         require(
             [
                 'Canvas',
-                'function/loop'
+                'shapes/Rect'
             ],
-            function (Canvas, loop) {
+            function (Canvas, Rect) {
 
                 var instance = new Canvas(canvas);
 
-                var fadeIn = true;
-                var alpha = 0;
-
-                var drawScreen = function () {
-
-                    instance.setAlpha(1);
-                    instance.drawColor('#000000');
-
-                    instance.setAlpha(0.25);
-                    instance.drawImage(img, 0, 0);
-
-                    instance.setTextFont('72px', 'Sans-Serif');
-                    instance.setTextBaseline('top');
-
-                    if (fadeIn) {
-                      alpha += 0.01;
-                      if (alpha > 1) {
-                        alpha = 1;
-                        fadeIn = false;
-                      }
+                canvas.onmousemove = function (e) {
+                    var x = e.offsetX * window.devicePixelRatio;
+                    var y = e.offsetY * window.devicePixelRatio;
+                    if (rect.isPointInPath(context, x, y)) {
+                        rect.hover(context)
                     }
                     else {
-                      alpha -= 0.1;
-                      if (alpha < 0) {
-                        alpha = 0;
-                        fadeIn = true;
-                      }
+                        rect.unhover(context)
                     }
-                    instance.setAlpha(alpha);
-                    instance.setFillColor('#fff');
-                    instance.fillText('123', 100, 100);
-                };
+                }
 
-                loop(drawScreen);
+                var rect = new Rect();
+                rect.drawPath(context, 50, 50, 100, 100);
+                rect.fill(context, 'red');
+                rect.stroke(context, 'black', 2)
+
+                console.log(rect);
+
             }
         );
     </script>
