@@ -37,21 +37,46 @@ define(function (require, exports, module) {
           }
 
           if (index >= 0) {
-            if (index !== hoverIndex) {
+            if (index !== hoverIndex
+              && !shapes[ index ].active
+            ) {
               if (hoverIndex >= 0) {
-                delete shapes[hoverIndex].hover
+                delete shapes[ hoverIndex ].hover
               }
-              shapes[index].hover = true
+              shapes[ index ].hover = true
               me.hoverIndex = index
               me.refresh()
             }
           }
           else if (hoverIndex >= 0) {
-            delete shapes[hoverIndex].hover
+            delete shapes[ hoverIndex ].hover
             delete me.hoverIndex
             me.refresh()
           }
 
+        }
+      )
+
+      canvas.addEventListener(
+        'click',
+        function (event) {
+          let { hoverIndex } = me
+
+          if (hoverIndex >= 0) {
+            if (hoverIndex !== me.activeIndex && me.activeIndex >= 0) {
+              delete me.shapes[me.activeIndex].active
+              delete me.activeIndex
+              me.refresh()
+            }
+            me.shapes[ hoverIndex ].active = true
+            me.activeIndex = hoverIndex
+            me.refresh()
+          }
+          else if (me.activeIndex >= 0) {
+            delete me.shapes[me.activeIndex].active
+            delete me.activeIndex
+            me.refresh()
+          }
         }
       )
     }
