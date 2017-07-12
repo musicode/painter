@@ -24,23 +24,11 @@ define(function (require) {
      * @return {boolean}
      */
     isPointInPath(context, x, y) {
-      return x >= this.x
-        && x <= this.x + this.width
-        && y >= this.y
-        && y <= this.y + this.height
-    }
-
-    /**
-     * 画路径
-     *
-     * @param {Context} context
-     */
-    drawPath(context) {
-
-      context.beginPath()
-      context.rect(this.x, this.y, this.width, this.height)
-      this.hasPath = true
-
+      let rect = this.getRect();
+      return x >= rect.x
+        && x <= rect.x + rect.width
+        && y >= rect.y
+        && y <= rect.y + rect.height
     }
 
     /**
@@ -68,12 +56,19 @@ define(function (require) {
         height += strokeThickness
       }
 
-      context.lineWidth = this.strokeThickness
+      context.lineWidth = strokeThickness
       context.strokeStyle = this.strokeColor
 
       context.beginPath()
       context.rect(x, y, width, height)
       context.stroke()
+
+      this.rect = {
+        x: x - strokeThickness * 0.5,
+        y: y - strokeThickness * 0.5,
+        width: width + strokeThickness,
+        height: height + strokeThickness
+      }
 
     }
 
@@ -84,10 +79,8 @@ define(function (require) {
      */
     fill(context) {
 
-      if (!this.hasPath) {
-        throw new Error('please drawPath() before fill()')
-      }
-
+      context.beginPath()
+      context.rect(this.x, this.y, this.width, this.height)
       context.fillStyle = this.fillColor
       context.fill()
 
@@ -103,8 +96,6 @@ define(function (require) {
       if (this.hover) {
         drawHover(this, context)
       }
-
-      this.drawPath(context)
 
       if (this.fillColor) {
         this.fill(context)
@@ -123,24 +114,7 @@ define(function (require) {
      * @return {Object} 返回格式为 { x, y, width, height }
      */
     getRect() {
-
-      let { strokePosition, strokeThickness, x, y, width, height } = this
-
-      if (strokePosition === constant.STROKE_POSITION_CENTER) {
-        x -= strokeThickness * 0.5
-        y -= strokeThickness * 0.5
-        width += strokeThickness
-        height += strokeThickness
-      }
-      else if (strokePosition === constant.STROKE_POSITION_OUTSIDE) {
-        x -= strokeThickness
-        y -= strokeThickness
-        width += strokeThickness * 2
-        height += strokeThickness * 2
-      }
-
-      return { x, y, width, height }
-
+      return this.rect || this
     }
 
   }
