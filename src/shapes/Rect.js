@@ -79,9 +79,10 @@ define(function (require) {
      */
     fill(context) {
 
+      context.fillStyle = this.fillColor
+
       context.beginPath()
       context.rect(this.x, this.y, this.width, this.height)
-      context.fillStyle = this.fillColor
       context.fill()
 
     }
@@ -93,16 +94,16 @@ define(function (require) {
      */
     draw(context) {
 
-      if (this.hover) {
-        drawHover(this, context)
-      }
-
       if (this.fillColor) {
         this.fill(context)
       }
 
       if (this.strokeThickness && this.strokeColor) {
         this.stroke(context)
+      }
+
+      if (this.hover) {
+        drawHover(this, context)
       }
 
     }
