@@ -4,17 +4,59 @@
  */
 define(function (require, exports, module) {
 
+  let { devicePixelRatio } = window
+
   class Canvas {
 
     constructor(canvas) {
       this.canvas = canvas
       this.context = canvas.getContext('2d')
       this.resize(canvas.width, canvas.height)
+      this.shapes = [ ]
+
+      let me = this
+
+      canvas.addEventListener(
+        'mousemove',
+        function (event) {
+
+          let { offsetX, offsetY } = event
+          if (devicePixelRatio > 1) {
+            offsetX *= devicePixelRatio
+            offsetY *= devicePixelRatio
+          }
+
+          let { shapes, hoverIndex } = me
+
+          let index
+          for (let i = shapes.length - 1; i >= 0; i--) {
+            if (shapes[ i ].isPointInPath(context, offsetX, offsetY)) {
+              index = i
+              break
+            }
+          }
+
+          if (index >= 0) {
+            if (index !== hoverIndex) {
+              if (hoverIndex >= 0) {
+                delete shapes[hoverIndex].hover
+              }
+              shapes[index].hover = true
+              me.hoverIndex = index
+              me.refresh()
+            }
+          }
+          else if (hoverIndex >= 0) {
+            delete shapes[hoverIndex].hover
+            delete me.hoverIndex
+            me.refresh()
+          }
+
+        }
+      )
     }
 
     resize(width, height) {
-
-      let { devicePixelRatio } = window
 
       if (devicePixelRatio > 1) {
         width *= devicePixelRatio
@@ -26,20 +68,24 @@ define(function (require, exports, module) {
 
     }
 
-    setStrokeWidth(width) {
-      this.context.lineWidth = width
+    addShape(shape) {
+      shape.draw(this.context)
+      this.shapes.push(shape)
     }
 
-    setStrokeColor(color) {
-      this.context.strokeStyle = color
+    refresh() {
+      let { context, shapes } = this
+      this.clear()
+      shapes.forEach(
+        function (shape) {
+          shape.draw(context)
+        }
+      )
     }
 
-    setFillColor(color) {
-      this.context.fillStyle = color
-    }
-
-    setAlpha(alpha) {
-      this.context.globalAlpha = alpha
+    clear() {
+      let { context, canvas } = this
+      context.clearRect(0, 0, canvas.width, canvas.height)
     }
 
     /**

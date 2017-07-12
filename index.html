@@ -12,10 +12,60 @@
             width: 300px;
             height: 150px;
         }
+
+        label {
+            font-size: 12px;
+            margin-right: 10px;
+        }
     </style>
 </head>
 <body>
     <canvas id="canvas"></canvas>
+
+    <form class="edit">
+
+        <p>
+            <label>
+                填充颜色
+            </label>
+            <input name="fillStyle" type="color">
+        </p>
+
+        <p>
+            <label>
+                描边粗细
+            </label>
+            <input name="lineWidth" type="number">
+        </p>
+
+        <p>
+            <label>
+                描边颜色
+            </label>
+            <input name="strokeStyle" type="color">
+        </p>
+
+        <p>
+            <label>
+                描边方式
+            </label>
+            <span>
+                <label>
+                    <input type="radio" name="strokePosition" value="1">
+                    inside
+                </label>
+                <label>
+                    <input type="radio" name="strokePosition" value="2">
+                    center
+                </label>
+                <label>
+                    <input type="radio" name="strokePosition" value="3">
+                    outside
+                </label>
+            </span>
+        </p>
+
+    </form>
 
     <script src="tool/esl.js"></script>
     <script>
@@ -38,23 +88,28 @@
 
                 var instance = new Canvas(canvas);
 
-                canvas.onmousemove = function (e) {
-                    var x = e.offsetX * window.devicePixelRatio;
-                    var y = e.offsetY * window.devicePixelRatio;
-                    if (rect.isPointInPath(context, x, y)) {
-                        rect.hover(context)
-                    }
-                    else {
-                        rect.unhover(context)
-                    }
-                }
+                instance.addShape(
+                  new Rect({
+                    x: 0,
+                    y: 0,
+                    width: 50,
+                    height: 50,
+                    fillColor: 'blue'
+                  })
+                )
 
-                var rect = new Rect();
-                rect.drawPath(context, 50, 50, 100, 100);
-                rect.fill(context, 'red');
-                rect.stroke(context, 'black', 2)
+                var rect = new Rect({
+                  x: 50,
+                  y: 50,
+                  width: 200,
+                  height: 200,
+                  strokeThickness: 30,
+                  strokePosition: 3,
+                  strokeColor: '#BBB',
+                  fillColor: 'red'
+                });
 
-                console.log(rect);
+                instance.addShape(rect)
 
             }
         );
