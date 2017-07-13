@@ -10,7 +10,6 @@ define(function () {
     gradient.addColorStop(1, '#f9f9f9')
     context.beginPath()
     context.fillStyle = gradient
-    context.strokeStyle = '#a2a2a2'
     context.rect(left, top, size, size)
     context.stroke()
     context.fill()
@@ -20,8 +19,8 @@ define(function () {
 
     const thumbSize = 12
 
-    context.lineWidth = 1
-    context.strokeStyle = '#ddd'
+    context.lineWidth = 2
+    context.strokeStyle = '#ccc'
 
     const { x, y, width, height } = shape.getRect()
 
@@ -38,6 +37,16 @@ define(function () {
     const middle = y + (height - thumbSize) / 2
     const bottom = y + height - thumbSize / 2
 
+    context.closePath()
+
+    context.strokeStyle = '#a2a2a2'
+
+    // 方块加点阴影
+    context.shadowColor = 'rgba(0,0,0,0.2)'
+    context.shadowOffsetX = 0
+    context.shadowOffsetY = 2
+    context.shadowBlur = 6
+
     // 周围的 8 个方块
     drawThumb(context, left, top, thumbSize)
     drawThumb(context, center, top, thumbSize)
@@ -47,6 +56,11 @@ define(function () {
     drawThumb(context, center, bottom, thumbSize)
     drawThumb(context, left, bottom, thumbSize)
     drawThumb(context, left, middle, thumbSize)
+
+    context.shadowColor =
+    context.shadowOffsetX =
+    context.shadowOffsetY =
+    context.shadowBlur = 0
 
   }
 
