@@ -18,11 +18,10 @@ define(function (require) {
      * @return {boolean}
      */
     isPointInPath(context, x, y) {
-      let rect = this.getRect()
-      return x >= rect.x
-        && x <= rect.x + rect.width
-        && y >= rect.y
-        && y <= rect.y + rect.height
+      return x >= this.x
+        && x <= this.x + this.width
+        && y >= this.y
+        && y <= this.y + this.height
     }
 
     /**
@@ -105,7 +104,7 @@ define(function (require) {
      * @return {Object} 返回格式为 { x, y, width, height }
      */
     getRect() {
-      return this.rect || this
+      return this
     }
 
   }

@@ -216,7 +216,7 @@ define(function (require, exports, module) {
         active.draw(context)
       }
       if (hoverShape && hoverShape !== activeShape) {
-        let hover = new Hover(hoverShape.getRect())
+        let hover = new Hover(hoverShape)
         hover.draw(context)
       }
       if (selection) {
