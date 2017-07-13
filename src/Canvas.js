@@ -4,9 +4,9 @@
  */
 define(function (require, exports, module) {
 
-  let drawHover = require('./function/drawHover')
   let Selection = require('./state/Selection')
   let Active = require('./state/Active')
+  let Hover = require('./state/Hover')
 
   let { devicePixelRatio } = window
 
@@ -141,16 +141,12 @@ define(function (require, exports, module) {
       )
 
       if (activeShape) {
-        let active = new Active({
-          x: activeShape.x,
-          y: activeShape.y,
-          width: activeShape.width,
-          height: activeShape.height,
-        })
+        let active = new Active(activeShape)
         active.draw(context)
       }
       if (hoverShape && hoverShape !== activeShape) {
-        drawHover(context, hoverShape)
+        let hover = new Hover(hoverShape.getRect())
+        hover.draw(context)
       }
 
     }
