@@ -32,7 +32,6 @@ define(function (require, exports, module) {
           if (hoverShape) {
             offsetX = cursorX - hoverShape.x
             offsetY = cursorY - hoverShape.y
-            console.log(offsetX, offsetY)
             dragging = hoverShape
             me.setActiveShape(hoverShape)
           }
@@ -45,7 +44,7 @@ define(function (require, exports, module) {
               y: cursorY,
               selection: true,
               strokeThickness: 2,
-              strokeColor: '#D6D6D6',
+              strokeColor: '#a2a2a2',
               fillColor: 'rgba(60,60,60,0.1)'
             })
             me.addShape(selection)
