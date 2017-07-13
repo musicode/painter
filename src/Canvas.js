@@ -6,6 +6,7 @@ define(function (require, exports, module) {
 
   let drawHover = require('./function/drawHover')
   let drawActive = require('./function/drawActive')
+  let Rect = require('./shapes/Rect')
 
   let { devicePixelRatio } = window
 
@@ -19,48 +20,86 @@ define(function (require, exports, module) {
 
       let me = this
 
+      let x, y, selection
+
+      canvas.addEventListener(
+        'mousedown',
+        function (event) {
+          let { hoverShape } = me
+          if (hoverShape) {
+            me.setActiveShape(hoverShape)
+          }
+          else {
+            if (me.activeShape) {
+              me.setActiveShape(null)
+            }
+            selection = new Rect({
+              x: x,
+              y: y,
+              selection: true,
+              strokeThickness: 2,
+              strokeColor: '#D6D6D6',
+              fillColor: 'rgba(60,60,60,0.1)'
+            })
+            me.addShape(selection)
+          }
+        }
+      )
+
       canvas.addEventListener(
         'mousemove',
         function (event) {
 
-          let { offsetX, offsetY } = event
+          x = event.offsetX
+          y = event.offsetY
+
           if (devicePixelRatio > 1) {
-            offsetX *= devicePixelRatio
-            offsetY *= devicePixelRatio
+            x *= devicePixelRatio
+            y *= devicePixelRatio
           }
+
 
           let { shapes, hoverShape } = me
 
-          let shape
+          let shape, needRefresh
           for (let i = shapes.length - 1; i >= 0; i--) {
-            if (shapes[ i ].isPointInPath(context, offsetX, offsetY)) {
+            if (!shapes[ i ].selection && shapes[ i ].isPointInPath(context, x, y)) {
               shape = shapes[ i ]
               break
             }
           }
 
-          if (shape) {
-            me.setHoverShape(shape)
+          // 先设置 active shape
+          if (selection) {
+            needRefresh = true
+            selection.width = x - selection.x
+            selection.height = y - selection.y
+            me.setActiveShape(shape, true)
           }
-          else if (hoverShape) {
-            me.setHoverShape(null)
+
+          // 再设置 hover shape
+          if (me.setHoverShape(shape, true)) {
+            needRefresh = true
+          }
+
+          if (needRefresh) {
+            me.refresh()
           }
 
         }
       )
 
-      canvas.addEventListener(
-        'click',
+      document.addEventListener(
+        'mouseup',
         function (event) {
-          let { hoverShape, activeShape } = me
-          if (hoverShape) {
-            me.setActiveShape(hoverShape)
-          }
-          else if (activeShape) {
-            me.setActiveShape(null)
+          if (selection) {
+            selection = null
+            me.shapes.pop()
+            me.refresh()
           }
         }
       )
+
     }
 
     resize(width, height) {
@@ -99,42 +138,26 @@ define(function (require, exports, module) {
       }
     }
 
-    setHoverShape(shape) {
-
-      let { hoverShape } = this
-
-      if (shape) {
-        if (shape && shape !== hoverShape) {
-          this.hoverShape = shape
+    setHoverShape(shape, silent) {
+      if (shape !== this.hoverShape) {
+        this.hoverShape = shape
+        if (shape !== this.activeShape) {
+          if (!silent) {
+            this.refresh()
+          }
+          return true
         }
       }
-      else if (hoverShape) {
-        delete this.hoverShape
-      }
-
-      if (hoverShape !== this.hoverShape) {
-        this.refresh()
-      }
-
     }
 
-    setActiveShape(shape) {
-
-      let { activeShape } = this
-
-      if (shape) {
-        if (shape && shape !== activeShape) {
-          this.activeShape = shape
+    setActiveShape(shape, silent) {
+      if (shape !== this.activeShape) {
+        this.activeShape = shape
+        if (!silent) {
+          this.refresh()
         }
+        return true
       }
-      else if (activeShape) {
-        delete this.activeShape
-      }
-
-      if (activeShape !== this.activeShape) {
-        this.refresh()
-      }
-
     }
 
     clear() {

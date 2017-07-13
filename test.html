@@ -1,0 +1,160 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title></title>
+<meta name="Keywords" content=""/>
+<meta name="Description" content=""/>
+<!--浏览器渲染设置-->
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="renderer" content="webkit">
+<!--移动端特性设置-->
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-touch-fullscreen" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="My WebAPP">
+<!-- --------------------------------页面模板公用头部结束-------------------------------- -->
+
+<!--当前页面依赖-->
+<script src="https://unpkg.com/yox@0.49.4/dist/yox-legacy.js"></script>
+
+<script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/layer/3.0.1/layer.min.js"></script>
+
+
+<style>
+	body, html, #root, #root-body {
+		width: 100%;
+		height: 100%;
+		overflow: hidden;
+        position: relative;
+		z-index: 1;
+	}
+    html {
+        
+    }
+</style>
+</head>
+<body>
+
+
+
+<div id="root">
+<script id="root-tpl" type="text/plain">
+    <div id="root-body">
+        <h1>singlePage222</h1>
+        <h5>{{title}}</h5>
+        <table class="rTable">
+                <tr>
+                    <th width="160">时间</th>
+                    <th>操作内容</th>
+                    <th width="160">IP</th>
+                    <th width="80">操作结果</th>
+                </tr>
+                {{#each log.rows}}
+                <tr>
+                    <td>{{time}}</td>
+                    <td>{{type}}({{cid}})</td>
+                    <td>{{ip}}</td>
+                    <td>
+                        {{#if result}}
+                        <span class="label label-green">成功</span>
+                        {{else}}
+                        <span class="label label-red">失败</span>
+                        {{/if}}
+                    </td>
+                </tr>
+                {{/each}}
+            </table>
+    </div>
+</script>
+</div>
+
+
+
+
+
+<!--当前页面私有JS-->
+<script>
+    $.support.cors = true
+	// 实例化页面视图模型
+    pageVM = new Yox({
+        el: '#root',
+        template: '#root-tpl',
+        data: {
+            title: '这个是标题',
+            states: {
+                
+            },
+            form: {
+                keyword: '',
+                result: []
+            }
+        },
+        methods: {
+            getData: function(){
+                var self = this;
+                layer.load();
+                $.ajax({
+                    type: 'get',
+                    url: 'http://www.easy-mock.com/mock/reborn/its/logUser',
+                    data: {
+                        // id: id
+                    },
+                    success:function(res){
+                        console.log(res);
+                        if(res.success){
+                            self.set('log', res.data);
+                            console.log('下面是set后的数据log')
+                            console.log(self.get('log'))
+                        }else {
+                            layer.msg('服务器返回失败：'+res.msg, {icon: 2})
+                        }
+                    },
+                    error:function(){
+                        layer.msg('接口地址错误或连接异常');
+                    },
+                    complete:function(){
+                        layer.closeAll('loading');
+                    }
+                })
+                console.log('getData' + Math.random());
+            }
+        },
+        events: {
+            submit: function(){
+                alert('submit')
+                return false;
+            }
+        },
+        computed: {
+            allChecked: {
+                deps: ['xxx', 'xxx.*.checked' ],
+                get: function () {
+                    
+                },
+                set: function (value) {
+                    
+                }
+            }
+        },
+        watchers: {
+            "xxx": function(newValue){
+                
+            }
+        },
+        afterMount: function(){
+            var self = this;
+            this.getData();
+            setInterval(function(){
+                self.getData();
+            }, 2000);
+        }
+
+    })
+</script>
+<!-- --------------------------------页面模板公用底部开始-------------------------------- -->
+</body>
+</html>
