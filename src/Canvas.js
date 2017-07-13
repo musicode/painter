@@ -29,32 +29,21 @@ define(function (require, exports, module) {
             offsetY *= devicePixelRatio
           }
 
-          let { shapes, hoverIndex } = me
+          let { shapes, hoverShape } = me
 
-          let index
+          let shape
           for (let i = shapes.length - 1; i >= 0; i--) {
             if (shapes[ i ].isPointInPath(context, offsetX, offsetY)) {
-              index = i
+              shape = shapes[ i ]
               break
             }
           }
 
-          if (index >= 0) {
-            if (index !== hoverIndex
-              && !shapes[ index ].active
-            ) {
-              if (hoverIndex >= 0) {
-                delete shapes[ hoverIndex ].hover
-              }
-              shapes[ index ].hover = true
-              me.hoverIndex = index
-              me.refresh()
-            }
+          if (shape) {
+            me.setHoverShape(shape)
           }
-          else if (hoverIndex >= 0) {
-            delete shapes[ hoverIndex ].hover
-            delete me.hoverIndex
-            me.refresh()
+          else if (hoverShape) {
+            me.setHoverShape(null)
           }
 
         }
@@ -63,22 +52,12 @@ define(function (require, exports, module) {
       canvas.addEventListener(
         'click',
         function (event) {
-          let { hoverIndex } = me
-
-          if (hoverIndex >= 0) {
-            if (hoverIndex !== me.activeIndex && me.activeIndex >= 0) {
-              delete me.shapes[me.activeIndex].active
-              delete me.activeIndex
-              me.refresh()
-            }
-            me.shapes[ hoverIndex ].active = true
-            me.activeIndex = hoverIndex
-            me.refresh()
+          let { hoverShape, activeShape } = me
+          if (hoverShape) {
+            me.setActiveShape(hoverShape)
           }
-          else if (me.activeIndex >= 0) {
-            delete me.shapes[me.activeIndex].active
-            delete me.activeIndex
-            me.refresh()
+          else if (activeShape) {
+            me.setActiveShape(null)
           }
         }
       )
@@ -102,7 +81,9 @@ define(function (require, exports, module) {
     }
 
     refresh() {
-      let { context, shapes, hoverIndex, activeIndex } = this
+
+      let { context, shapes, hoverShape, activeShape } = this
+
       this.clear()
       shapes.forEach(
         function (shape) {
@@ -110,12 +91,50 @@ define(function (require, exports, module) {
         }
       )
 
-      if (activeIndex >= 0) {
-        drawActive(context, shapes[ activeIndex ])
+      if (activeShape) {
+        drawActive(context, activeShape)
       }
-      if (hoverIndex >= 0 && hoverIndex !== activeIndex) {
-        drawHover(context, shapes[ hoverIndex ])
+      if (hoverShape && hoverShape !== activeShape) {
+        drawHover(context, hoverShape)
       }
+    }
+
+    setHoverShape(shape) {
+
+      let { hoverShape } = this
+
+      if (shape) {
+        if (shape && shape !== hoverShape) {
+          this.hoverShape = shape
+        }
+      }
+      else if (hoverShape) {
+        delete this.hoverShape
+      }
+
+      if (hoverShape !== this.hoverShape) {
+        this.refresh()
+      }
+
+    }
+
+    setActiveShape(shape) {
+
+      let { activeShape } = this
+
+      if (shape) {
+        if (shape && shape !== activeShape) {
+          this.activeShape = shape
+        }
+      }
+      else if (activeShape) {
+        delete this.activeShape
+      }
+
+      if (activeShape !== this.activeShape) {
+        this.refresh()
+      }
+
     }
 
     clear() {
