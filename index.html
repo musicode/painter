@@ -17,6 +17,33 @@
             font-size: 12px;
             margin-right: 10px;
         }
+
+        canvas[data-drag="0"] {
+            cursor: nw-resize;
+        }
+
+        canvas[data-drag="2"] {
+            cursor: ne-resize;
+        }
+
+        canvas[data-drag="4"] {
+            cursor: se-resize;
+        }
+
+        canvas[data-drag="6"] {
+            cursor: sw-resize;
+        }
+
+        canvas[data-drag="1"],
+        canvas[data-drag="5"] {
+            cursor: row-resize;
+        }
+
+        canvas[data-drag="3"],
+        canvas[data-drag="7"] {
+            cursor: col-resize;
+        }
+
     </style>
 </head>
 <body>

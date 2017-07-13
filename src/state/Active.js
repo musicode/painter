@@ -9,7 +9,7 @@ define(function (require) {
 
   class Active extends Shape {
 
-    constructor(props, emitter) {
+    constructor(props, emitter, canvas) {
       super(props)
 
       let me = this
@@ -26,8 +26,11 @@ define(function (require) {
             && event.y > box[ 1 ]
             && event.y <= box[ 1 ] + thumbSize
           ) {
-            console.log(i)
+            canvas.setAttribute('data-drag', i)
             break
+          }
+          else {
+            canvas.removeAttribute('data-drag')
           }
         }
       })

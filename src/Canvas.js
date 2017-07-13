@@ -212,7 +212,7 @@ define(function (require, exports, module) {
       )
 
       if (activeShape) {
-        let active = new Active(activeShape, this.emitter)
+        let active = new Active(activeShape, this.emitter, canvas)
         active.draw(context)
       }
       if (hoverShape && hoverShape !== activeShape) {
