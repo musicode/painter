@@ -8,10 +8,6 @@ define(function (require) {
 
   class Hover extends Shape {
 
-    isPointInPath() {
-      return false
-    }
-
     draw(context) {
 
       const thickness = 4

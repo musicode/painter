@@ -12,25 +12,49 @@ define(function (require) {
     constructor(props, emitter, canvas) {
       super(props)
 
-      let me = this
+      let me = this, currentBox
 
       emitter
       .on('mousedown', function (event) {
 
       })
       .on('mousemove', function (event) {
-        for (let i = 0, len = me.boxes.length, box; i < len; i++) {
-          box = me.boxes[ i ]
-          if (event.x > box[ 0 ]
-            && event.x <= box[ 0 ] + thumbSize
-            && event.y > box[ 1 ]
-            && event.y <= box[ 1 ] + thumbSize
+        for (let i = 0, len = me.boxes.length, x, y; i < len; i += 2) {
+          x = me.boxes[ i ]
+          y = me.boxes[ i + 1 ]
+          if (event.x > x
+            && event.x <= x + thumbSize
+            && event.y > y
+            && event.y <= y + thumbSize
           ) {
-            canvas.setAttribute('data-drag', i)
+            switch (i) {
+              case 1:
+              case 5:
+                canvas.style.cursor = 'row-resize'
+                break
+              case 3:
+              case 7:
+                canvas.style.cursor = 'col-resize'
+                break
+              case 0:
+                canvas.style.cursor = 'nw-resize'
+                break
+              case 2:
+                canvas.style.cursor = 'ne-resize'
+                break
+              case 4:
+                canvas.style.cursor = 'se-resize'
+                break
+              case 6:
+                canvas.style.cursor = 'sw-resize'
+                break
+            }
+            currentBox = i
             break
           }
-          else {
-            canvas.removeAttribute('data-drag')
+          else if (currentBox >= 0) {
+            canvas.style.cursor = ''
+            currentBox = -1
           }
         }
       })
@@ -41,7 +65,7 @@ define(function (require) {
 
     draw(context) {
 
-      const { x, y, width, height } = this
+      let { x, y, width, height } = this
 
       const left = x - thumbSize / 2
       const center = x + (width - thumbSize) / 2
@@ -58,7 +82,6 @@ define(function (require) {
       context.beginPath()
       context.rect(x, y, width, height)
       context.stroke()
-
       context.closePath()
 
       context.strokeStyle = '#a2a2a2'
@@ -69,29 +92,31 @@ define(function (require) {
       context.shadowOffsetY = 2
       context.shadowBlur = 6
 
-      this.boxes = [
-        [ left, top ],
-        [ center, top ],
-        [ right, top ],
-        [ right, middle ],
-        [ right, bottom ],
-        [ center, bottom ],
-        [ left, bottom ],
-        [ left, middle ],
+      const boxes = [
+        left, top,
+        center, top,
+        right, top,
+        right, middle,
+        right, bottom,
+        center, bottom,
+        left, bottom,
+        left, middle,
       ]
 
-      this.boxes.forEach(
-        function (box) {
-          const gradient = context.createLinearGradient(box[ 0 ], box[ 1 ] + thumbSize, box[ 0 ], box[ 1 ])
-          gradient.addColorStop(0, '#ddd')
-          gradient.addColorStop(1, '#f9f9f9')
-          context.beginPath()
-          context.fillStyle = gradient
-          context.rect(box[ 0 ], box[ 1 ], thumbSize, thumbSize)
-          context.stroke()
-          context.fill()
-        }
-      )
+      for (let i = 0, len = boxes.length, gradient; i < len; i += 2) {
+        x = boxes[ i ]
+        y = boxes[ i + 1 ]
+        gradient = context.createLinearGradient(x, y + thumbSize, x, y)
+        gradient.addColorStop(0, '#ddd')
+        gradient.addColorStop(1, '#f9f9f9')
+        context.beginPath()
+        context.fillStyle = gradient
+        context.rect(x, y, thumbSize, thumbSize)
+        context.stroke()
+        context.fill()
+      }
+
+      this.boxes = boxes
 
       context.shadowColor =
       context.shadowOffsetX =

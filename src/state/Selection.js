@@ -8,10 +8,6 @@ define(function (require) {
 
   class Selection extends Shape {
 
-    isPointInPath() {
-      return false
-    }
-
     draw(context) {
 
       context.lineWidth = 2
