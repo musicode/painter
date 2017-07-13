@@ -6,6 +6,10 @@ define(function () {
 
   class Shape {
 
+    constructor(options) {
+      Object.assign(this, options)
+    }
+
     getRect() {
       throw new Error('please implements getRect method.')
     }

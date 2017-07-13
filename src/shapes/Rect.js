@@ -9,13 +9,8 @@ define(function (require) {
 
   class Rect extends Shape {
 
-    constructor(options) {
-      super(options)
-      Object.assign(this, options)
-    }
-
     /**
-     * 描边色
+     * 点是否位于图形范围内
      *
      * @param {Context} context
      * @param {number} x
@@ -23,7 +18,7 @@ define(function (require) {
      * @return {boolean}
      */
     isPointInPath(context, x, y) {
-      let rect = this.getRect();
+      let rect = this.getRect()
       return x >= rect.x
         && x <= rect.x + rect.width
         && y >= rect.y

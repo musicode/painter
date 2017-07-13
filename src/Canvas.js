@@ -5,8 +5,8 @@
 define(function (require, exports, module) {
 
   let drawHover = require('./function/drawHover')
-  let drawActive = require('./function/drawActive')
-  let Rect = require('./shapes/Rect')
+  let Selection = require('./state/Selection')
+  let Active = require('./state/Active')
 
   let { devicePixelRatio } = window
 
@@ -39,13 +39,9 @@ define(function (require, exports, module) {
             if (me.activeShape) {
               me.setActiveShape(null)
             }
-            selection = new Rect({
+            selection = new Selection({
               x: cursorX,
               y: cursorY,
-              selection: true,
-              strokeThickness: 2,
-              strokeColor: '#a2a2a2',
-              fillColor: 'rgba(60,60,60,0.1)'
             })
             me.addShape(selection)
           }
@@ -68,7 +64,7 @@ define(function (require, exports, module) {
 
           let hoverShape, needRefresh
           for (let i = shapes.length - 1; i >= 0; i--) {
-            if (!shapes[ i ].selection && shapes[ i ].isPointInPath(context, cursorX, cursorY)) {
+            if (shapes[ i ].isPointInPath(context, cursorX, cursorY)) {
               hoverShape = shapes[ i ]
               break
             }
@@ -145,7 +141,13 @@ define(function (require, exports, module) {
       )
 
       if (activeShape) {
-        drawActive(context, activeShape)
+        let active = new Active({
+          x: activeShape.x,
+          y: activeShape.y,
+          width: activeShape.width,
+          height: activeShape.height,
+        })
+        active.draw(context)
       }
       if (hoverShape && hoverShape !== activeShape) {
         drawHover(context, hoverShape)

@@ -12,9 +12,13 @@ define(function () {
     context.strokeStyle = '#45C0FF'
 
     let rect = shape.getRect()
-    console.log(rect)
     context.beginPath()
-    context.rect(rect.x - thickness * 0.5, rect.y - thickness * 0.5, rect.width + thickness, rect.height + thickness)
+    context.rect(
+      rect.x - thickness * 0.5,
+      rect.y - thickness * 0.5,
+      rect.width + thickness,
+      rect.height + thickness
+    )
     context.stroke()
 
   }
