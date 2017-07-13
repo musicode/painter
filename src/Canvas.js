@@ -13,9 +13,11 @@ define(function (require, exports, module) {
   class Canvas {
 
     constructor(canvas) {
+
       this.canvas = canvas
       this.context = canvas.getContext('2d')
       this.resize(canvas.width, canvas.height)
+
       this.shapes = [ ]
 
       let me = this
@@ -131,7 +133,7 @@ define(function (require, exports, module) {
 
     refresh() {
 
-      let { context, shapes, hoverShape, activeShape } = this
+      let { context, shapes, activeShape, hoverShape } = this
 
       this.clear()
       shapes.forEach(
@@ -154,12 +156,10 @@ define(function (require, exports, module) {
     setHoverShape(shape, silent) {
       if (shape != this.hoverShape) {
         this.hoverShape = shape
-        if (!this.activeShape || shape != this.activeShape) {
-          if (!silent) {
-            this.refresh()
-          }
-          return true
+        if (!silent && (!this.activeShape || shape != this.activeShape)) {
+          this.refresh()
         }
+        return true
       }
     }
 
