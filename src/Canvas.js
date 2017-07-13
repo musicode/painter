@@ -10,42 +10,26 @@ define(function (require, exports, module) {
 
   let { devicePixelRatio } = window
 
-  class Canvas {
+  class Emitter {
 
     constructor(canvas) {
 
-      this.canvas = canvas
-      this.context = canvas.getContext('2d')
-      this.resize(canvas.width, canvas.height)
+      this.listeners = { }
 
-      this.shapes = [ ]
-
-      let me = this
-
-      let canvasX = canvas.offsetLeft, canvasY = canvas.offsetTop
-      let cursorX, cursorY, offsetX, offsetY
-
-      let selection, dragging
+      let rect = canvas.getBoundingClientRect()
+      let me = this, cursorX, cursorY
 
       canvas.addEventListener(
         'mousedown',
         function (event) {
-          let { hoverShape } = me
-          if (hoverShape) {
-            offsetX = cursorX - hoverShape.x
-            offsetY = cursorY - hoverShape.y
-            dragging = hoverShape
-            me.setActiveShape(hoverShape)
-          }
-          else {
-            if (me.activeShape) {
-              me.setActiveShape(null)
-            }
-            selection = new Selection({
-              x: cursorX,
-              y: cursorY,
-            })
-            me.addShape(selection)
+          if (!me.disabled) {
+            me.fire(
+              'mousedown',
+              {
+                x: cursorX,
+                y: cursorY,
+              }
+            )
           }
         }
       )
@@ -53,64 +37,149 @@ define(function (require, exports, module) {
       document.addEventListener(
         'mousemove',
         function (event) {
-
-          cursorX = event.pageX - canvasX
-          cursorY = event.pageY - canvasY
-
-          if (devicePixelRatio > 1) {
-            cursorX *= devicePixelRatio
-            cursorY *= devicePixelRatio
-          }
-
-          let { shapes } = me
-
-          let hoverShape, needRefresh
-          for (let i = shapes.length - 1; i >= 0; i--) {
-            if (shapes[ i ].isPointInPath(context, cursorX, cursorY)) {
-              hoverShape = shapes[ i ]
-              break
+          if (!me.disabled) {
+            cursorX = event.pageX - rect.left
+            cursorY = event.pageY - rect.top
+            if (devicePixelRatio > 1) {
+              cursorX *= devicePixelRatio
+              cursorY *= devicePixelRatio
             }
+            me.fire(
+              'mousemove',
+              {
+                x: cursorX,
+                y: cursorY,
+              }
+            )
           }
-
-          if (dragging) {
-            needRefresh = true
-            dragging.x = cursorX - offsetX
-            dragging.y = cursorY - offsetY
-          }
-
-          // 先设置 active shape
-          if (selection) {
-            needRefresh = true
-            selection.width = cursorX - selection.x
-            selection.height = cursorY - selection.y
-            me.setActiveShape(hoverShape, true)
-          }
-
-          // 再设置 hover shape
-          if (me.setHoverShape(hoverShape, true)) {
-            needRefresh = true
-          }
-
-          if (needRefresh) {
-            me.refresh()
-          }
-
         }
       )
 
       document.addEventListener(
         'mouseup',
         function (event) {
-          if (selection) {
-            selection = null
-            me.shapes.pop()
-            me.refresh()
-          }
-          if (dragging) {
-            dragging = null
+          if (!me.disabled) {
+            me.fire(
+              'mouseup',
+              {
+                x: cursorX,
+                y: cursorY,
+              }
+            )
           }
         }
       )
+
+    }
+
+    enable() {
+      this.disabled = false
+    }
+
+    disable() {
+      this.disabled = true
+    }
+
+    fire(type, data) {
+      let { listeners } = this
+      let list = listeners[ type ]
+      if (list) {
+        for (let i = 0, len = list.length; i < len; i++) {
+          if (list[ i ](data) === false) {
+            break
+          }
+        }
+      }
+    }
+
+    on(type, listener) {
+      let list = this.listeners[ type ] || (this.listeners[ type ] = [ ])
+      list.push(listener)
+      return this
+    }
+
+  }
+
+  class Canvas {
+
+    constructor(canvas) {
+
+      let me = this
+
+      me.canvas = canvas
+      me.context = canvas.getContext('2d')
+      me.resize(canvas.width, canvas.height)
+
+      me.shapes = [ ]
+
+      let offsetX, offsetY, selection, dragging
+
+      (me.emitter = new Emitter(canvas))
+      .on('mousedown', function (event) {
+
+        let { hoverShape } = me
+        if (hoverShape) {
+          offsetX = event.x - hoverShape.x
+          offsetY = event.y - hoverShape.y
+          dragging = hoverShape
+          me.setActiveShape(hoverShape)
+        }
+        else {
+          if (me.activeShape) {
+            me.setActiveShape(null)
+          }
+          selection = new Selection({
+            x: event.x,
+            y: event.y,
+          })
+        }
+
+      })
+      .on('mousemove', function (event) {
+
+        let { shapes } = me
+
+        let hoverShape, needRefresh
+        for (let i = shapes.length - 1; i >= 0; i--) {
+          if (shapes[ i ].isPointInPath(context, event.x, event.y)) {
+            hoverShape = shapes[ i ]
+            break
+          }
+        }
+
+        if (dragging) {
+          needRefresh = true
+          dragging.x = event.x - offsetX
+          dragging.y = event.y - offsetY
+        }
+
+        // 先设置 active shape
+        if (selection) {
+          needRefresh = true
+          selection.width = event.x - selection.x
+          selection.height = event.y - selection.y
+          me.setActiveShape(hoverShape, true)
+        }
+
+        // 再设置 hover shape
+        if (me.setHoverShape(hoverShape, true)) {
+          needRefresh = true
+        }
+
+        if (needRefresh) {
+          me.refresh()
+        }
+
+      })
+      .on('mouseup', function () {
+        if (dragging) {
+          dragging = null
+        }
+        if (selection) {
+          selection = null
+          me.refresh()
+        }
+      })
 
     }
 
@@ -133,7 +202,7 @@ define(function (require, exports, module) {
 
     refresh() {
 
-      let { context, shapes, activeShape, hoverShape } = this
+      let { context, shapes, activeShape, hoverShape, selection } = this
 
       this.clear()
       shapes.forEach(
@@ -143,12 +212,15 @@ define(function (require, exports, module) {
       )
 
       if (activeShape) {
-        let active = new Active(activeShape)
+        let active = new Active(activeShape, this.emitter)
         active.draw(context)
       }
       if (hoverShape && hoverShape !== activeShape) {
         let hover = new Hover(hoverShape.getRect())
         hover.draw(context)
+      }
+      if (selection) {
+        selection.draw(context)
       }
 
     }

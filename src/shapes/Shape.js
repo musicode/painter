@@ -6,8 +6,8 @@ define(function () {
 
   class Shape {
 
-    constructor(options) {
-      Object.assign(this, options)
+    constructor(props) {
+      Object.assign(this, props)
     }
 
     getRect() {

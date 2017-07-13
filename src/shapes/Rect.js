@@ -51,7 +51,7 @@ define(function (require) {
       }
 
       context.lineWidth = strokeThickness
-      context.strokeStyle = this.strokeColor
+      context.strokeStyle = this.strokeStyle
 
       context.beginPath()
       context.rect(x, y, width, height)
@@ -73,7 +73,7 @@ define(function (require) {
      */
     fill(context) {
 
-      context.fillStyle = this.fillColor
+      context.fillStyle = this.fillStyle
 
       context.beginPath()
       context.rect(this.x, this.y, this.width, this.height)
@@ -88,11 +88,11 @@ define(function (require) {
      */
     draw(context) {
 
-      if (this.fillColor) {
+      if (this.fillStyle) {
         this.fill(context)
       }
 
-      if (this.strokeThickness && this.strokeColor) {
+      if (this.strokeThickness && this.strokeStyle) {
         this.stroke(context)
       }
 

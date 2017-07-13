@@ -4,21 +4,40 @@
  */
 define(function (require) {
 
-  var Shape = require('../shapes/Shape')
+  const Shape = require('../shapes/Shape')
+  const thumbSize = 12
 
   class Active extends Shape {
 
-    isPointInPath(context, x, y) {
-      let rect = this
-      return x >= rect.x
-        && x <= rect.x + rect.width
-        && y >= rect.y
-        && y <= rect.y + rect.height
+    constructor(props, emitter) {
+      super(props)
+
+      let me = this
+
+      emitter
+      .on('mousedown', function (event) {
+
+      })
+      .on('mousemove', function (event) {
+        for (let i = 0, len = me.boxes.length, box; i < len; i++) {
+          box = me.boxes[ i ]
+          if (event.x > box[ 0 ]
+            && event.x <= box[ 0 ] + thumbSize
+            && event.y > box[ 1 ]
+            && event.y <= box[ 1 ] + thumbSize
+          ) {
+            console.log(i)
+            break
+          }
+        }
+      })
+      .on('mouseup', function (event) {
+
+      })
     }
 
     draw(context) {
 
-      const thumbSize = 12
       const { x, y, width, height } = this
 
       const left = x - thumbSize / 2
@@ -47,15 +66,29 @@ define(function (require) {
       context.shadowOffsetY = 2
       context.shadowBlur = 6
 
-      // 周围的 8 个方块
-      drawThumb(context, left, top, thumbSize)
-      drawThumb(context, center, top, thumbSize)
-      drawThumb(context, right, top, thumbSize)
-      drawThumb(context, right, middle, thumbSize)
-      drawThumb(context, right, bottom, thumbSize)
-      drawThumb(context, center, bottom, thumbSize)
-      drawThumb(context, left, bottom, thumbSize)
-      drawThumb(context, left, middle, thumbSize)
+      this.boxes = [
+        [ left, top ],
+        [ center, top ],
+        [ right, top ],
+        [ right, middle ],
+        [ right, bottom ],
+        [ center, bottom ],
+        [ left, bottom ],
+        [ left, middle ],
+      ]
+
+      this.boxes.forEach(
+        function (box) {
+          const gradient = context.createLinearGradient(box[ 0 ], box[ 1 ] + thumbSize, box[ 0 ], box[ 1 ])
+          gradient.addColorStop(0, '#ddd')
+          gradient.addColorStop(1, '#f9f9f9')
+          context.beginPath()
+          context.fillStyle = gradient
+          context.rect(box[ 0 ], box[ 1 ], thumbSize, thumbSize)
+          context.stroke()
+          context.fill()
+        }
+      )
 
       context.shadowColor =
       context.shadowOffsetX =
@@ -64,17 +97,6 @@ define(function (require) {
 
     }
 
-  }
-
-  function drawThumb(context, left, top, size) {
-    const gradient = context.createLinearGradient(left, top + size, left, top)
-    gradient.addColorStop(0, '#ddd')
-    gradient.addColorStop(1, '#f9f9f9')
-    context.beginPath()
-    context.fillStyle = gradient
-    context.rect(left, top, size, size)
-    context.stroke()
-    context.fill()
   }
 
   return Active
