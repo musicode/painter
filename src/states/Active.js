@@ -134,15 +134,17 @@ define(function (require) {
 
     isPointInPath(context, x, y) {
       let { boxes } = this
-      for (let i = 0, len = boxes.length, tx, ty; i < len; i += 2) {
-        tx = boxes[ i ]
-        ty = boxes[ i + 1 ]
-        if (x >= tx
-          && x <= tx + THUMB_SIZE
-          && y >= ty
-          && y <= ty + THUMB_SIZE
-        ) {
-          return i / 2
+      if (boxes) {
+        for (let i = 0, len = boxes.length, tx, ty; i < len; i += 2) {
+          tx = boxes[ i ]
+          ty = boxes[ i + 1 ]
+          if (x >= tx - 2 * THUMB_SIZE
+            && x <= tx + 3 * THUMB_SIZE
+            && y >= ty - 2 * THUMB_SIZE
+            && y <= ty + 3 * THUMB_SIZE
+          ) {
+            return i / 2
+          }
         }
       }
       return false

@@ -8,6 +8,8 @@ define(function (require, exports, module) {
   let Active = require('./states/Active')
   let Hover = require('./states/Hover')
 
+  let array = require('./util/array')
+
   let { devicePixelRatio } = window
 
   class Emitter {
@@ -123,6 +125,7 @@ define(function (require, exports, module) {
       me.resize(canvas.width, canvas.height)
 
       me.shapes = [ ]
+      me.states = [ ]
 
       let offsetX, offsetY, draggingShape
 
@@ -130,11 +133,14 @@ define(function (require, exports, module) {
       .on('mousedown', function (event) {
 
         let { hoverShape } = me
+
         if (hoverShape) {
           offsetX = event.x - hoverShape.x
           offsetY = event.y - hoverShape.y
           draggingShape = hoverShape
-          me.setActiveShape(draggingShape)
+          me.setHoverShape(null, true)
+          me.setActiveShape(draggingShape, true)
+          me.refresh()
         }
         else {
           me.setActiveShape(null)
@@ -144,14 +150,18 @@ define(function (require, exports, module) {
       })
       .on('mousemove', function (event) {
 
+        let { activeShape, selection, shapes, states } = me
+
         if (draggingShape) {
           draggingShape.x = event.x - offsetX
           draggingShape.y = event.y - offsetY
+          if (draggingShape === activeShape) {
+            states[ 0 ].x = draggingShape.x
+            states[ 0 ].y = draggingShape.y
+          }
           me.refresh()
           return
         }
-
-        let { selection, shapes } = me
 
         if (selection) {
           selection.width = event.x - selection.x
@@ -160,17 +170,28 @@ define(function (require, exports, module) {
           return
         }
 
-        let hoverShape
-        for (let i = shapes.length - 1, shape; i >= 0; i--) {
-          shape = shapes[ i ]
-          if (shape.isPointInPath(context, event.x, event.y) !== false) {
-            if (!shape.state) {
-              hoverShape = shape
-            }
-            break
+        let hoverShape, isStateShape, hoverResult
+        array.each(
+          [ states, shapes ],
+          function (list) {
+            array.each(
+              list,
+              function (shape) {
+                if (shape && shape.isPointInPath(context, event.x, event.y) !== false) {
+                  hoverShape = shape
+                  isStateShape = shape.state
+                  return hoverResult = false
+                }
+              }
+            )
+            return hoverResult
           }
+        )
+
+        if (!isStateShape) {
+          me.setHoverShape(hoverShape)
         }
-        me.setHoverShape(hoverShape)
+
 
       })
       .on('mouseup', function () {
@@ -212,25 +233,18 @@ define(function (require, exports, module) {
      */
     refresh() {
 
-      const { context, canvas, shapes, active, activeShape, hover, hoverShape, selection } = this
+      const { context, canvas, shapes, states } = this
 
       context.clearRect(0, 0, canvas.width, canvas.height)
 
-      shapes.forEach(
-        function (shape) {
+      const drawShape = function (shape) {
+        if (shape) {
           shape.draw(context)
         }
-      )
+      }
 
-      if (active) {
-        active.draw(context)
-      }
-      if (hover && (!active || activeShape !== hoverShape)) {
-        hover.draw(context)
-      }
-      if (selection) {
-        selection.draw(context)
-      }
+      shapes.forEach(drawShape)
+      states.forEach(drawShape)
 
     }
 
@@ -248,17 +262,20 @@ define(function (require, exports, module) {
      * @param {?silent} silent
      */
     setHoverShape(shape, silent) {
-      if (shape != this.hoverShape) {
+      let { hoverShape, activeShape, states } = this
+      if (shape != hoverShape) {
+        console.log(shape)
         this.hoverShape = shape
-        if (this.hover) {
-          this.hover.destroy()
-          this.hover = null
+
+        if (states[ 1 ]) {
+          states[ 1 ].destroy()
+          states[ 1 ] = null
         }
         if (shape) {
-          this.hover = new Hover({ shape })
+          states[ 1 ] = new Hover({ shape })
         }
         if (!silent) {
-          if (!this.activeShape || shape != this.activeShape) {
+          if (!activeShape || shape != activeShape) {
             this.refresh()
           }
         }
@@ -271,14 +288,15 @@ define(function (require, exports, module) {
      * @param {?silent} silent
      */
     setActiveShape(shape, silent) {
-      if (shape != this.activeShape) {
+      let { activeShape, states } = this
+      if (shape != activeShape) {
         this.activeShape = shape
-        if (this.active) {
-          this.active.destroy()
-          this.active = null
+        if (states[ 0 ]) {
+          states[ 0 ].destroy()
+          states[ 0 ] = null
         }
         if (shape) {
-          this.active = new Active(shape, this.emitter, this.canvas)
+          states[ 0 ] = new Active(shape, this.emitter, this.canvas)
         }
         if (!silent) {
           this.refresh()
