@@ -127,20 +127,26 @@ define(function (require, exports, module) {
       me.shapes = [ ]
       me.states = [ ]
 
-      let offsetX, offsetY, draggingShape
+      let offsetX, offsetY, draggingShape, editing
 
       (me.emitter = new Emitter(canvas))
       .on('mousedown', function (event) {
 
-        let { hoverShape } = me
-
+        let { hoverShape, activeShape } = me
         if (hoverShape) {
-          offsetX = event.x - hoverShape.x
-          offsetY = event.y - hoverShape.y
-          draggingShape = hoverShape
-          me.setHoverShape(null, true)
-          me.setActiveShape(draggingShape, true)
-          me.refresh()
+          if (hoverShape.state) {
+            if (hoverShape instanceof Active) {
+              editing = true
+            }
+          }
+          else {
+            offsetX = event.x - hoverShape.x
+            offsetY = event.y - hoverShape.y
+            draggingShape = hoverShape
+            me.setHoverShape(null, true)
+            me.setActiveShape(draggingShape, true)
+            me.refresh()
+          }
         }
         else {
           me.setActiveShape(null)
@@ -151,6 +157,11 @@ define(function (require, exports, module) {
       .on('mousemove', function (event) {
 
         let { activeShape, selection, shapes, states } = me
+
+        if (editing) {
+          me.refresh()
+          return
+        }
 
         if (draggingShape) {
           draggingShape.x = event.x - offsetX
@@ -170,7 +181,7 @@ define(function (require, exports, module) {
           return
         }
 
-        let hoverShape, isStateShape, hoverResult
+        let hoverShape, hoverResult
         array.each(
           [ states, shapes ],
           function (list) {
@@ -179,7 +190,6 @@ define(function (require, exports, module) {
               function (shape) {
                 if (shape && shape.isPointInPath(context, event.x, event.y) !== false) {
                   hoverShape = shape
-                  isStateShape = shape.state
                   return hoverResult = false
                 }
               }
@@ -188,13 +198,13 @@ define(function (require, exports, module) {
           }
         )
 
-        if (!isStateShape) {
-          me.setHoverShape(hoverShape)
-        }
-
+        me.setHoverShape(hoverShape)
 
       })
       .on('mouseup', function () {
+        if (editing) {
+          editing = null
+        }
         if (draggingShape) {
           draggingShape = null
         }
@@ -264,22 +274,20 @@ define(function (require, exports, module) {
     setHoverShape(shape, silent) {
       let { hoverShape, activeShape, states } = this
       if (shape != hoverShape) {
-        console.log(shape)
         this.hoverShape = shape
-
-        if (states[ 1 ]) {
-          states[ 1 ].destroy()
-          states[ 1 ] = null
-        }
-        if (shape) {
-          states[ 1 ] = new Hover({ shape })
-        }
-        if (!silent) {
-          if (!activeShape || shape != activeShape) {
+        if (!activeShape || shape != activeShape) {
+          if (states[ 1 ]) {
+            states[ 1 ].destroy()
+            states[ 1 ] = null
+          }
+          if (shape && !shape.state) {
+            states[ 1 ] = new Hover({ shape })
+          }
+          if (!silent) {
             this.refresh()
           }
+          return true
         }
-        return true
       }
     }
 

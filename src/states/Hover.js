@@ -9,9 +9,7 @@ define(function (require) {
   class Hover extends State {
 
     isPointInPath(context, x, y) {
-      context.beginPath()
-      this.drawPath(context)
-      return context.isPointInPath(x, y)
+      return false
     }
 
     drawPath(context) {

@@ -22,61 +22,77 @@ define(function (require) {
 
       super(props)
 
-      let me = this, style = canvas.style, currentBox, dragging
+      let me = this, style = canvas.style, currentBox, dragging, pinX, pinY
 
       me.emitter = emitter
       me.mousedownHandler = function (event) {
         if (currentBox >= 0) {
-          let x, y
           switch (currentBox) {
             case LEFT_TOP:
-              x = me.boxes[ 9 ]
-              y = me.boxes[ 10 ]
+              pinX = me.boxes[ 8 ]
+              pinY = me.boxes[ 9 ]
               break
             case CENTER_TOP:
-              x = me.boxes[ 11 ]
-              y = me.boxes[ 12 ]
+              pinX = me.boxes[ 10 ]
+              pinY = me.boxes[ 11 ]
               break
             case RIGHT_TOP:
-              x = me.boxes[ 13 ]
-              y = me.boxes[ 14 ]
+              pinX = me.boxes[ 12 ]
+              pinY = me.boxes[ 13 ]
               break
             case RIGHT_MIDDLE:
-              x = me.boxes[ 15 ]
-              y = me.boxes[ 16 ]
+              pinX = me.boxes[ 14 ]
+              pinY = me.boxes[ 15 ]
               break
             case RIGHT_BOTTOM:
-              x = me.boxes[ 0 ]
-              y = me.boxes[ 1 ]
+              pinX = me.boxes[ 0 ]
+              pinY = me.boxes[ 1 ]
               break
             case CENTER_BOTTOM:
-              x = me.boxes[ 3 ]
-              y = me.boxes[ 4 ]
+              pinX = me.boxes[ 2 ]
+              pinY = me.boxes[ 3 ]
               break
             case LEFT_BOTTOM:
-              x = me.boxes[ 5 ]
-              y = me.boxes[ 6 ]
+              pinX = me.boxes[ 4 ]
+              pinY = me.boxes[ 5 ]
               break
             case LEFT_MIDDLE:
-              x = me.boxes[ 7 ]
-              y = me.boxes[ 8 ]
+              pinX = me.boxes[ 6 ]
+              pinY = me.boxes[ 7 ]
               break
           }
-          me.x = x
-          me.y = y
+          console.log(pinX, pinY)
           dragging = true
         }
       }
       me.mousemoveHandler = function (event) {
         if (dragging) {
-          me.width = event.x - me.x
-          me.height = event.y - me.y
+console.log('dragging', event)
+          if (event.x < pinX) {
+            me.x = event.x
+            me.width = pinX - event.x
+          }
+          else {
+            me.x = pinX
+            me.width = event.x - pinX
+          }
+
+          if (event.y < pinY) {
+            me.y = event.y
+            me.height = pinY - event.y
+          }
+          else {
+            me.y = pinY
+            me.height = event.y - pinY
+          }
+
           return
         }
 
         let index = me.isPointInPath(null, event.x, event.y), cursor
         if (index !== false) {
           if (currentBox !== index) {
+            console.log('press', index)
             currentBox = index
             switch (index) {
               case CENTER_TOP:
@@ -138,10 +154,10 @@ define(function (require) {
         for (let i = 0, len = boxes.length, tx, ty; i < len; i += 2) {
           tx = boxes[ i ]
           ty = boxes[ i + 1 ]
-          if (x >= tx - 2 * THUMB_SIZE
-            && x <= tx + 3 * THUMB_SIZE
-            && y >= ty - 2 * THUMB_SIZE
-            && y <= ty + 3 * THUMB_SIZE
+          if (x >= tx - THUMB_SIZE
+            && x <= tx + 2 * THUMB_SIZE
+            && y >= ty - THUMB_SIZE
+            && y <= ty + 2 * THUMB_SIZE
           ) {
             return i / 2
           }
