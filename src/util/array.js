@@ -5,12 +5,21 @@
 define(function (require, exports, module) {
 
   return {
-    each(array, callback) {
+    each(array, callback, reversed) {
       let { length } = array
       if (length) {
-        for (let i = 0; i < length; i++) {
-          if (callback(array[ i ], i) === false) {
-            break
+        if (reversed) {
+          for (let i = length - 1; i >= 0; i--) {
+            if (callback(array[ i ], i) === false) {
+              break
+            }
+          }
+        }
+        else {
+          for (let i = 0; i < length; i++) {
+            if (callback(array[ i ], i) === false) {
+              break
+            }
           }
         }
       }

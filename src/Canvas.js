@@ -4,13 +4,17 @@
  */
 define(function (require, exports, module) {
 
-  let Selection = require('./states/Selection')
-  let Active = require('./states/Active')
-  let Hover = require('./states/Hover')
+  const Selection = require('./states/Selection')
+  const Active = require('./states/Active')
+  const Hover = require('./states/Hover')
 
-  let array = require('./util/array')
+  const array = require('./util/array')
 
-  let { devicePixelRatio } = window
+  const INDEX_ACTIVE = 0
+  const INDEX_HOVER = 1
+  const INDEX_SELECTION = 2
+
+  const { devicePixelRatio } = window
 
   class Emitter {
 
@@ -162,8 +166,8 @@ define(function (require, exports, module) {
           draggingShape.x = event.x - offsetX
           draggingShape.y = event.y - offsetY
           if (draggingShape === activeShape) {
-            states[ 0 ].x = draggingShape.x
-            states[ 0 ].y = draggingShape.y
+            states[ INDEX_ACTIVE ].x = draggingShape.x
+            states[ INDEX_ACTIVE ].y = draggingShape.y
           }
           me.refresh()
           return
@@ -187,7 +191,8 @@ define(function (require, exports, module) {
                   hoverShape = shape
                   return hoverResult = false
                 }
-              }
+              },
+              true
             )
             return hoverResult
           }
@@ -277,18 +282,22 @@ define(function (require, exports, module) {
       let { hoverShape, activeShape, states } = this
       if (shape != hoverShape) {
         this.hoverShape = shape
+        if (states[ INDEX_HOVER ]) {
+          states[ INDEX_HOVER ].destroy()
+          states[ INDEX_HOVER ] = null
+        }
+        let needRefresh = hoverShape != null
         if (!activeShape || shape != activeShape) {
-          if (states[ 1 ]) {
-            states[ 1 ].destroy()
-            states[ 1 ] = null
-          }
           if (shape && !shape.state) {
-            states[ 1 ] = new Hover({ shape })
+            states[ INDEX_HOVER ] = new Hover({ shape })
           }
+          needRefresh = true
+        }
+        if (needRefresh) {
           if (!silent) {
             this.refresh()
           }
-          return true
+          return needRefresh
         }
       }
     }
@@ -301,12 +310,12 @@ define(function (require, exports, module) {
       let { activeShape, states } = this
       if (shape != activeShape) {
         this.activeShape = shape
-        if (states[ 0 ]) {
-          states[ 0 ].destroy()
-          states[ 0 ] = null
+        if (states[ INDEX_ACTIVE ]) {
+          states[ INDEX_ACTIVE ].destroy()
+          states[ INDEX_ACTIVE ] = null
         }
         if (shape) {
-          states[ 0 ] = new Active(shape, this.emitter, this.canvas)
+          states[ INDEX_ACTIVE ] = new Active(shape, this.emitter, this.canvas)
         }
         if (!silent) {
           this.refresh()
