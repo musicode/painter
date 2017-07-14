@@ -4,9 +4,9 @@
  */
 define(function (require, exports, module) {
 
-  let Selection = require('./state/Selection')
-  let Active = require('./state/Active')
-  let Hover = require('./state/Hover')
+  let Selection = require('./states/Selection')
+  let Active = require('./states/Active')
+  let Hover = require('./states/Hover')
 
   let { devicePixelRatio } = window
 
@@ -19,9 +19,9 @@ define(function (require, exports, module) {
       let rect = canvas.getBoundingClientRect()
       let me = this, cursorX, cursorY
 
-      canvas.addEventListener(
+      document.addEventListener(
         'mousedown',
-        function (event) {
+        function () {
           if (!me.disabled) {
             me.fire(
               'mousedown',
@@ -57,7 +57,7 @@ define(function (require, exports, module) {
 
       document.addEventListener(
         'mouseup',
-        function (event) {
+        function () {
           if (!me.disabled) {
             me.fire(
               'mouseup',
@@ -112,7 +112,7 @@ define(function (require, exports, module) {
 
       me.shapes = [ ]
 
-      let offsetX, offsetY, selection, dragging
+      let offsetX, offsetY, draggingShape
 
       (me.emitter = new Emitter(canvas))
       .on('mousedown', function (event) {
@@ -121,62 +121,52 @@ define(function (require, exports, module) {
         if (hoverShape) {
           offsetX = event.x - hoverShape.x
           offsetY = event.y - hoverShape.y
-          dragging = hoverShape
-          me.setActiveShape(hoverShape)
+          draggingShape = hoverShape
+          me.setActiveShape(draggingShape)
         }
         else {
-          if (me.activeShape) {
-            me.setActiveShape(null)
-          }
-          selection = new Selection({
-            x: event.x,
-            y: event.y,
-          })
+          me.setActiveShape(null)
+          me.selection = new Selection(event)
         }
 
       })
       .on('mousemove', function (event) {
 
-        let { shapes } = me
+        if (draggingShape) {
+          draggingShape.x = event.x - offsetX
+          draggingShape.y = event.y - offsetY
+          me.refresh()
+          return
+        }
 
-        let hoverShape, needRefresh
-        for (let i = shapes.length - 1; i >= 0; i--) {
-          if (shapes[ i ].isPointInPath(context, event.x, event.y)) {
-            hoverShape = shapes[ i ]
+        let { selection, shapes } = me
+
+        if (selection) {
+          selection.width = event.x - selection.x
+          selection.height = event.y - selection.y
+          me.refresh()
+          return
+        }
+
+        let hoverShape
+        for (let i = shapes.length - 1, shape; i >= 0; i--) {
+          shape = shapes[ i ]
+          if (shape.isPointInPath(context, event.x, event.y) !== false) {
+            if (!shape.state) {
+              hoverShape = shape
+            }
             break
           }
         }
-
-        if (dragging) {
-          needRefresh = true
-          dragging.x = event.x - offsetX
-          dragging.y = event.y - offsetY
-        }
-
-        // 先设置 active shape
-        if (selection) {
-          needRefresh = true
-          selection.width = event.x - selection.x
-          selection.height = event.y - selection.y
-          me.setActiveShape(hoverShape, true)
-        }
-
-        // 再设置 hover shape
-        if (me.setHoverShape(hoverShape, true)) {
-          needRefresh = true
-        }
-
-        if (needRefresh) {
-          me.refresh()
-        }
+        me.setHoverShape(hoverShape)
 
       })
       .on('mouseup', function () {
-        if (dragging) {
-          dragging = null
+        if (draggingShape) {
+          draggingShape = null
         }
-        if (selection) {
-          selection = null
+        if (me.selection) {
+          delete me.selection
           me.refresh()
         }
       })
@@ -195,28 +185,35 @@ define(function (require, exports, module) {
 
     }
 
+    /**
+     * 添加图形
+     *
+     * @param {Shape} shape
+     */
     addShape(shape) {
       shape.draw(this.context)
       this.shapes.push(shape)
     }
 
+    /**
+     * 全量刷新画布
+     */
     refresh() {
 
-      let { context, shapes, activeShape, hoverShape, selection } = this
+      const { context, canvas, shapes, active, hover, selection } = this
 
-      this.clear()
+      context.clearRect(0, 0, canvas.width, canvas.height)
+
       shapes.forEach(
         function (shape) {
           shape.draw(context)
         }
       )
 
-      if (activeShape) {
-        let active = new Active(activeShape, this.emitter, canvas)
+      if (active) {
         active.draw(context)
       }
-      if (hoverShape && hoverShape !== activeShape) {
-        let hover = new Hover(hoverShape)
+      if (hover) {
         hover.draw(context)
       }
       if (selection) {
@@ -225,19 +222,52 @@ define(function (require, exports, module) {
 
     }
 
+    /**
+     * 清空画布
+     */
+    clear() {
+      let { context, canvas, shapes } = this
+      shapes.length = 0
+      context.clearRect(0, 0, canvas.width, canvas.height)
+    }
+
+    /**
+     * @param {Shape} shape
+     * @param {?silent} silent
+     */
     setHoverShape(shape, silent) {
       if (shape != this.hoverShape) {
         this.hoverShape = shape
-        if (!silent && (!this.activeShape || shape != this.activeShape)) {
-          this.refresh()
+        if (this.hover) {
+          this.hover.destroy()
+          this.hover = null
+        }
+        if (shape) {
+          this.hover = new Hover({ shape })
+        }
+        if (!silent) {
+          if (!this.activeShape || shape != this.activeShape) {
+            this.refresh()
+          }
         }
         return true
       }
     }
 
+    /**
+     * @param {Shape} shape
+     * @param {?silent} silent
+     */
     setActiveShape(shape, silent) {
       if (shape != this.activeShape) {
         this.activeShape = shape
+        if (this.active) {
+          this.active.destroy()
+          this.active = null
+        }
+        if (shape) {
+          this.active = new Active(shape, this.emitter, this.canvas)
+        }
         if (!silent) {
           this.refresh()
         }
@@ -245,10 +275,7 @@ define(function (require, exports, module) {
       }
     }
 
-    clear() {
-      let { context, canvas } = this
-      context.clearRect(0, 0, canvas.width, canvas.height)
-    }
+
 
 
 

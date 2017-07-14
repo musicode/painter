@@ -24,12 +24,7 @@ define(function (require) {
         && y <= this.y + this.height
     }
 
-    /**
-     * 描边
-     *
-     * @param {Context} context
-     */
-    stroke(context) {
+    drawPath(context) {
 
       // canvas 的描边机制是 center
       let { strokePosition, strokeThickness, x, y, width, height } = this
@@ -49,19 +44,23 @@ define(function (require) {
         height += strokeThickness
       }
 
-      context.lineWidth = strokeThickness
+      context.rect(x, y, width, height)
+
+    }
+
+    /**
+     * 描边
+     *
+     * @param {Context} context
+     */
+    stroke(context) {
+
+      context.lineWidth = this.strokeThickness
       context.strokeStyle = this.strokeStyle
 
       context.beginPath()
-      context.rect(x, y, width, height)
+      this.drawPath(context)
       context.stroke()
-
-      this.rect = {
-        x: x - strokeThickness * 0.5,
-        y: y - strokeThickness * 0.5,
-        width: width + strokeThickness,
-        height: height + strokeThickness
-      }
 
     }
 
@@ -95,16 +94,6 @@ define(function (require) {
         this.stroke(context)
       }
 
-    }
-
-    /**
-     * 获取矩形的矩形范围
-     *
-     * @override
-     * @return {Object} 返回格式为 { x, y, width, height }
-     */
-    getRect() {
-      return this
     }
 
   }

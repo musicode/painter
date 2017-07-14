@@ -4,8 +4,8 @@
  */
 define(function (require) {
 
-  const Shape = require('../shapes/Shape')
-  const thumbSize = 12
+  const State = require('./State')
+  const THUMB_SIZE = 12
 
   const LEFT_TOP = 0
   const CENTER_TOP = 1
@@ -16,7 +16,7 @@ define(function (require) {
   const LEFT_BOTTOM = 6
   const LEFT_MIDDLE = 7
 
-  class Active extends Shape {
+  class Active extends State {
 
     constructor(props, emitter, canvas) {
 
@@ -75,49 +75,40 @@ define(function (require) {
           return
         }
 
-        for (let i = 0, len = me.boxes.length, x, y, index, cursor; i < len; i += 2) {
-          x = me.boxes[ i ]
-          y = me.boxes[ i + 1 ]
-          if (event.x >= x
-            && event.x <= x + thumbSize
-            && event.y >= y
-            && event.y <= y + thumbSize
-          ) {
-            index = i / 2
-            if (index !== currentBox) {
-              switch (index) {
-                case CENTER_TOP:
-                case CENTER_BOTTOM:
-                  cursor = 'row-resize'
-                  break
-                case RIGHT_MIDDLE:
-                case LEFT_MIDDLE:
-                  cursor = 'col-resize'
-                  break
-                case LEFT_TOP:
-                  cursor = 'nw-resize'
-                  break
-                case RIGHT_TOP:
-                  cursor = 'ne-resize'
-                  break
-                case RIGHT_BOTTOM:
-                  cursor = 'se-resize'
-                  break
-                case LEFT_BOTTOM:
-                  cursor = 'sw-resize'
-                  break
-              }
-              currentBox = index
+        let index = me.isPointInPath(null, event.x, event.y), cursor
+        if (index >= 0) {
+          if (currentBox !== index) {
+            currentBox = index
+            switch (index) {
+              case CENTER_TOP:
+              case CENTER_BOTTOM:
+                cursor = 'row-resize'
+                break
+              case RIGHT_MIDDLE:
+              case LEFT_MIDDLE:
+                cursor = 'col-resize'
+                break
+              case LEFT_TOP:
+                cursor = 'nw-resize'
+                break
+              case RIGHT_TOP:
+                cursor = 'ne-resize'
+                break
+              case RIGHT_BOTTOM:
+                cursor = 'se-resize'
+                break
+              case LEFT_BOTTOM:
+                cursor = 'sw-resize'
+                break
             }
-            break
           }
-          else if (currentBox >= 0) {
-            cursor = ''
-            currentBox = -1
-          }
-          if (cursor != null) {
-            style.cursor = cursor
-          }
+        }
+        else if (currentBox >= 0) {
+          cursor = ''
+          currentBox = -1
+        }
+        if (cursor != null) {
+          style.cursor = cursor
         }
       })
       .on('mouseup', function (event) {
@@ -129,17 +120,33 @@ define(function (require) {
       })
     }
 
+    isPointInPath(context, x, y) {
+      let { boxes } = this
+      for (let i = 0, len = boxes.length, tx, ty; i < len; i += 2) {
+        tx = boxes[ i ]
+        ty = boxes[ i + 1 ]
+        if (x >= tx
+          && x <= tx + THUMB_SIZE
+          && y >= ty
+          && y <= ty + THUMB_SIZE
+        ) {
+          return i / 2
+        }
+      }
+      return false
+    }
+
     draw(context) {
 
       let { x, y, width, height } = this
 
-      const left = x - thumbSize / 2
-      const center = x + (width - thumbSize) / 2
-      const right = x + width - thumbSize / 2
+      const left = x - THUMB_SIZE / 2
+      const center = x + (width - THUMB_SIZE) / 2
+      const right = x + width - THUMB_SIZE / 2
 
-      const top = y - thumbSize / 2
-      const middle = y + (height - thumbSize) / 2
-      const bottom = y + height - thumbSize / 2
+      const top = y - THUMB_SIZE / 2
+      const middle = y + (height - THUMB_SIZE) / 2
+      const bottom = y + height - THUMB_SIZE / 2
 
       context.lineWidth = 2
       context.strokeStyle = '#ccc'
@@ -172,12 +179,12 @@ define(function (require) {
       for (let i = 0, len = boxes.length, gradient; i < len; i += 2) {
         x = boxes[ i ]
         y = boxes[ i + 1 ]
-        gradient = context.createLinearGradient(x, y + thumbSize, x, y)
+        gradient = context.createLinearGradient(x, y + THUMB_SIZE, x, y)
         gradient.addColorStop(0, '#ddd')
         gradient.addColorStop(1, '#f9f9f9')
         context.beginPath()
         context.fillStyle = gradient
-        context.rect(x, y, thumbSize, thumbSize)
+        context.rect(x, y, THUMB_SIZE, THUMB_SIZE)
         context.stroke()
         context.fill()
       }

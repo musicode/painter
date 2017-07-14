@@ -1,13 +1,14 @@
 /**
- * @file 图形基类
+ * @file 状态基类
  * @author musicode
  */
 define(function () {
 
-  class Shape {
+  class State {
 
     constructor(props) {
       Object.assign(this, props)
+      this.state = true
     }
 
     destroy() {
@@ -16,6 +17,6 @@ define(function () {
 
   }
 
-  return Shape
+  return State
 
 })
