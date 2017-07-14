@@ -7,59 +7,125 @@ define(function (require) {
   const Shape = require('../shapes/Shape')
   const thumbSize = 12
 
+  const LEFT_TOP = 0
+  const CENTER_TOP = 1
+  const RIGHT_TOP = 2
+  const RIGHT_MIDDLE = 3
+  const RIGHT_BOTTOM = 4
+  const CENTER_BOTTOM = 5
+  const LEFT_BOTTOM = 6
+  const LEFT_MIDDLE = 7
+
   class Active extends Shape {
 
     constructor(props, emitter, canvas) {
+
       super(props)
 
-      let me = this, currentBox
+      let me = this, style = canvas.style, currentBox, dragging
 
       emitter
       .on('mousedown', function (event) {
-
+        if (currentBox >= 0) {
+          let x, y
+          switch (currentBox) {
+            case LEFT_TOP:
+              x = me.boxes[ 9 ]
+              y = me.boxes[ 10 ]
+              break
+            case CENTER_TOP:
+              x = me.boxes[ 11 ]
+              y = me.boxes[ 12 ]
+              break
+            case RIGHT_TOP:
+              x = me.boxes[ 13 ]
+              y = me.boxes[ 14 ]
+              break
+            case RIGHT_MIDDLE:
+              x = me.boxes[ 15 ]
+              y = me.boxes[ 16 ]
+              break
+            case RIGHT_BOTTOM:
+              x = me.boxes[ 0 ]
+              y = me.boxes[ 1 ]
+              break
+            case CENTER_BOTTOM:
+              x = me.boxes[ 3 ]
+              y = me.boxes[ 4 ]
+              break
+            case LEFT_BOTTOM:
+              x = me.boxes[ 5 ]
+              y = me.boxes[ 6 ]
+              break
+            case LEFT_MIDDLE:
+              x = me.boxes[ 7 ]
+              y = me.boxes[ 8 ]
+              break
+          }
+          me.x = x
+          me.y = y
+          dragging = true
+        }
       })
       .on('mousemove', function (event) {
-        for (let i = 0, len = me.boxes.length, x, y; i < len; i += 2) {
+
+        if (dragging) {
+          me.width = event.x - me.x
+          me.height = event.y = me.y
+          return
+        }
+
+        for (let i = 0, len = me.boxes.length, x, y, index, cursor; i < len; i += 2) {
           x = me.boxes[ i ]
           y = me.boxes[ i + 1 ]
-          if (event.x > x
+          if (event.x >= x
             && event.x <= x + thumbSize
-            && event.y > y
+            && event.y >= y
             && event.y <= y + thumbSize
           ) {
-            switch (i) {
-              case 1:
-              case 5:
-                canvas.style.cursor = 'row-resize'
-                break
-              case 3:
-              case 7:
-                canvas.style.cursor = 'col-resize'
-                break
-              case 0:
-                canvas.style.cursor = 'nw-resize'
-                break
-              case 2:
-                canvas.style.cursor = 'ne-resize'
-                break
-              case 4:
-                canvas.style.cursor = 'se-resize'
-                break
-              case 6:
-                canvas.style.cursor = 'sw-resize'
-                break
+            index = i / 2
+            if (index !== currentBox) {
+              switch (index) {
+                case CENTER_TOP:
+                case CENTER_BOTTOM:
+                  cursor = 'row-resize'
+                  break
+                case RIGHT_MIDDLE:
+                case LEFT_MIDDLE:
+                  cursor = 'col-resize'
+                  break
+                case LEFT_TOP:
+                  cursor = 'nw-resize'
+                  break
+                case RIGHT_TOP:
+                  cursor = 'ne-resize'
+                  break
+                case RIGHT_BOTTOM:
+                  cursor = 'se-resize'
+                  break
+                case LEFT_BOTTOM:
+                  cursor = 'sw-resize'
+                  break
+              }
+              currentBox = index
             }
-            currentBox = i
             break
           }
           else if (currentBox >= 0) {
-            canvas.style.cursor = ''
+            cursor = ''
             currentBox = -1
+          }
+          if (cursor != null) {
+            style.cursor = cursor
           }
         }
       })
       .on('mouseup', function (event) {
-
+        dragging = null
+        if (currentBox >= 0) {
+          style.cursor = ''
+          currentBox = -1
+        }
       })
     }
 
