@@ -26,7 +26,7 @@ define(function (require) {
       context.fillStyle = 'rgba(60,60,60,0.1)'
 
       context.beginPath()
-      this.drawPath()
+      this.drawPath(context)
       context.stroke()
       context.fill()
 

@@ -10,7 +10,7 @@ define(function (require) {
 
     isPointInPath(context, x, y) {
       context.beginPath()
-      this.drawPath()
+      this.drawPath(context)
       return context.isPointInPath(x, y)
     }
 
@@ -24,7 +24,7 @@ define(function (require) {
       context.strokeStyle = '#45C0FF'
 
       context.beginPath()
-      this.drawPath()
+      this.drawPath(context)
       context.stroke()
 
     }

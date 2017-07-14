@@ -84,8 +84,9 @@ define(function (require, exports, module) {
       let { listeners } = this
       let list = listeners[ type ]
       if (list) {
-        for (let i = 0, len = list.length; i < len; i++) {
-          if (list[ i ](data) === false) {
+        for (let i = 0, len = list.length, handler; i < len; i++) {
+          handler = list[ i ]
+          if (handler && handler(data) === false) {
             break
           }
         }
@@ -95,6 +96,17 @@ define(function (require, exports, module) {
     on(type, listener) {
       let list = this.listeners[ type ] || (this.listeners[ type ] = [ ])
       list.push(listener)
+      return this
+    }
+
+    off(type, listener) {
+      let list = this.listeners[ type ]
+      if (list) {
+        let index = list.indexOf(listener)
+        if (index >= 0) {
+          list.splice(index, 1)
+        }
+      }
       return this
     }
 
@@ -200,7 +212,7 @@ define(function (require, exports, module) {
      */
     refresh() {
 
-      const { context, canvas, shapes, active, hover, selection } = this
+      const { context, canvas, shapes, active, activeShape, hover, hoverShape, selection } = this
 
       context.clearRect(0, 0, canvas.width, canvas.height)
 
@@ -213,7 +225,7 @@ define(function (require, exports, module) {
       if (active) {
         active.draw(context)
       }
-      if (hover) {
+      if (hover && (!active || activeShape !== hoverShape)) {
         hover.draw(context)
       }
       if (selection) {

@@ -24,8 +24,8 @@ define(function (require) {
 
       let me = this, style = canvas.style, currentBox, dragging
 
-      emitter
-      .on('mousedown', function (event) {
+      me.emitter = emitter
+      me.mousedownHandler = function (event) {
         if (currentBox >= 0) {
           let x, y
           switch (currentBox) {
@@ -66,17 +66,16 @@ define(function (require) {
           me.y = y
           dragging = true
         }
-      })
-      .on('mousemove', function (event) {
-
+      }
+      me.mousemoveHandler = function (event) {
         if (dragging) {
           me.width = event.x - me.x
-          me.height = event.y = me.y
+          me.height = event.y - me.y
           return
         }
 
         let index = me.isPointInPath(null, event.x, event.y), cursor
-        if (index >= 0) {
+        if (index !== false) {
           if (currentBox !== index) {
             currentBox = index
             switch (index) {
@@ -110,14 +109,27 @@ define(function (require) {
         if (cursor != null) {
           style.cursor = cursor
         }
-      })
-      .on('mouseup', function (event) {
+      }
+      me.mouseupHandler = function (event) {
         dragging = null
         if (currentBox >= 0) {
           style.cursor = ''
           currentBox = -1
         }
-      })
+      }
+
+      emitter
+      .on('mousedown', me.mousedownHandler)
+      .on('mousemove', me.mousemoveHandler)
+      .on('mouseup', me.mouseupHandler)
+
+    }
+
+    destroy() {
+      this.emitter
+      .off('mousedown', this.mousedownHandler)
+      .off('mousemove', this.mousemoveHandler)
+      .off('mouseup', this.mouseupHandler)
     }
 
     isPointInPath(context, x, y) {
