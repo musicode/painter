@@ -61,13 +61,14 @@ define(function (require) {
               pinY = me.boxes[ 7 ]
               break
           }
-          console.log(pinX, pinY)
+          pinX += THUMB_SIZE / 2
+          pinY += THUMB_SIZE / 2
           dragging = true
         }
       }
       me.mousemoveHandler = function (event) {
         if (dragging) {
-console.log('dragging', event)
+
           if (event.x < pinX) {
             me.x = event.x
             me.width = pinX - event.x
@@ -92,7 +93,6 @@ console.log('dragging', event)
         let index = me.isPointInPath(null, event.x, event.y), cursor
         if (index !== false) {
           if (currentBox !== index) {
-            console.log('press', index)
             currentBox = index
             switch (index) {
               case CENTER_TOP:
