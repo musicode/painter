@@ -84,8 +84,10 @@ define(function (require) {
         }
       }
       me.mousemoveHandler = function (event) {
+
         if (emitter.updating) {
           update(event)
+          emitter.fire('updating', me)
           return
         }
 

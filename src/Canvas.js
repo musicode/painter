@@ -208,6 +208,13 @@ define(function (require, exports, module) {
           me.refresh()
         }
       })
+      .on('updating', function (event) {
+        let { activeShape } = me
+        activeShape.x = event.x
+        activeShape.y = event.y
+        activeShape.width = event.width
+        activeShape.height = event.height
+      })
 
     }
 
