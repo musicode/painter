@@ -22,7 +22,7 @@ define(function (require) {
 
       super(props)
 
-      let me = this, style = canvas.style, currentBox, update
+      let me = this, style = canvas.style, currentBox, update, normalize
 
       me.emitter = emitter
       me.mousedownHandler = function (event) {
@@ -86,8 +86,27 @@ define(function (require) {
       me.mousemoveHandler = function (event) {
 
         if (emitter.updating) {
+
           update(event)
-          emitter.fire('updating', me)
+
+          let { x, y, width, height } = me
+
+          if (width < 0) {
+            x += width
+            width *= -1
+          }
+          if (height < 0) {
+            y += height
+            height *= -1
+          }
+
+          normalize = { x, y, width, height }
+
+          emitter.fire(
+            'updating',
+            normalize
+          )
+
           return
         }
 
@@ -128,7 +147,13 @@ define(function (require) {
         }
       }
       me.mouseupHandler = function (event) {
-        emitter.updating = false
+        if (emitter.updating) {
+          emitter.updating = false
+          if (normalize) {
+            Object.assign(me, normalize)
+            normalize = null
+          }
+        }
         if (currentBox >= 0) {
           style.cursor = ''
           currentBox = -1
