@@ -22,71 +22,70 @@ define(function (require) {
 
       super(props)
 
-      let me = this, style = canvas.style, currentBox, dragging, pinX, pinY
+      let me = this, style = canvas.style, currentBox, update
 
       me.emitter = emitter
       me.mousedownHandler = function (event) {
         if (currentBox >= 0) {
+          let left = me.x, top = me.y, right = left + me.width, bottom = top + me.height
           switch (currentBox) {
             case LEFT_TOP:
-              pinX = me.boxes[ 8 ]
-              pinY = me.boxes[ 9 ]
+              update = function (event) {
+                me.x = event.x
+                me.y = event.y
+                me.width = right - event.x
+                me.height = bottom - event.y
+              }
               break
             case CENTER_TOP:
-              pinX = me.boxes[ 10 ]
-              pinY = me.boxes[ 11 ]
+              update = function (event) {
+                me.y = event.y
+                me.height = bottom - event.y
+              }
               break
             case RIGHT_TOP:
-              pinX = me.boxes[ 12 ]
-              pinY = me.boxes[ 13 ]
+              update = function (event) {
+                me.y = event.y
+                me.width = event.x - left
+                me.height = bottom - event.y
+              }
               break
             case RIGHT_MIDDLE:
-              pinX = me.boxes[ 14 ]
-              pinY = me.boxes[ 15 ]
+              update = function (event) {
+                me.width = event.x - left
+              }
               break
             case RIGHT_BOTTOM:
-              pinX = me.boxes[ 0 ]
-              pinY = me.boxes[ 1 ]
+              update = function (event) {
+                me.width = event.x - left
+                me.height = event.y - top
+              }
               break
             case CENTER_BOTTOM:
-              pinX = me.boxes[ 2 ]
-              pinY = me.boxes[ 3 ]
+              update = function (event) {
+                me.height = event.y - top
+              }
               break
             case LEFT_BOTTOM:
-              pinX = me.boxes[ 4 ]
-              pinY = me.boxes[ 5 ]
+              update = function (event) {
+                me.x = event.x
+                me.width = right - event.x
+                me.height = event.y - top
+              }
               break
             case LEFT_MIDDLE:
-              pinX = me.boxes[ 6 ]
-              pinY = me.boxes[ 7 ]
+              update = function (event) {
+                me.x = event.x
+                me.width = right - event.x
+              }
               break
           }
-          pinX += THUMB_SIZE / 2
-          pinY += THUMB_SIZE / 2
-          dragging = true
+          emitter.updating = true
         }
       }
       me.mousemoveHandler = function (event) {
-        if (dragging) {
-
-          if (event.x < pinX) {
-            me.x = event.x
-            me.width = pinX - event.x
-          }
-          else {
-            me.x = pinX
-            me.width = event.x - pinX
-          }
-
-          if (event.y < pinY) {
-            me.y = event.y
-            me.height = pinY - event.y
-          }
-          else {
-            me.y = pinY
-            me.height = event.y - pinY
-          }
-
+        if (emitter.updating) {
+          update(event)
           return
         }
 
@@ -127,7 +126,7 @@ define(function (require) {
         }
       }
       me.mouseupHandler = function (event) {
-        dragging = null
+        emitter.updating = false
         if (currentBox >= 0) {
           style.cursor = ''
           currentBox = -1

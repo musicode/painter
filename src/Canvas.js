@@ -134,12 +134,7 @@ define(function (require, exports, module) {
 
         let { hoverShape, activeShape } = me
         if (hoverShape) {
-          if (hoverShape.state) {
-            if (hoverShape instanceof Active) {
-              editing = true
-            }
-          }
-          else {
+          if (!hoverShape.state) {
             offsetX = event.x - hoverShape.x
             offsetY = event.y - hoverShape.y
             draggingShape = hoverShape
@@ -158,7 +153,7 @@ define(function (require, exports, module) {
 
         let { activeShape, selection, shapes, states } = me
 
-        if (editing) {
+        if (me.emitter.updating) {
           me.refresh()
           return
         }
