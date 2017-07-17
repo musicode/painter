@@ -137,7 +137,7 @@ define(function (require, exports, module) {
       me.shapes = [ ]
       me.states = [ ]
 
-      let offsetX, offsetY, offsets, updateSelection
+      let offsetX, offsetY, offsets, updateSelection, updating, updateWidth, updateHeight
 
       (me.emitter = new Emitter(canvas))
       .on('mousedown', function (event) {
@@ -199,8 +199,7 @@ define(function (require, exports, module) {
 
         let { emitter, activeShapes, shapes, states } = me
 
-        if (emitter.updating) {
-          me.refresh()
+        if (updating) {
           return
         }
 
@@ -269,12 +268,28 @@ define(function (require, exports, module) {
           me.refresh()
         }
       })
+      .on('updateStart', function (event) {
+        updating = true
+        updateWidth = event.width
+        updateHeight = event.height
+      })
+      .on('updateEnd', function (event) {
+        updating = false
+        updateWidth = updateHeight = null
+      })
       .on('updating', function (event) {
-        // let { activeShapes } = me
-        // activeShape.x = event.x
-        // activeShape.y = event.y
-        // activeShape.width = event.width
-        // activeShape.height = event.height
+        me.refresh()
+        let scaleX = event.width / updateWidth
+        let scaleY = event.height / updateHeight
+        array.each(
+          me.activeShapes,
+          function (shape) {
+            shape.width *= scaleX
+            shape.height *= scaleY
+          }
+        )
+        updateWidth = event.width
+        updateHeight = event.height
       })
 
     }
