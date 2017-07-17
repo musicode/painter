@@ -28,16 +28,6 @@ define(function (require) {
 
       me.emitter = emitter
 
-      let width = me.width
-      Object.defineProperty(this, 'width', {
-          get: function () {
-              return width;
-          },
-          set: function (value) {
-              width = value;
-          }
-      });
-
       me.mousedownHandler = function (event) {
         if (currentBox >= 0) {
           let left = me.x, top = me.y, right = left + me.width, bottom = top + me.height
@@ -71,7 +61,7 @@ define(function (require) {
               update = updateRect(me, right, top)
               break
           }
-          emitter.updating = true
+          emitter.fire('updateStart', me)
         }
       }
       me.mousemoveHandler = function (event) {
@@ -123,9 +113,6 @@ define(function (require) {
           style.cursor = ''
           currentBox = -1
         }
-        if (emitter.updating) {
-          emitter.updating = false
-        }
         if (update) {
           update = null
         }
@@ -135,6 +122,7 @@ define(function (require) {
         if (targetY) {
           targetY = null
         }
+        emitter.fire('updateEnd', me)
       }
 
       emitter
