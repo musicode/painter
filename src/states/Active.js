@@ -5,6 +5,7 @@
 define(function (require) {
 
   const State = require('./State')
+  const updateRect = require('../function/updateRect')
 
   const THUMB_SIZE = 12
 
@@ -23,62 +24,51 @@ define(function (require) {
 
       super(props)
 
-      let me = this, style = canvas.style, currentBox, update, normalize
+      let me = this, style = canvas.style, currentBox, targetX, targetY, update
 
       me.emitter = emitter
+
+      let width = me.width
+      Object.defineProperty(this, 'width', {
+          get: function () {
+              return width;
+          },
+          set: function (value) {
+              width = value;
+          }
+      });
+
       me.mousedownHandler = function (event) {
         if (currentBox >= 0) {
           let left = me.x, top = me.y, right = left + me.width, bottom = top + me.height
           switch (currentBox) {
             case LEFT_TOP:
-              update = function (event) {
-                me.x = event.x
-                me.y = event.y
-                me.width = right - event.x
-                me.height = bottom - event.y
-              }
+              update = updateRect(me, right, bottom)
               break
             case CENTER_TOP:
-              update = function (event) {
-                me.y = event.y
-                me.height = bottom - event.y
-              }
+              targetX = left
+              update = updateRect(me, right, bottom)
               break
             case RIGHT_TOP:
-              update = function (event) {
-                me.y = event.y
-                me.width = event.x - left
-                me.height = bottom - event.y
-              }
+              update = updateRect(me, left, bottom)
               break
             case RIGHT_MIDDLE:
-              update = function (event) {
-                me.width = event.x - left
-              }
+              targetY = bottom
+              update = updateRect(me, left, top)
               break
             case RIGHT_BOTTOM:
-              update = function (event) {
-                me.width = event.x - left
-                me.height = event.y - top
-              }
+              update = updateRect(me, left, top)
               break
             case CENTER_BOTTOM:
-              update = function (event) {
-                me.height = event.y - top
-              }
+              targetX = right
+              update = updateRect(me, left, top)
               break
             case LEFT_BOTTOM:
-              update = function (event) {
-                me.x = event.x
-                me.width = right - event.x
-                me.height = event.y - top
-              }
+              update = updateRect(me, right, top)
               break
             case LEFT_MIDDLE:
-              update = function (event) {
-                me.x = event.x
-                me.width = right - event.x
-              }
+              targetY = bottom
+              update = updateRect(me, right, top)
               break
           }
           emitter.updating = true
@@ -86,28 +76,9 @@ define(function (require) {
       }
       me.mousemoveHandler = function (event) {
 
-        if (emitter.updating) {
-
-          update(event)
-
-          let { x, y, width, height } = me
-
-          if (width < 0) {
-            x += width
-            width *= -1
-          }
-          if (height < 0) {
-            y += height
-            height *= -1
-          }
-
-          normalize = { x, y, width, height }
-
-          emitter.fire(
-            'updating',
-            normalize
-          )
-
+        if (update) {
+          update(targetX || event.x, targetY || event.y)
+          emitter.fire('updating', me)
           return
         }
 
@@ -148,16 +119,21 @@ define(function (require) {
         }
       }
       me.mouseupHandler = function (event) {
-        if (emitter.updating) {
-          emitter.updating = false
-          if (normalize) {
-            Object.assign(me, normalize)
-            normalize = null
-          }
-        }
         if (currentBox >= 0) {
           style.cursor = ''
           currentBox = -1
+        }
+        if (emitter.updating) {
+          emitter.updating = false
+        }
+        if (update) {
+          update = null
+        }
+        if (targetX) {
+          targetX = null
+        }
+        if (targetY) {
+          targetY = null
         }
       }
 

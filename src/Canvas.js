@@ -306,7 +306,7 @@ define(function (require, exports, module) {
      */
     refresh() {
 
-      const { context, canvas, shapes, states } = this
+      const { context, canvas, shapes, states, activeShapes } = this
 
       context.clearRect(0, 0, canvas.width, canvas.height)
 
@@ -317,6 +317,23 @@ define(function (require, exports, module) {
       }
 
       shapes.forEach(drawShape)
+
+      // 当选中的图形数量大于 1 时
+      // 每个图形都需要矩形描边（参考 Sketch）
+      if (activeShapes && activeShapes.length > 1) {
+        context.lineWidth = 1
+        context.strokeStyle = '#C0CED8'
+        array.each(
+          activeShapes,
+          function (shape) {
+            let rect = shape.getRect()
+            context.strokeRect(rect.x + 0.5, rect.y + 0.5, rect.width, rect.height)
+          }
+        )
+      }
+
+      // 确保最后绘制状态层
+      // 这样才能位于最高层
       states.forEach(drawShape)
 
     }
@@ -339,30 +356,26 @@ define(function (require, exports, module) {
       if (shape != hoverShape) {
         this.hoverShape = shape
 
-        let flag = 0
-        if (states[ INDEX_HOVER ]) {
-          flag++
+        let isValid = shape && !shape.state, needClear = states[ INDEX_HOVER ]
+
+        if (needClear) {
           states[ INDEX_HOVER ].destroy()
           states[ INDEX_HOVER ] = null
         }
 
-        if (shape) {
-          flag++
-          if (activeShapes) {
-            array.each(
-              activeShapes,
-              function (activeShape) {
-                if (shape === activeShape) {
-                  flag--
-                  return false
-                }
+        if (isValid && activeShapes) {
+          array.each(
+            activeShapes,
+            function (activeShape) {
+              if (shape === activeShape) {
+                return isValid = false
               }
-            )
-          }
+            }
+          )
         }
 
-        if (flag > 0) {
-          if (shape && !shape.state) {
+        if (needClear || isValid) {
+          if (isValid) {
             states[ INDEX_HOVER ] = new Hover({ shape })
           }
           if (!silent) {
@@ -426,85 +439,6 @@ define(function (require, exports, module) {
 
         return true
       }
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /**
-     * 设置字体
-     *
-     * @param {string} fontSize 字体大小，如 20px，需自带单位
-     * @param {string} fontFamily
-     */
-    setTextFont(fontSize, fontFamily) {
-      this.context.font = `${fontSize} ${fontFamily}`
-    }
-
-    /**
-     * 设置字体的水平对齐方式
-     *
-     * @param {string} align 可选值有 start/end/left/right/center
-     */
-    setTextAlign(align) {
-      this.context.textAlign = align
-    }
-
-    /**
-     * 设置字体的垂直对齐方式
-     *
-     * @param {string} baseline 可选值有 top/hangling/middle/alphabetic/ideographic/bottom
-     */
-    setTextBaseline(baseline) {
-      this.context.textBaseline = baseline
-    }
-
-    /**
-     * 设置画布的颜色
-     *
-     * @param {string} baseline 可选值有 top
-     */
-    drawColor(color) {
-      let { width, height } = this.canvas
-      this.context.fillStyle = color
-      this.context.fillRect(0, 0, width, height)
-    }
-
-    drawRect(left, top, right, bottom) {
-      this.context.rect(left, top, right - left, bottom - top)
-    }
-
-    drawImage(bitmap, left, top) {
-      this.context.drawImage(bitmap, left, top)
-    }
-
-    fillText(text, left, top) {
-      this.context.fillText(text, left, top)
-    }
-
-    strokeText(text, left, top) {
-      this.context.strokeText(text, left, top)
-    }
-
-    fillRect(left, top, right, bottom) {
-      this.context.fillRect(left, top, right - left, bottom - top)
-    }
-
-    strokeRect(left, top, right, bottom) {
-      this.context.strokeRect(left, top, right - left, bottom - top)
-    }
-
-    clearRect(left, top, right, bottom) {
-      this.context.clearRect(left, top, right - left, bottom - top)
     }
 
   }

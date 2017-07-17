@@ -91,20 +91,36 @@
 
                 instance.addShape(
                   new Rect({
-                    x: 0,
-                    y: 0,
-                    width: 50,
-                    height: 50,
+                    x: 200,
+                    y: 200,
+                    width: 200,
+                    height: 200,
+                    strokeThickness: 20,
+                    strokePosition: 2,
+                    strokeStyle: '#f0f0f0',
                     fillStyle: 'green'
                   })
                 )
 
+                instance.addShape(
+                  new Rect({
+                    x: 700,
+                    y: 250,
+                    width: 200,
+                    height: 200,
+                    strokeThickness: 20,
+                    strokePosition: 3,
+                    strokeStyle: '#f0f0f0',
+                    fillStyle: 'blue'
+                  })
+                )
+
                 var rect = new Rect({
-                  x: 50,
-                  y: 50,
+                  x: 500,
+                  y: 100,
                   width: 200,
                   height: 200,
-                  strokeThickness: 30,
+                  strokeThickness: 20,
                   strokePosition: 1,
                   strokeStyle: '#f6f6f6',
                   fillStyle: 'red'
