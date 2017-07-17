@@ -24,30 +24,8 @@ define(function (require) {
         && y <= this.y + this.height
     }
 
-    drawPath(context, ignoreStrokeThickness) {
-
-      // canvas 的描边机制是 center
-      let { strokePosition, strokeThickness, x, y, width, height } = this
-
-      if (!ignoreStrokeThickness) {
-        // inside
-        if (strokePosition === constant.STROKE_POSITION_INSIDE) {
-          x += strokeThickness * 0.5
-          y += strokeThickness * 0.5
-          width -= strokeThickness
-          height -= strokeThickness
-        }
-        // outside
-        else if (strokePosition === constant.STROKE_POSITION_OUTSIDE) {
-          x -= strokeThickness * 0.5
-          y -= strokeThickness * 0.5
-          width += strokeThickness
-          height += strokeThickness
-        }
-      }
-
-      context.rect(x, y, width, height)
-
+    drawPath(context) {
+      context.rect(this.x, this.y, this.width, this.height)
     }
 
     /**
@@ -57,11 +35,28 @@ define(function (require) {
      */
     stroke(context) {
 
+      // canvas 的描边机制是 center
+      let { strokePosition, strokeThickness, x, y, width, height } = this
+
+      // inside
+      if (strokePosition === constant.STROKE_POSITION_INSIDE) {
+        x += strokeThickness * 0.5
+        y += strokeThickness * 0.5
+        width -= strokeThickness
+        height -= strokeThickness
+      }
+      // outside
+      else if (strokePosition === constant.STROKE_POSITION_OUTSIDE) {
+        x -= strokeThickness * 0.5
+        y -= strokeThickness * 0.5
+        width += strokeThickness
+        height += strokeThickness
+      }
+
       context.lineWidth = this.strokeThickness
       context.strokeStyle = this.strokeStyle
-
       context.beginPath()
-      this.drawPath(context)
+      context.rect(x, y, width, height)
       context.stroke()
 
     }

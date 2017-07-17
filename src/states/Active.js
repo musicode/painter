@@ -204,12 +204,12 @@ define(function (require) {
       const middle = y + (height - THUMB_SIZE) / 2
       const bottom = y + height - THUMB_SIZE / 2
 
-      context.lineWidth = 2
+      context.lineWidth = 1
       context.strokeStyle = '#ccc'
 
       // 矩形线框
       context.beginPath()
-      context.rect(x, y, width, height)
+      context.rect(x + 0.5, y + 0.5, width, height)
       context.stroke()
       context.closePath()
 
