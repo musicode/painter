@@ -14,6 +14,10 @@ define(function () {
 
     }
 
+    getRect() {
+
+    }
+
   }
 
   return Shape

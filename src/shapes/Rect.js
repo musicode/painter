@@ -93,6 +93,10 @@ define(function (require) {
 
     }
 
+    getRect() {
+      return this
+    }
+
   }
 
   return Rect

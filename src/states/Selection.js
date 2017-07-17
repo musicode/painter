@@ -16,14 +16,14 @@ define(function (require) {
     }
 
     drawPath(context) {
-      context.rect(this.x, this.y, this.width, this.height)
+      context.rect(this.x + 0.5, this.y + 0.5, this.width, this.height)
     }
 
     draw(context) {
 
-      context.lineWidth = 2
-      context.strokeStyle = '#a2a2a2'
-      context.fillStyle = 'rgba(60,60,60,0.1)'
+      context.lineWidth = 1
+      context.strokeStyle = '#ccc'
+      context.fillStyle = 'rgba(180,180,180,0.1)'
 
       context.beginPath()
       this.drawPath(context)

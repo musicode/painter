@@ -8,6 +8,8 @@ define(function (require, exports, module) {
   const Active = require('./states/Active')
   const Hover = require('./states/Hover')
 
+  const updateRect = require('./function/updateRect')
+  const hasIntersection = require('./function/hasIntersection')
   const array = require('./util/array')
 
   const INDEX_ACTIVE = 0
@@ -134,7 +136,7 @@ define(function (require, exports, module) {
       me.shapes = [ ]
       me.states = [ ]
 
-      let offsetX, offsetY, draggingShape, editing
+      let offsetX, offsetY, editingShape, updateSelection
 
       (me.emitter = new Emitter(canvas))
       .on('mousedown', function (event) {
@@ -144,46 +146,65 @@ define(function (require, exports, module) {
           if (!hoverShape.state) {
             offsetX = event.x - hoverShape.x
             offsetY = event.y - hoverShape.y
-            draggingShape = hoverShape
+            editingShape = hoverShape
             me.setHoverShape(null, true)
-            me.setActiveShape(draggingShape, true)
+            me.setActiveShape(editingShape, true)
             me.refresh()
           }
         }
         else {
           me.setActiveShape(null)
-          me.selection = new Selection(event)
+          updateSelection = updateRect(
+            me.states[ INDEX_SELECTION ] = new Selection(event),
+            event.x,
+            event.y
+          )
         }
 
       })
       .on('mousemove', function (event) {
 
-        let { activeShape, selection, shapes, states } = me
+        let { emitter, activeShape, shapes, states } = me
 
-        if (me.emitter.updating) {
+        if (emitter.updating) {
           me.refresh()
           return
         }
 
-        if (draggingShape) {
-          draggingShape.x = event.x - offsetX
-          draggingShape.y = event.y - offsetY
-          if (draggingShape === activeShape) {
-            states[ INDEX_ACTIVE ].x = draggingShape.x
-            states[ INDEX_ACTIVE ].y = draggingShape.y
+        if (editingShape) {
+          editingShape.x = event.x - offsetX
+          editingShape.y = event.y - offsetY
+          if (editingShape === activeShape) {
+            states[ INDEX_ACTIVE ].x = editingShape.x
+            states[ INDEX_ACTIVE ].y = editingShape.y
           }
           me.refresh()
           return
         }
 
-        if (selection) {
-          selection.width = event.x - selection.x
-          selection.height = event.y - selection.y
+        let selectionShape = states[ INDEX_SELECTION ]
+        if (selectionShape) {
+
+          // 更新矩形区域
+          updateSelection(event.x, event.y)
+
+          // 判断与矩形区域有交集的图形
+          let list = [ ]
+          array.each(
+            shapes,
+            function (shape) {
+              if (hasIntersection(shape.getRect(), selectionShape)) {
+                list.push(shape)
+              }
+            }
+          )
+
+console.log(list)
           me.refresh()
           return
         }
 
-        let hoverShape, hoverResult
+        let hoverShape
         array.each(
           [ states, shapes ],
           function (list) {
@@ -192,12 +213,14 @@ define(function (require, exports, module) {
               function (shape) {
                 if (shape && shape.isPointInPath(context, event.x, event.y) !== false) {
                   hoverShape = shape
-                  return hoverResult = false
+                  return false
                 }
               },
               true
             )
-            return hoverResult
+            if (hoverShape) {
+              return false
+            }
           }
         )
 
@@ -205,14 +228,11 @@ define(function (require, exports, module) {
 
       })
       .on('mouseup', function () {
-        if (editing) {
-          editing = null
+        if (editingShape) {
+          editingShape = null
         }
-        if (draggingShape) {
-          draggingShape = null
-        }
-        if (me.selection) {
-          delete me.selection
+        if (me.states[ INDEX_SELECTION ]) {
+          me.states[ INDEX_SELECTION ] = null
           me.refresh()
         }
       })

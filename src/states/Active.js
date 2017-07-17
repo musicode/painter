@@ -5,6 +5,7 @@
 define(function (require) {
 
   const State = require('./State')
+
   const THUMB_SIZE = 12
 
   const LEFT_TOP = 0
