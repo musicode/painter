@@ -24,24 +24,26 @@ define(function (require) {
         && y <= this.y + this.height
     }
 
-    drawPath(context) {
+    drawPath(context, ignoreStrokeThickness) {
 
       // canvas 的描边机制是 center
       let { strokePosition, strokeThickness, x, y, width, height } = this
 
-      // inside
-      if (strokePosition === constant.STROKE_POSITION_INSIDE) {
-        x += strokeThickness * 0.5
-        y += strokeThickness * 0.5
-        width -= strokeThickness
-        height -= strokeThickness
-      }
-      // outside
-      else if (strokePosition === constant.STROKE_POSITION_OUTSIDE) {
-        x -= strokeThickness * 0.5
-        y -= strokeThickness * 0.5
-        width += strokeThickness
-        height += strokeThickness
+      if (!ignoreStrokeThickness) {
+        // inside
+        if (strokePosition === constant.STROKE_POSITION_INSIDE) {
+          x += strokeThickness * 0.5
+          y += strokeThickness * 0.5
+          width -= strokeThickness
+          height -= strokeThickness
+        }
+        // outside
+        else if (strokePosition === constant.STROKE_POSITION_OUTSIDE) {
+          x -= strokeThickness * 0.5
+          y -= strokeThickness * 0.5
+          width += strokeThickness
+          height += strokeThickness
+        }
       }
 
       context.rect(x, y, width, height)

@@ -13,7 +13,7 @@ define(function (require) {
     }
 
     drawPath(context) {
-      this.shape.drawPath(context)
+      this.shape.drawPath(context, true)
     }
 
     draw(context) {
