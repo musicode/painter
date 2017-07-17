@@ -9,7 +9,8 @@ define(function (require, exports, module) {
   const Hover = require('./states/Hover')
 
   const updateRect = require('./function/updateRect')
-  const hasIntersection = require('./function/hasIntersection')
+  const getInterRect = require('./function/getInterRect')
+  const getUnionRect = require('./function/getUnionRect')
   const array = require('./util/array')
 
   const INDEX_ACTIVE = 0
@@ -136,70 +137,102 @@ define(function (require, exports, module) {
       me.shapes = [ ]
       me.states = [ ]
 
-      let offsetX, offsetY, editingShape, updateSelection
+      let offsetX, offsetY, offsets, updateSelection
 
       (me.emitter = new Emitter(canvas))
       .on('mousedown', function (event) {
 
-        let { hoverShape, activeShape } = me
+        let { x, y } = event
+        let { hoverShape, activeShapes, states } = me
         if (hoverShape) {
           if (!hoverShape.state) {
-            offsetX = event.x - hoverShape.x
-            offsetY = event.y - hoverShape.y
-            editingShape = hoverShape
-            me.setHoverShape(null, true)
-            me.setActiveShape(editingShape, true)
+
+            if (activeShapes) {
+              array.each(
+                activeShapes,
+                function (shape) {
+                  if (hoverShape === shape) {
+                    hoverShape = null
+                    return false
+                  }
+                }
+              )
+            }
+
+            if (hoverShape) {
+              activeShapes = [ hoverShape ]
+              me.setActiveShapes(activeShapes, true)
+            }
+
+            offsetX = x - states[ INDEX_ACTIVE ].x
+            offsetY = y - states[ INDEX_ACTIVE ].y
+
+            offsets = [ ]
+            array.each(
+              activeShapes,
+              function (shape) {
+                offsets.push({
+                  x: x - shape.x,
+                  y: y - shape.y,
+                })
+                if (hoverShape === shape) {
+                  hoverShape = null
+                  return false
+                }
+              }
+            )
+
             me.refresh()
           }
         }
         else {
-          me.setActiveShape(null)
+          me.setActiveShapes(null)
           updateSelection = updateRect(
-            me.states[ INDEX_SELECTION ] = new Selection(event),
-            event.x,
-            event.y
+            me.states[ INDEX_SELECTION ] = new Selection({ x, y }),
+            x,
+            y
           )
         }
 
       })
       .on('mousemove', function (event) {
 
-        let { emitter, activeShape, shapes, states } = me
+        let { emitter, activeShapes, shapes, states } = me
 
         if (emitter.updating) {
           me.refresh()
           return
         }
 
-        if (editingShape) {
-          editingShape.x = event.x - offsetX
-          editingShape.y = event.y - offsetY
-          if (editingShape === activeShape) {
-            states[ INDEX_ACTIVE ].x = editingShape.x
-            states[ INDEX_ACTIVE ].y = editingShape.y
-          }
+        if (offsets) {
+          states[ INDEX_ACTIVE ].x = event.x - offsetX
+          states[ INDEX_ACTIVE ].y = event.y - offsetY
+
+          array.each(
+            activeShapes,
+            function (shape, i) {
+              shape.x = event.x - offsets[ i ].x
+              shape.y = event.y - offsets[ i ].y
+            }
+          )
+
           me.refresh()
           return
         }
 
         let selectionShape = states[ INDEX_SELECTION ]
         if (selectionShape) {
-
-          // 更新矩形区域
           updateSelection(event.x, event.y)
-
-          // 判断与矩形区域有交集的图形
-          let list = [ ]
-          array.each(
-            shapes,
-            function (shape) {
-              if (hasIntersection(shape.getRect(), selectionShape)) {
-                list.push(shape)
+          me.setActiveShapes(
+            shapes.filter(
+              function (shape) {
+                if (getInterRect(shape.getRect(), selectionShape)) {
+                  return true
+                }
               }
-            }
+            ),
+            true
           )
-
-console.log(list)
           me.refresh()
           return
         }
@@ -228,8 +261,8 @@ console.log(list)
 
       })
       .on('mouseup', function () {
-        if (editingShape) {
-          editingShape = null
+        if (offsets) {
+          offsets = null
         }
         if (me.states[ INDEX_SELECTION ]) {
           me.states[ INDEX_SELECTION ] = null
@@ -237,11 +270,11 @@ console.log(list)
         }
       })
       .on('updating', function (event) {
-        let { activeShape } = me
-        activeShape.x = event.x
-        activeShape.y = event.y
-        activeShape.width = event.width
-        activeShape.height = event.height
+        // let { activeShapes } = me
+        // activeShape.x = event.x
+        // activeShape.y = event.y
+        // activeShape.width = event.width
+        // activeShape.height = event.height
       })
 
     }
@@ -302,47 +335,95 @@ console.log(list)
      * @param {?silent} silent
      */
     setHoverShape(shape, silent) {
-      let { hoverShape, activeShape, states } = this
+      let { hoverShape, activeShapes, states } = this
       if (shape != hoverShape) {
         this.hoverShape = shape
+
+        let flag = 0
         if (states[ INDEX_HOVER ]) {
+          flag++
           states[ INDEX_HOVER ].destroy()
           states[ INDEX_HOVER ] = null
         }
-        let needRefresh = hoverShape != null
-        if (!activeShape || shape != activeShape) {
+
+        if (shape) {
+          flag++
+          if (activeShapes) {
+            array.each(
+              activeShapes,
+              function (activeShape) {
+                if (shape === activeShape) {
+                  flag--
+                  return false
+                }
+              }
+            )
+          }
+        }
+
+        if (flag > 0) {
           if (shape && !shape.state) {
             states[ INDEX_HOVER ] = new Hover({ shape })
           }
-          needRefresh = true
-        }
-        if (needRefresh) {
           if (!silent) {
             this.refresh()
           }
-          return needRefresh
+          return true
         }
       }
     }
 
     /**
-     * @param {Shape} shape
+     * @param {Shape} shapes
      * @param {?silent} silent
      */
-    setActiveShape(shape, silent) {
-      let { activeShape, states } = this
-      if (shape != activeShape) {
-        this.activeShape = shape
+    setActiveShapes(shapes, silent) {
+      let { hoverShape, activeShapes, states } = this
+      if (shapes != activeShapes) {
+
+        let length, hasHoverShape
+
+        if (shapes) {
+          length = shapes.length
+
+          let isSame = activeShapes && length === activeShapes.length, i = 0
+          while (i < length) {
+            if (shapes[ i ] === hoverShape) {
+              hasHoverShape = true
+            }
+            if (isSame && shapes[ i ] !== activeShapes[ i ]) {
+              break
+            }
+            i++
+          }
+          if (isSame && i === length) {
+            return
+          }
+        }
+
+        if (hasHoverShape) {
+          this.setHoverShape(null, true)
+        }
+
+        this.activeShapes = shapes
+
         if (states[ INDEX_ACTIVE ]) {
           states[ INDEX_ACTIVE ].destroy()
           states[ INDEX_ACTIVE ] = null
         }
-        if (shape) {
-          states[ INDEX_ACTIVE ] = new Active(shape, this.emitter, this.canvas)
+
+        if (length > 0) {
+          states[ INDEX_ACTIVE ] = new Active(
+            getUnionRect(shapes),
+            this.emitter,
+            this.canvas
+          )
         }
+
         if (!silent) {
           this.refresh()
         }
+
         return true
       }
     }
