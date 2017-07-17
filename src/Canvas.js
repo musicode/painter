@@ -356,7 +356,7 @@ define(function (require, exports, module) {
       if (shape != hoverShape) {
         this.hoverShape = shape
 
-        let isValid = shape && !shape.state, needClear = states[ INDEX_HOVER ]
+        let needClear = states[ INDEX_HOVER ], isValid = shape && !shape.state
 
         if (needClear) {
           states[ INDEX_HOVER ].destroy()
@@ -372,12 +372,12 @@ define(function (require, exports, module) {
               }
             }
           )
-        }
-
-        if (needClear || isValid) {
           if (isValid) {
             states[ INDEX_HOVER ] = new Hover({ shape })
           }
+        }
+
+        if (needClear || isValid) {
           if (!silent) {
             this.refresh()
           }
