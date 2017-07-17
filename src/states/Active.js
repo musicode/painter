@@ -219,7 +219,7 @@ define(function (require) {
       context.shadowColor = 'rgba(0,0,0,0.2)'
       context.shadowOffsetX = 0
       context.shadowOffsetY = 2
-      context.shadowBlur = 6
+      context.shadowBlur = 3
 
       const boxes = [
         left, top,
@@ -236,7 +236,7 @@ define(function (require) {
         x = boxes[ i ]
         y = boxes[ i + 1 ]
         gradient = context.createLinearGradient(x, y + THUMB_SIZE, x, y)
-        gradient.addColorStop(0, '#ddd')
+        gradient.addColorStop(0, '#d6d6d6')
         gradient.addColorStop(1, '#f9f9f9')
         context.beginPath()
         context.fillStyle = gradient

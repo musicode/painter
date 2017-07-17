@@ -14,7 +14,10 @@ define(function (require, exports, module) {
   const INDEX_HOVER = 1
   const INDEX_SELECTION = 2
 
-  const { devicePixelRatio } = window
+  let { devicePixelRatio } = window
+  if (devicePixelRatio > 2) {
+    devicePixelRatio = 2
+  }
 
   class Emitter {
 
