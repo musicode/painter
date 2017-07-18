@@ -82,6 +82,25 @@ define(function (require, exports, module) {
         }
       )
 
+      document.addEventListener(
+        'keyup',
+        function (event) {
+          if (!me.disabled) {
+            let map = {
+              37: 'left',
+              38: 'up',
+              39: 'right',
+              40: 'down',
+              46: 'delete',
+            }
+            let name = map[ event.keyCode ]
+            if (name) {
+              me.fire(name)
+            }
+          }
+        }
+      )
+
     }
 
     enable() {
@@ -128,7 +147,7 @@ define(function (require, exports, module) {
 
     constructor(canvas) {
 
-      let me = this
+      const me = this
 
       me.canvas = canvas
       me.context = canvas.getContext('2d')
@@ -138,9 +157,9 @@ define(function (require, exports, module) {
       me.states = [ ]
       me.emitter = new Emitter(canvas)
 
-      let updateSelection, updateBaseRatios, mouseOffset
+      const { emitter, shapes, states } = me
 
-      let { emitter, shapes, states } = me
+      let updateSelection, updateRatios, mouseOffset
 
       emitter
       .on('mousedown', function (event) {
@@ -160,14 +179,13 @@ define(function (require, exports, module) {
               )
             }
             if (hoverShape) {
-              activeShapes = [ hoverShape ]
-              me.setActiveShapes(activeShapes)
+              me.setActiveShapes([ hoverShape ])
             }
             mouseOffset = {
               x: event.x - states[ INDEX_ACTIVE ].x,
               y: event.y - states[ INDEX_ACTIVE ].y,
             }
-            emitter.fire('updateStart', event)
+            emitter.fire('updateStart')
           }
         }
         else {
@@ -240,9 +258,9 @@ define(function (require, exports, module) {
           me.refresh()
         }
       })
-      .on('updateStart', function (event) {
+      .on('updateStart', function () {
         let state = states[ INDEX_ACTIVE ]
-        updateBaseRatios = me.activeShapes.map(
+        updateRatios = me.activeShapes.map(
           function (shape) {
             return {
               x: (shape.x - state.x) / state.width,
@@ -254,24 +272,41 @@ define(function (require, exports, module) {
         )
       })
       .on('updateEnd', function () {
-        updateBaseRatios = null
+        updateRatios = null
       })
       .on('updating', function () {
         let { x, y, width, height } = states[ INDEX_ACTIVE ]
         array.each(
           me.activeShapes,
           function (shape, i) {
-            shape.x = x + width * updateBaseRatios[ i ].x
-            shape.y = y + height * updateBaseRatios[ i ].y
-            shape.width = width * updateBaseRatios[ i ].width
-            shape.height = height * updateBaseRatios[ i ].height
+            shape.x = x + width * updateRatios[ i ].x
+            shape.y = y + height * updateRatios[ i ].y
+            shape.width = width * updateRatios[ i ].width
+            shape.height = height * updateRatios[ i ].height
           }
         )
         me.refresh()
       })
+      .on('left', function () {
 
+      })
+      .on('up', function () {
+
+      })
+      .on('right', function () {
+
+      })
+      .on('down', function () {
+
+      })
     }
 
+    /**
+     * 调整画布大小
+     *
+     * @param {number} width
+     * @param {number} height
+     */
     resize(width, height) {
 
       if (devicePixelRatio > 1) {
@@ -309,7 +344,7 @@ define(function (require, exports, module) {
         }
       }
 
-      shapes.forEach(drawShape)
+      array.each(shapes, drawShape)
 
       // 当选中的图形数量大于 1 时
       // 每个图形都需要矩形描边（参考 Sketch）
@@ -327,7 +362,7 @@ define(function (require, exports, module) {
 
       // 确保最后绘制状态层
       // 这样才能位于最高层
-      states.forEach(drawShape)
+      array.each(states, drawShape)
 
     }
 

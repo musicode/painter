@@ -61,7 +61,7 @@ define(function (require) {
               update = updateRect(me, right, top)
               break
           }
-          emitter.fire('updateStart', event)
+          emitter.fire('updateStart')
         }
       }
       me.moveHandler = function (event) {
