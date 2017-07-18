@@ -163,27 +163,25 @@ define(function (require, exports, module) {
 
         let { hoverShape, activeShapes } = me
         if (hoverShape) {
-          if (!hoverShape.state) {
-            if (activeShapes) {
-              array.each(
-                activeShapes,
-                function (shape) {
-                  if (hoverShape === shape) {
-                    hoverShape = null
-                    return false
-                  }
+          if (activeShapes) {
+            array.each(
+              activeShapes,
+              function (shape) {
+                if (hoverShape === shape) {
+                  hoverShape = null
+                  return false
                 }
-              )
-            }
-            if (hoverShape && me.setActiveShapes([ hoverShape ])) {
-              me.refresh()
-            }
-            mouseOffset = {
-              x: event.x - states[ INDEX_ACTIVE ].x,
-              y: event.y - states[ INDEX_ACTIVE ].y,
-            }
-            emitter.fire('updateStart')
+              }
+            )
           }
+          if (hoverShape && me.setActiveShapes([ hoverShape ])) {
+            me.refresh()
+          }
+          mouseOffset = {
+            x: event.x - states[ INDEX_ACTIVE ].x,
+            y: event.y - states[ INDEX_ACTIVE ].y,
+          }
+          emitter.fire('updateStart')
         }
         else {
           if (me.setActiveShapes(null)) {
@@ -244,7 +242,7 @@ define(function (require, exports, module) {
           }
         )
 
-        if (me.setHoverShape(hoverShape)) {
+        if ((!hoverShape || !hoverShape.state) && me.setHoverShape(hoverShape)) {
           me.refresh()
         }
 
@@ -384,12 +382,12 @@ define(function (require, exports, module) {
      * @param {Shape} shape
      * @return {boolean} 是否需要刷新画布
      */
-    setHoverShape(shape, silent) {
+    setHoverShape(shape) {
       let { hoverShape, activeShapes, states } = this
       if (shape != hoverShape) {
         this.hoverShape = shape
 
-        let needClear = states[ INDEX_HOVER ], isValid = shape && !shape.state
+        let needClear = states[ INDEX_HOVER ], isValid = shape
 
         // 如果清除上一次的 hover 图形，则一定要刷新画布
         if (needClear) {
