@@ -136,17 +136,18 @@ define(function (require, exports, module) {
 
       me.shapes = [ ]
       me.states = [ ]
+      me.emitter = new Emitter(canvas)
 
-      let offsetX, offsetY, offsets, updateSelection, updating, updateWidth, updateHeight
+      let updateSelection, updateBaseRatios, mouseOffset
 
-      (me.emitter = new Emitter(canvas))
+      let { emitter, shapes, states } = me
+
+      emitter
       .on('mousedown', function (event) {
 
-        let { x, y } = event
-        let { hoverShape, activeShapes, states } = me
+        let { hoverShape, activeShapes } = me
         if (hoverShape) {
           if (!hoverShape.state) {
-
             if (activeShapes) {
               array.each(
                 activeShapes,
@@ -158,64 +159,35 @@ define(function (require, exports, module) {
                 }
               )
             }
-
             if (hoverShape) {
               activeShapes = [ hoverShape ]
-              me.setActiveShapes(activeShapes, true)
+              me.setActiveShapes(activeShapes)
             }
-
-            offsetX = x - states[ INDEX_ACTIVE ].x
-            offsetY = y - states[ INDEX_ACTIVE ].y
-
-            offsets = [ ]
-            array.each(
-              activeShapes,
-              function (shape) {
-                offsets.push({
-                  x: x - shape.x,
-                  y: y - shape.y,
-                })
-                if (hoverShape === shape) {
-                  hoverShape = null
-                  return false
-                }
-              }
-            )
-
-            me.refresh()
+            mouseOffset = {
+              x: event.x - states[ INDEX_ACTIVE ].x,
+              y: event.y - states[ INDEX_ACTIVE ].y,
+            }
+            emitter.fire('updateStart', event)
           }
         }
         else {
           me.setActiveShapes(null)
           updateSelection = updateRect(
-            me.states[ INDEX_SELECTION ] = new Selection({ x, y }),
-            x,
-            y
+            states[ INDEX_SELECTION ] = new Selection(event),
+            event.x,
+            event.y
           )
         }
 
       })
       .on('mousemove', function (event) {
 
-        let { emitter, activeShapes, shapes, states } = me
+        let { shapes } = me
 
-        if (updating) {
-          return
-        }
-
-        if (offsets) {
-          states[ INDEX_ACTIVE ].x = event.x - offsetX
-          states[ INDEX_ACTIVE ].y = event.y - offsetY
-
-          array.each(
-            activeShapes,
-            function (shape, i) {
-              shape.x = event.x - offsets[ i ].x
-              shape.y = event.y - offsets[ i ].y
-            }
-          )
-
-          me.refresh()
+        if (mouseOffset) {
+          states[ INDEX_ACTIVE ].x = event.x - mouseOffset.x
+          states[ INDEX_ACTIVE ].y = event.y - mouseOffset.y
+          emitter.fire('updating')
           return
         }
 
@@ -260,36 +232,42 @@ define(function (require, exports, module) {
 
       })
       .on('mouseup', function () {
-        if (offsets) {
-          offsets = null
+        if (mouseOffset) {
+          mouseOffset = null
         }
-        if (me.states[ INDEX_SELECTION ]) {
-          me.states[ INDEX_SELECTION ] = null
+        if (states[ INDEX_SELECTION ]) {
+          states[ INDEX_SELECTION ] = null
           me.refresh()
         }
       })
       .on('updateStart', function (event) {
-        updating = true
-        updateWidth = event.width
-        updateHeight = event.height
-      })
-      .on('updateEnd', function (event) {
-        updating = false
-        updateWidth = updateHeight = null
-      })
-      .on('updating', function (event) {
-        me.refresh()
-        let scaleX = event.width / updateWidth
-        let scaleY = event.height / updateHeight
-        array.each(
-          me.activeShapes,
+        let state = states[ INDEX_ACTIVE ]
+        updateBaseRatios = me.activeShapes.map(
           function (shape) {
-            shape.width *= scaleX
-            shape.height *= scaleY
+            return {
+              x: (shape.x - state.x) / state.width,
+              y: (shape.y - state.y) / state.height,
+              width: shape.width / state.width,
+              height: shape.height / state.height,
+            }
           }
         )
-        updateWidth = event.width
-        updateHeight = event.height
+      })
+      .on('updateEnd', function () {
+        updateBaseRatios = null
+      })
+      .on('updating', function () {
+        let { x, y, width, height } = states[ INDEX_ACTIVE ]
+        array.each(
+          me.activeShapes,
+          function (shape, i) {
+            shape.x = x + width * updateBaseRatios[ i ].x
+            shape.y = y + height * updateBaseRatios[ i ].y
+            shape.width = width * updateBaseRatios[ i ].width
+            shape.height = height * updateBaseRatios[ i ].height
+          }
+        )
+        me.refresh()
       })
 
     }
@@ -378,15 +356,17 @@ define(function (require, exports, module) {
           states[ INDEX_HOVER ] = null
         }
 
-        if (isValid && activeShapes) {
-          array.each(
-            activeShapes,
-            function (activeShape) {
-              if (shape === activeShape) {
-                return isValid = false
+        if (isValid) {
+          if (activeShapes) {
+            array.each(
+              activeShapes,
+              function (activeShape) {
+                if (shape === activeShape) {
+                  return isValid = false
+                }
               }
-            }
-          )
+            )
+          }
           if (isValid) {
             states[ INDEX_HOVER ] = new Hover({ shape })
           }

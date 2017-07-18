@@ -28,7 +28,7 @@ define(function (require) {
 
       me.emitter = emitter
 
-      me.mousedownHandler = function (event) {
+      me.downHandler = function (event) {
         if (currentBox >= 0) {
           let left = me.x, top = me.y, right = left + me.width, bottom = top + me.height
           switch (currentBox) {
@@ -61,14 +61,14 @@ define(function (require) {
               update = updateRect(me, right, top)
               break
           }
-          emitter.fire('updateStart', me)
+          emitter.fire('updateStart', event)
         }
       }
-      me.mousemoveHandler = function (event) {
+      me.moveHandler = function (event) {
 
         if (update) {
           update(targetX || event.x, targetY || event.y)
-          emitter.fire('updating', me)
+          emitter.fire('updating')
           return
         }
 
@@ -108,7 +108,7 @@ define(function (require) {
           style.cursor = cursor
         }
       }
-      me.mouseupHandler = function (event) {
+      me.upHandler = function (event) {
         if (currentBox >= 0) {
           style.cursor = ''
           currentBox = -1
@@ -122,21 +122,21 @@ define(function (require) {
         if (targetY) {
           targetY = null
         }
-        emitter.fire('updateEnd', me)
+        emitter.fire('updateEnd')
       }
 
       emitter
-      .on('mousedown', me.mousedownHandler)
-      .on('mousemove', me.mousemoveHandler)
-      .on('mouseup', me.mouseupHandler)
+      .on('mousedown', me.downHandler)
+      .on('mousemove', me.moveHandler)
+      .on('mouseup', me.upHandler)
 
     }
 
     destroy() {
       this.emitter
-      .off('mousedown', this.mousedownHandler)
-      .off('mousemove', this.mousemoveHandler)
-      .off('mouseup', this.mouseupHandler)
+      .off('mousedown', this.downHandler)
+      .off('mousemove', this.moveHandler)
+      .off('mouseup', this.upHandler)
     }
 
     isPointInPath(context, x, y) {
