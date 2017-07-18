@@ -177,7 +177,7 @@ define(function (require, exports, module) {
           emitter.fire('updateStart')
         }
         else {
-          if (me.setActiveShapes(null)) {
+          if (me.setActiveShapes()) {
             me.refresh()
           }
           updateSelection = updateRect(
@@ -287,7 +287,7 @@ define(function (require, exports, module) {
               array.remove(shapes, shape)
             }
           )
-          me.setActiveShapes(null)
+          me.setActiveShapes()
           me.refresh()
         }
       })
@@ -442,9 +442,9 @@ define(function (require, exports, module) {
         }
 
         // 如果选中的图形恰好处于 hover 状态
-        // 需要先清除 hover 状态
+        // 需要先清除它的 hover 状态
         if (hasHoverShape) {
-          this.setHoverShape(null)
+          this.setHoverShape()
         }
 
         this.activeShapes = shapes
