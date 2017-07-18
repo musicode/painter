@@ -17,6 +17,14 @@ define(function (require, exports, module) {
   const INDEX_HOVER = 1
   const INDEX_SELECTION = 2
 
+  const SHORTCUT = {
+    37: 'left',
+    38: 'up',
+    39: 'right',
+    40: 'down',
+    46: 'delete',
+  }
+
   let { devicePixelRatio } = window
   if (devicePixelRatio > 2) {
     devicePixelRatio = 2
@@ -83,45 +91,33 @@ define(function (require, exports, module) {
         }
       )
 
-      document.addEventListener(
-        'keyup',
-        function (event) {
-          if (!me.disabled) {
-            let map = {
-              37: 'left',
-              38: 'up',
-              39: 'right',
-              40: 'down',
-              46: 'delete',
-            }
-            let name = map[ event.keyCode ]
-            if (name) {
-              me.fire(name)
+      if (SHORTCUT) {
+        document.addEventListener(
+          'keyup',
+          function (event) {
+            if (!me.disabled) {
+              let name = SHORTCUT[ event.keyCode ]
+              if (name) {
+                me.fire(name)
+              }
             }
           }
-        }
-      )
+        )
+      }
 
-    }
-
-    enable() {
-      this.disabled = false
-    }
-
-    disable() {
-      this.disabled = true
     }
 
     fire(type, data) {
-      let { listeners } = this
-      let list = listeners[ type ]
+      let list = this.listeners[ type ]
       if (list) {
-        for (let i = 0, len = list.length, handler; i < len; i++) {
-          handler = list[ i ]
-          if (handler && handler(data) === false) {
-            break
+        array.each(
+          list,
+          function (handler) {
+            if (handler) {
+              return handler(data)
+            }
           }
-        }
+        )
       }
     }
 
