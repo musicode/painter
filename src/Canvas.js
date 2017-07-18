@@ -18,10 +18,6 @@ define(function (require, exports, module) {
   const INDEX_SELECTION = 2
 
   const SHORTCUT = {
-    37: 'left',
-    38: 'up',
-    39: 'right',
-    40: 'down',
     46: 'delete',
   }
 
@@ -130,10 +126,7 @@ define(function (require, exports, module) {
     off(type, listener) {
       let list = this.listeners[ type ]
       if (list) {
-        let index = list.indexOf(listener)
-        if (index >= 0) {
-          list.splice(index, 1)
-        }
+        array.remove(list, listener)
       }
       return this
     }
@@ -285,17 +278,18 @@ define(function (require, exports, module) {
         )
         me.refresh()
       })
-      .on('left', function () {
-
-      })
-      .on('up', function () {
-
-      })
-      .on('right', function () {
-
-      })
-      .on('down', function () {
-
+      .on('delete', function () {
+        let { shapes, activeShapes } = me
+        if (activeShapes) {
+          array.each(
+            activeShapes,
+            function (shape) {
+              array.remove(shapes, shape)
+            }
+          )
+          me.setActiveShapes(null)
+          me.refresh()
+        }
       })
       .on('canvasEdit', function (event) {
         event.action(canvas)

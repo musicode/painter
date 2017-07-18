@@ -5,6 +5,7 @@
 define(function (require, exports, module) {
 
   return {
+
     each(array, callback, reversed) {
       let { length } = array
       if (length) {
@@ -22,6 +23,14 @@ define(function (require, exports, module) {
             }
           }
         }
+      }
+    },
+
+    remove(array, item) {
+      let index = array.indexOf(item)
+      if (index >= 0) {
+        array.splice(index, 1)
+        return true
       }
     }
   }
