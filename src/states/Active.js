@@ -20,11 +20,11 @@ define(function (require) {
 
   class Active extends State {
 
-    constructor(props, emitter, canvas) {
+    constructor(props, emitter) {
 
       super(props)
 
-      let me = this, style = canvas.style, currentBox, targetX, targetY, update
+      let me = this, currentBox, targetX, targetY, update
 
       me.emitter = emitter
 
@@ -105,23 +105,29 @@ define(function (require) {
           currentBox = -1
         }
         if (cursor != null) {
-          style.cursor = cursor
+          emitter.fire(
+            'canvasEdit',
+            {
+              action: function (canvas) {
+                canvas.style.cursor = cursor
+              }
+            }
+          )
         }
       }
       me.upHandler = function (event) {
         if (currentBox >= 0) {
-          style.cursor = ''
           currentBox = -1
+          emitter.fire(
+            'canvasEdit',
+            {
+              action: function (canvas) {
+                canvas.style.cursor = ''
+              }
+            }
+          )
         }
-        if (update) {
-          update = null
-        }
-        if (targetX) {
-          targetX = null
-        }
-        if (targetY) {
-          targetY = null
-        }
+        update = targetX = targetY = null
         emitter.fire('updateEnd')
       }
 
@@ -145,6 +151,7 @@ define(function (require) {
         for (let i = 0, len = boxes.length, tx, ty; i < len; i += 2) {
           tx = boxes[ i ]
           ty = boxes[ i + 1 ]
+          // 放大响应区域
           if (x >= tx - THUMB_SIZE
             && x <= tx + 2 * THUMB_SIZE
             && y >= ty - THUMB_SIZE

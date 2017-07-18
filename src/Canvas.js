@@ -179,8 +179,8 @@ define(function (require, exports, module) {
                 }
               )
             }
-            if (hoverShape) {
-              me.setActiveShapes([ hoverShape ])
+            if (hoverShape && me.setActiveShapes([ hoverShape ])) {
+              me.refresh()
             }
             mouseOffset = {
               x: event.x - states[ INDEX_ACTIVE ].x,
@@ -190,7 +190,9 @@ define(function (require, exports, module) {
           }
         }
         else {
-          me.setActiveShapes(null)
+          if (me.setActiveShapes(null)) {
+            me.refresh()
+          }
           updateSelection = updateRect(
             states[ INDEX_SELECTION ] = new Selection(event),
             event.x,
@@ -220,8 +222,7 @@ define(function (require, exports, module) {
                   return true
                 }
               }
-            ),
-            true
+            )
           )
           me.refresh()
           return
@@ -247,7 +248,9 @@ define(function (require, exports, module) {
           }
         )
 
-        me.setHoverShape(hoverShape)
+        if (me.setHoverShape(hoverShape)) {
+          me.refresh()
+        }
 
       })
       .on('mouseup', function () {
@@ -299,6 +302,9 @@ define(function (require, exports, module) {
       })
       .on('down', function () {
 
+      })
+      .on('canvasEdit', function (event) {
+        event.action(canvas)
       })
     }
 
@@ -377,8 +383,10 @@ define(function (require, exports, module) {
     }
 
     /**
+     * 设置 hover 状态的图形，同一时刻最多只能 hover 一个图形
+     *
      * @param {Shape} shape
-     * @param {?silent} silent
+     * @return {boolean} 是否需要刷新画布
      */
     setHoverShape(shape, silent) {
       let { hoverShape, activeShapes, states } = this
@@ -387,11 +395,13 @@ define(function (require, exports, module) {
 
         let needClear = states[ INDEX_HOVER ], isValid = shape && !shape.state
 
+        // 如果清除上一次的 hover 图形，则一定要刷新画布
         if (needClear) {
           states[ INDEX_HOVER ].destroy()
           states[ INDEX_HOVER ] = null
         }
 
+        // 如果新的 hover 图形是有效的，则需要刷新画布
         if (isValid) {
           if (activeShapes) {
             array.each(
@@ -408,20 +418,17 @@ define(function (require, exports, module) {
           }
         }
 
-        if (needClear || isValid) {
-          if (!silent) {
-            this.refresh()
-          }
-          return true
-        }
+        return needClear || isValid
       }
     }
 
     /**
-     * @param {Shape} shapes
-     * @param {?silent} silent
+     * 设置选中状态的图形，可以多选
+     *
+     * @param {Array.<Shape>} shapes
+     * @return {boolean} 是否需要刷新画布
      */
-    setActiveShapes(shapes, silent) {
+    setActiveShapes(shapes) {
       let { hoverShape, activeShapes, states } = this
       if (shapes != activeShapes) {
 
@@ -430,6 +437,7 @@ define(function (require, exports, module) {
         if (shapes) {
           length = shapes.length
 
+          // 两个数组的数组项完全相同则认为相同
           let isSame = activeShapes && length === activeShapes.length, i = 0
           while (i < length) {
             if (shapes[ i ] === hoverShape) {
@@ -445,8 +453,10 @@ define(function (require, exports, module) {
           }
         }
 
+        // 如果选中的图形恰好处于 hover 状态
+        // 需要先清除 hover 状态
         if (hasHoverShape) {
-          this.setHoverShape(null, true)
+          this.setHoverShape(null)
         }
 
         this.activeShapes = shapes
@@ -459,13 +469,8 @@ define(function (require, exports, module) {
         if (length > 0) {
           states[ INDEX_ACTIVE ] = new Active(
             getUnionRect(shapes),
-            this.emitter,
-            this.canvas
+            this.emitter
           )
-        }
-
-        if (!silent) {
-          this.refresh()
         }
 
         return true
