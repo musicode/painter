@@ -40,22 +40,13 @@ define(function (require) {
 
     }
 
+    /**
+     * 绘制路径
+     *
+     * @param {Painter} painter
+     */
     drawPath(painter) {
-
-      const { x, y, width, height } = this
-
-      if (width === height) {
-        const radius = width / 2
-        painter.moveTo(x + radius, y)
-        painter.arc(x, y, radius, 0, 2 * Math.PI, true)
-      }
-      else {
-        const w = (width / 0.75) / 2, h = height / 2
-        painter.moveTo(x, y - h)
-        painter.bezierCurveTo(x + w, y - h, x + w, y + h, x, y + h)
-        painter.bezierCurveTo(x - w, y + h, x - w, y - h, x, y - h)
-      }
-
+      painter.drawOval(this.x, this.y, this.width, this.height)
     }
 
     /**
@@ -65,12 +56,33 @@ define(function (require) {
      */
     stroke(painter) {
 
-      let { strokePosition, strokeThickness, x, y, width, height } = this
+      let {
+        x,
+        y,
+        width,
+        height,
+        strokeStyle,
+        strokePosition,
+        strokeThickness,
+      } = this
 
-      painter.setLineWidth(this.strokeThickness)
-      painter.setStrokeStyle(this.strokeStyle)
+      // Canvas 的描边机制是 center
+
+      // inside
+      if (strokePosition === constant.STROKE_POSITION_INSIDE) {
+        width -= strokeThickness
+        height -= strokeThickness
+      }
+      // outside
+      else if (strokePosition === constant.STROKE_POSITION_OUTSIDE) {
+        width += strokeThickness
+        height += strokeThickness
+      }
+
+      painter.setLineWidth(strokeThickness)
+      painter.setStrokeStyle(strokeStyle)
       painter.begin()
-      this.drawPath(painter)
+      painter.drawOval(x, y, width, height)
       painter.stroke()
 
     }
@@ -81,12 +93,10 @@ define(function (require) {
      * @param {Painter} painter
      */
     fill(painter) {
-
       painter.setFillStyle(this.fillStyle)
       painter.begin()
       this.drawPath(painter)
       painter.fill()
-
     }
 
     getRect() {

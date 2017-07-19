@@ -29,6 +29,11 @@ define(function (require) {
         && y <= this.y + this.height
     }
 
+    /**
+     * 绘制路径
+     *
+     * @param {Painter} painter
+     */
     drawPath(painter) {
       painter.drawRect(this.x, this.y, this.width, this.height)
     }
@@ -40,8 +45,17 @@ define(function (require) {
      */
     stroke(painter) {
 
-      // canvas 的描边机制是 center
-      let { strokePosition, strokeThickness, x, y, width, height } = this
+      let {
+        x,
+        y,
+        width,
+        height,
+        strokeStyle,
+        strokePosition,
+        strokeThickness,
+      } = this
+
+      // Canvas 的描边机制是 center
 
       // inside
       if (strokePosition === constant.STROKE_POSITION_INSIDE) {
@@ -59,11 +73,8 @@ define(function (require) {
       }
 
       painter.setLineWidth(strokeThickness)
-      painter.setStrokeStyle(this.strokeStyle)
-
-      painter.begin()
-      painter.drawRect(x, y, width, height)
-      painter.stroke()
+      painter.setStrokeStyle(strokeStyle)
+      painter.strokeRect(x, y, width, height)
 
     }
 
@@ -73,13 +84,8 @@ define(function (require) {
      * @param {Painter} painter
      */
     fill(painter) {
-
       painter.setFillStyle(this.fillStyle)
-
-      painter.begin()
-      painter.drawRect(this.x, this.y, this.width, this.height)
-      painter.fill()
-
+      painter.fillRect(this.x, this.y, this.width, this.height)
     }
 
     getRect() {

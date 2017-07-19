@@ -51,20 +51,33 @@ define(function (require, exports, module) {
       this.context.strokeRect(x, y, width, height)
     }
 
+    fillRect(x, y, width, height) {
+      this.context.fillRect(x, y, width, height)
+    }
+
     isPointInPath(x, y) {
       return this.context.isPointInPath(x, y)
     }
 
     setLineWidth(value) {
-      this.context.lineWidth = value
+      let { context } = this
+      if (context.lineWidth !== value) {
+        context.lineWidth = value
+      }
     }
 
     setStrokeStyle(value) {
-      this.context.strokeStyle = value
+      let { context } = this
+      if (context.strokeStyle !== value) {
+        context.strokeStyle = value
+      }
     }
 
     setFillStyle(value) {
-      this.context.fillStyle = value
+      let { context } = this
+      if (context.fillStyle !== value) {
+        context.fillStyle = value
+      }
     }
 
     clear() {
