@@ -108,7 +108,7 @@ define(function (require) {
           emitter.fire(
             'canvasEdit',
             {
-              action: function (canvas) {
+              edit: function (canvas) {
                 canvas.style.cursor = cursor
               }
             }
@@ -121,7 +121,7 @@ define(function (require) {
           emitter.fire(
             'canvasEdit',
             {
-              action: function (canvas) {
+              edit: function (canvas) {
                 canvas.style.cursor = ''
               }
             }
@@ -145,7 +145,7 @@ define(function (require) {
       .off('mouseup', this.upHandler)
     }
 
-    isPointInPath(context, x, y) {
+    isPointInPath(painter, x, y) {
       let { boxes } = this
       if (boxes) {
         for (let i = 0, len = boxes.length, tx, ty; i < len; i += 2) {
@@ -164,7 +164,7 @@ define(function (require) {
       return false
     }
 
-    draw(context) {
+    draw(painter) {
 
       let { x, y, width, height } = this
 
@@ -176,22 +176,19 @@ define(function (require) {
       const middle = y + (height - THUMB_SIZE) / 2
       const bottom = y + height - THUMB_SIZE / 2
 
-      context.lineWidth = 1
-      context.strokeStyle = '#ccc'
+      painter.setLineWidth(1)
+      painter.setStrokeStyle('#ccc')
 
       // 矩形线框
-      context.beginPath()
-      context.rect(x + 0.5, y + 0.5, width, height)
-      context.stroke()
-      context.closePath()
+      painter.begin()
+      painter.drawRect(x + 0.5, y + 0.5, width, height)
+      painter.stroke()
+      painter.close()
 
-      context.strokeStyle = '#a2a2a2'
+      painter.setStrokeStyle('#a2a2a2')
 
       // 方块加点阴影
-      context.shadowColor = 'rgba(0,0,0,0.2)'
-      context.shadowOffsetX = 0
-      context.shadowOffsetY = 2
-      context.shadowBlur = 3
+      painter.enableShadow(0, 2, 3, 'rgba(0,0,0,0.2)')
 
       const boxes = [
         left, top,
@@ -207,22 +204,19 @@ define(function (require) {
       for (let i = 0, len = boxes.length, gradient; i < len; i += 2) {
         x = boxes[ i ]
         y = boxes[ i + 1 ]
-        gradient = context.createLinearGradient(x, y + THUMB_SIZE, x, y)
+        gradient = painter.createLinearGradient(x, y + THUMB_SIZE, x, y)
         gradient.addColorStop(0, '#d6d6d6')
         gradient.addColorStop(1, '#f9f9f9')
-        context.beginPath()
-        context.fillStyle = gradient
-        context.rect(x, y, THUMB_SIZE, THUMB_SIZE)
-        context.stroke()
-        context.fill()
+        painter.begin()
+        painter.setFillStyle(gradient)
+        painter.drawRect(x, y, THUMB_SIZE, THUMB_SIZE)
+        painter.stroke()
+        painter.fill()
       }
 
       this.boxes = boxes
 
-      context.shadowColor =
-      context.shadowOffsetX =
-      context.shadowOffsetY =
-      context.shadowBlur = 0
+      painter.disableShadow()
 
     }
 

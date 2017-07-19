@@ -7,33 +7,38 @@ define(function (require) {
   var Shape = require('./Shape')
   var constant = require('../constant')
 
+  /**
+   * (x, y) 左上角
+   * width 宽
+   * height 高
+   */
   class Rect extends Shape {
 
     /**
      * 点是否位于图形范围内
      *
-     * @param {Context} context
+     * @param {Painter} painter
      * @param {number} x
      * @param {number} y
      * @return {boolean}
      */
-    isPointInPath(context, x, y) {
+    isPointInPath(painter, x, y) {
       return x >= this.x
         && x <= this.x + this.width
         && y >= this.y
         && y <= this.y + this.height
     }
 
-    drawPath(context) {
-      context.rect(this.x, this.y, this.width, this.height)
+    drawPath(painter) {
+      painter.drawRect(this.x, this.y, this.width, this.height)
     }
 
     /**
      * 描边
      *
-     * @param {Context} context
+     * @param {Painter} painter
      */
-    stroke(context) {
+    stroke(painter) {
 
       // canvas 的描边机制是 center
       let { strokePosition, strokeThickness, x, y, width, height } = this
@@ -53,43 +58,27 @@ define(function (require) {
         height += strokeThickness
       }
 
-      context.lineWidth = this.strokeThickness
-      context.strokeStyle = this.strokeStyle
-      context.beginPath()
-      context.rect(x, y, width, height)
-      context.stroke()
+      painter.setLineWidth(strokeThickness)
+      painter.setStrokeStyle(this.strokeStyle)
+
+      painter.begin()
+      painter.drawRect(x, y, width, height)
+      painter.stroke()
 
     }
 
     /**
      * 填充
      *
-     * @param {Context} context
+     * @param {Painter} painter
      */
-    fill(context) {
+    fill(painter) {
 
-      context.fillStyle = this.fillStyle
+      painter.setFillStyle(this.fillStyle)
 
-      context.beginPath()
-      context.rect(this.x, this.y, this.width, this.height)
-      context.fill()
-
-    }
-
-    /**
-     * 填充色
-     *
-     * @param {Context} context
-     */
-    draw(context) {
-
-      if (this.fillStyle) {
-        this.fill(context)
-      }
-
-      if (this.strokeThickness && this.strokeStyle) {
-        this.stroke(context)
-      }
+      painter.begin()
+      painter.drawRect(this.x, this.y, this.width, this.height)
+      painter.fill()
 
     }
 

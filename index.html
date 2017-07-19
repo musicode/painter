@@ -83,9 +83,10 @@
         require(
             [
                 'Canvas',
-                'shapes/Rect'
+                'shapes/Rect',
+                'shapes/Oval',
             ],
-            function (Canvas, Rect) {
+            function (Canvas, Rect, Oval) {
 
                 window.instance = new Canvas(canvas);
 
@@ -96,7 +97,7 @@
                     width: 200,
                     height: 200,
                     strokeThickness: 20,
-                    strokePosition: 2,
+                    strokePosition: 1,
                     strokeStyle: '#f0f0f0',
                     fillStyle: 'rgba(255,0,0,0.3)'
                   })
@@ -104,29 +105,71 @@
 
                 instance.addShape(
                   new Rect({
-                    x: 700,
-                    y: 250,
+                    x: 500,
+                    y: 200,
                     width: 200,
                     height: 200,
                     strokeThickness: 20,
-                    strokePosition: 3,
+                    strokePosition: 2,
                     strokeStyle: '#f0f0f0',
                     fillStyle: 'rgba(0,255,0,0.3)'
                   })
                 )
 
-                var rect = new Rect({
-                  x: 500,
-                  y: 100,
-                  width: 200,
-                  height: 200,
-                  strokeThickness: 20,
-                  strokePosition: 1,
-                  strokeStyle: '#f6f6f6',
-                  fillStyle: 'rgba(0,0,255,0.3)'
-                });
+                instance.addShape(
+                  new Rect({
+                    x: 800,
+                    y: 200,
+                    width: 200,
+                    height: 200,
+                    strokeThickness: 20,
+                    strokePosition: 3,
+                    strokeStyle: '#f6f6f6',
+                    fillStyle: 'rgba(0,0,255,0.3)'
+                  })
+                )
 
-                instance.addShape(rect)
+
+
+
+                instance.addShape(
+                  new Oval({
+                    x: 300,
+                    y: 600,
+                    width: 200,
+                    height: 200,
+                    strokeThickness: 20,
+                    strokePosition: 1,
+                    strokeStyle: '#f0f0f0',
+                    fillStyle: 'rgba(255,0,0,0.3)'
+                  })
+                )
+
+                instance.addShape(
+                  new Oval({
+                    x: 600,
+                    y: 600,
+                    width: 200,
+                    height: 200,
+                    strokeThickness: 20,
+                    strokePosition: 2,
+                    strokeStyle: '#f0f0f0',
+                    fillStyle: 'rgba(0,255,0,0.3)'
+                  })
+                )
+
+                instance.addShape(
+                  new Oval({
+                    x: 900,
+                    y: 600,
+                    width: 200,
+                    height: 200,
+                    strokeThickness: 20,
+                    strokePosition: 3,
+                    strokeStyle: '#f6f6f6',
+                    fillStyle: 'rgba(0,0,255,0.3)'
+                  })
+                )
 
             }
         );

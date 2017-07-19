@@ -8,22 +8,22 @@ define(function (require) {
 
   class Hover extends State {
 
-    isPointInPath(context, x, y) {
+    isPointInPath(painter, x, y) {
       return false
     }
 
-    drawPath(context) {
-      this.shape.drawPath(context, true)
+    drawPath(painter) {
+      this.shape.drawPath(painter)
     }
 
-    draw(context) {
+    draw(painter) {
 
-      context.lineWidth = 4
-      context.strokeStyle = '#45C0FF'
+      painter.setLineWidth(4)
+      painter.setStrokeStyle('#45C0FF')
 
-      context.beginPath()
-      this.drawPath(context)
-      context.stroke()
+      painter.begin()
+      this.drawPath(painter)
+      painter.stroke()
 
     }
 

@@ -14,6 +14,23 @@ define(function () {
 
     }
 
+    /**
+     * 绘制图形
+     *
+     * @param {Painter} painter
+     */
+    draw(painter) {
+
+      if (this.fillStyle) {
+        this.fill(painter)
+      }
+
+      if (this.strokeThickness && this.strokeStyle) {
+        this.stroke(painter)
+      }
+
+    }
+
     getRect() {
 
     }

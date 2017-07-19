@@ -13,6 +13,8 @@ define(function (require, exports, module) {
   const getUnionRect = require('./function/getUnionRect')
   const array = require('./util/array')
 
+  const Painter = require('./Painter')
+
   const INDEX_ACTIVE = 0
   const INDEX_HOVER = 1
   const INDEX_SELECTION = 2
@@ -26,6 +28,9 @@ define(function (require, exports, module) {
     devicePixelRatio = 2
   }
 
+  // [TODO]
+  // 1. 图形的 beginPath 尽量减少
+  // 2. 重构 canvas 的事件 handler
   class Emitter {
 
     constructor(canvas) {
@@ -140,14 +145,14 @@ define(function (require, exports, module) {
       const me = this
 
       me.canvas = canvas
-      me.context = canvas.getContext('2d')
+      me.painter = new Painter(canvas.getContext('2d'))
       me.resize(canvas.width, canvas.height)
 
       me.shapes = [ ]
       me.states = [ ]
       me.emitter = new Emitter(canvas)
 
-      const { emitter, shapes, states } = me
+      const { painter, emitter, shapes, states } = me
 
       let updateSelection, updateRatios, mouseOffset
 
@@ -222,7 +227,7 @@ define(function (require, exports, module) {
             array.each(
               list,
               function (shape) {
-                if (shape && shape.isPointInPath(context, event.x, event.y) !== false) {
+                if (shape && shape.isPointInPath(painter, event.x, event.y) !== false) {
                   hoverShape = shape
                   return false
                 }
@@ -292,7 +297,7 @@ define(function (require, exports, module) {
         }
       })
       .on('canvasEdit', function (event) {
-        event.action(canvas)
+        event.edit(canvas)
       })
     }
 
@@ -320,7 +325,7 @@ define(function (require, exports, module) {
      * @param {Shape} shape
      */
     addShape(shape) {
-      shape.draw(this.context)
+      shape.draw(this.painter)
       this.shapes.push(shape)
     }
 
@@ -329,13 +334,13 @@ define(function (require, exports, module) {
      */
     refresh() {
 
-      const { context, canvas, shapes, states, activeShapes } = this
+      const { painter, shapes, states, activeShapes } = this
 
-      context.clearRect(0, 0, canvas.width, canvas.height)
+      painter.clear()
 
       const drawShape = function (shape) {
         if (shape) {
-          shape.draw(context)
+          shape.draw(painter)
         }
       }
 
@@ -344,13 +349,13 @@ define(function (require, exports, module) {
       // 当选中的图形数量大于 1 时
       // 每个图形都需要矩形描边（参考 Sketch）
       if (activeShapes && activeShapes.length > 1) {
-        context.lineWidth = 1
-        context.strokeStyle = '#C0CED8'
+        painter.setLineWidth(1)
+        painter.setStrokeStyle('#C0CED8')
         array.each(
           activeShapes,
           function (shape) {
             let rect = shape.getRect()
-            context.strokeRect(rect.x + 0.5, rect.y + 0.5, rect.width, rect.height)
+            painter.strokeRect(rect.x + 0.5, rect.y + 0.5, rect.width, rect.height)
           }
         )
       }
@@ -365,9 +370,9 @@ define(function (require, exports, module) {
      * 清空画布
      */
     clear() {
-      let { context, canvas, shapes } = this
+      let { painter, shapes } = this
       shapes.length = 0
-      context.clearRect(0, 0, canvas.width, canvas.height)
+      painter.clear()
     }
 
     /**
@@ -456,7 +461,11 @@ define(function (require, exports, module) {
 
         if (length > 0) {
           states[ INDEX_ACTIVE ] = new Active(
-            getUnionRect(shapes),
+            getUnionRect(shapes.map(
+              function (shape) {
+                return shape.getRect()
+              }
+            )),
             this.emitter
           )
         }
