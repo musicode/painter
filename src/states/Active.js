@@ -5,6 +5,7 @@
 define(function (require) {
 
   const State = require('./State')
+  const Emitter = require('../Emitter')
   const updateRect = require('../function/updateRect')
 
   const THUMB_SIZE = 12
@@ -30,7 +31,7 @@ define(function (require) {
 
       me.downHandler = function (event) {
         if (currentBox >= 0) {
-          let left = me.x, top = me.y, right = left + me.width, bottom = top + me.height
+          const left = me.x, top = me.y, right = left + me.width, bottom = top + me.height
           switch (currentBox) {
             case LEFT_TOP:
               update = updateRect(me, right, bottom)
@@ -68,7 +69,9 @@ define(function (require) {
 
         if (update) {
           update(targetX || event.x, targetY || event.y)
-          emitter.fire('updating')
+          emitter.fire(
+            Emitter.ACTIVE_RECT_CHANGE
+          )
           return
         }
 
@@ -106,9 +109,9 @@ define(function (require) {
         }
         if (cursor != null) {
           emitter.fire(
-            'canvasEdit',
+            Emitter.CANVAS_DECO,
             {
-              edit: function (canvas) {
+              action: function (canvas) {
                 canvas.style.cursor = cursor
               }
             }
@@ -119,9 +122,9 @@ define(function (require) {
         if (currentBox >= 0) {
           currentBox = -1
           emitter.fire(
-            'canvasEdit',
+            Emitter.CANVAS_DECO,
             {
-              edit: function (canvas) {
+              action: function (canvas) {
                 canvas.style.cursor = ''
               }
             }
@@ -132,26 +135,26 @@ define(function (require) {
       }
 
       emitter
-      .on('mousedown', me.downHandler)
-      .on('mousemove', me.moveHandler)
-      .on('mouseup', me.upHandler)
+      .on(Emitter.MOUSE_DOWN, me.downHandler)
+      .on(Emitter.MOUSE_MOVE, me.moveHandler)
+      .on(Emitter.MOUSE_UP, me.upHandler)
 
     }
 
     destroy() {
       this.emitter
-      .off('mousedown', this.downHandler)
-      .off('mousemove', this.moveHandler)
-      .off('mouseup', this.upHandler)
+      .off(Emitter.MOUSE_DOWN, this.downHandler)
+      .off(Emitter.MOUSE_MOVE, this.moveHandler)
+      .off(Emitter.MOUSE_UP, this.upHandler)
     }
 
     isPointInPath(painter, x, y) {
-      let { boxes } = this
+      const { boxes } = this
       if (boxes) {
         for (let i = 0, len = boxes.length, tx, ty; i < len; i += 2) {
           tx = boxes[ i ]
           ty = boxes[ i + 1 ]
-          // 放大响应区域
+          // 扩大响应区域
           if (x >= tx - THUMB_SIZE
             && x <= tx + 2 * THUMB_SIZE
             && y >= ty - THUMB_SIZE
@@ -183,7 +186,6 @@ define(function (require) {
       painter.begin()
       painter.drawRect(x + 0.5, y + 0.5, width, height)
       painter.stroke()
-      painter.close()
 
       painter.setStrokeStyle('#a2a2a2')
 

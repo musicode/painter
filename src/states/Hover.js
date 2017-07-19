@@ -12,17 +12,13 @@ define(function (require) {
       return false
     }
 
-    drawPath(painter) {
-      this.shape.drawPath(painter)
-    }
-
     draw(painter) {
 
       painter.setLineWidth(4)
       painter.setStrokeStyle('#45C0FF')
 
       painter.begin()
-      this.drawPath(painter)
+      this.shape.drawPath(painter)
       painter.stroke()
 
     }

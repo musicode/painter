@@ -15,10 +15,6 @@ define(function (require) {
         && y <= this.y + this.height
     }
 
-    drawPath(painter) {
-      painter.drawRect(this.x + 0.5, this.y + 0.5, this.width, this.height)
-    }
-
     draw(painter) {
 
       painter.setLineWidth(1)
@@ -26,7 +22,7 @@ define(function (require) {
       painter.setFillStyle('rgba(180,180,180,0.1)')
 
       painter.begin()
-      this.drawPath(painter)
+      painter.drawRect(this.x + 0.5, this.y + 0.5, this.width, this.height)
       painter.stroke()
       painter.fill()
 

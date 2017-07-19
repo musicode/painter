@@ -13,15 +13,12 @@ define(function (require, exports, module) {
   const getUnionRect = require('./function/getUnionRect')
   const array = require('./util/array')
 
+  const Emitter = require('./Emitter')
   const Painter = require('./Painter')
 
   const INDEX_ACTIVE = 0
   const INDEX_HOVER = 1
   const INDEX_SELECTION = 2
-
-  const SHORTCUT = {
-    46: 'delete',
-  }
 
   let { devicePixelRatio } = window
   if (devicePixelRatio > 2) {
@@ -31,113 +28,7 @@ define(function (require, exports, module) {
   // [TODO]
   // 1. 图形的 beginPath 尽量减少
   // 2. 重构 canvas 的事件 handler
-  class Emitter {
-
-    constructor(canvas) {
-
-      this.listeners = { }
-
-      let me = this, cursorX, cursorY
-
-      let left = canvas.offsetLeft, top = canvas.offsetTop
-
-      document.addEventListener(
-        'mousedown',
-        function () {
-          if (!me.disabled) {
-            me.fire(
-              'mousedown',
-              {
-                x: cursorX,
-                y: cursorY,
-              }
-            )
-          }
-        }
-      )
-
-      document.addEventListener(
-        'mousemove',
-        function (event) {
-          if (!me.disabled) {
-            cursorX = event.pageX - left
-            cursorY = event.pageY - top
-            if (devicePixelRatio > 1) {
-              cursorX *= devicePixelRatio
-              cursorY *= devicePixelRatio
-            }
-            me.fire(
-              'mousemove',
-              {
-                x: cursorX,
-                y: cursorY,
-              }
-            )
-          }
-        }
-      )
-
-      document.addEventListener(
-        'mouseup',
-        function () {
-          if (!me.disabled) {
-            me.fire(
-              'mouseup',
-              {
-                x: cursorX,
-                y: cursorY,
-              }
-            )
-          }
-        }
-      )
-
-      if (SHORTCUT) {
-        document.addEventListener(
-          'keyup',
-          function (event) {
-            if (!me.disabled) {
-              let name = SHORTCUT[ event.keyCode ]
-              if (name) {
-                me.fire(name)
-              }
-            }
-          }
-        )
-      }
-
-    }
-
-    fire(type, data) {
-      let list = this.listeners[ type ]
-      if (list) {
-        array.each(
-          list,
-          function (handler) {
-            if (handler) {
-              return handler(data)
-            }
-          }
-        )
-      }
-    }
-
-    on(type, listener) {
-      let list = this.listeners[ type ] || (this.listeners[ type ] = [ ])
-      list.push(listener)
-      return this
-    }
-
-    off(type, listener) {
-      let list = this.listeners[ type ]
-      if (list) {
-        array.remove(list, listener)
-      }
-      return this
-    }
-
-  }
-
+  // 3. 把 states 做成插件机制，各自管理自己的逻辑
   class Canvas {
 
     constructor(canvas) {
@@ -157,103 +48,112 @@ define(function (require, exports, module) {
       let updateSelection, updateRatios, mouseOffset
 
       emitter
-      .on('mousedown', function (event) {
+      .on(
+        Emitter.MOUSE_DOWN,
+        function (event) {
 
-        let { hoverShape, activeShapes } = me
-        if (hoverShape) {
-          if (activeShapes) {
-            array.each(
-              activeShapes,
-              function (shape) {
-                if (hoverShape === shape) {
-                  hoverShape = null
-                  return false
+          let { hoverShape, activeShapes } = me
+          if (hoverShape) {
+            if (activeShapes) {
+              array.each(
+                activeShapes,
+                function (shape) {
+                  if (hoverShape === shape) {
+                    hoverShape = null
+                    return false
+                  }
                 }
-              }
-            )
-          }
-          if (hoverShape && me.setActiveShapes([ hoverShape ])) {
-            me.refresh()
-          }
-          mouseOffset = {
-            x: event.x - states[ INDEX_ACTIVE ].x,
-            y: event.y - states[ INDEX_ACTIVE ].y,
-          }
-          emitter.fire('updateStart')
-        }
-        else {
-          if (me.setActiveShapes()) {
-            me.refresh()
-          }
-          updateSelection = updateRect(
-            states[ INDEX_SELECTION ] = new Selection(event),
-            event.x,
-            event.y
-          )
-        }
-
-      })
-      .on('mousemove', function (event) {
-
-        let { shapes } = me
-
-        if (mouseOffset) {
-          states[ INDEX_ACTIVE ].x = event.x - mouseOffset.x
-          states[ INDEX_ACTIVE ].y = event.y - mouseOffset.y
-          emitter.fire('updating')
-          return
-        }
-
-        let selectionShape = states[ INDEX_SELECTION ]
-        if (selectionShape) {
-          updateSelection(event.x, event.y)
-          me.setActiveShapes(
-            shapes.filter(
-              function (shape) {
-                if (getInterRect(shape.getRect(), selectionShape)) {
-                  return true
-                }
-              }
-            )
-          )
-          me.refresh()
-          return
-        }
-
-        let hoverShape
-        array.each(
-          [ states, shapes ],
-          function (list) {
-            array.each(
-              list,
-              function (shape) {
-                if (shape && shape.isPointInPath(painter, event.x, event.y) !== false) {
-                  hoverShape = shape
-                  return false
-                }
-              },
-              true
-            )
-            if (hoverShape) {
-              return false
+              )
             }
+            if (hoverShape && me.setActiveShapes([ hoverShape ])) {
+              me.refresh()
+            }
+            mouseOffset = {
+              x: event.x - states[ INDEX_ACTIVE ].x,
+              y: event.y - states[ INDEX_ACTIVE ].y,
+            }
+            emitter.fire('updateStart')
           }
-        )
+          else {
+            if (me.setActiveShapes()) {
+              me.refresh()
+            }
+            updateSelection = updateRect(
+              states[ INDEX_SELECTION ] = new Selection(event),
+              event.x,
+              event.y
+            )
+          }
 
-        if ((!hoverShape || !hoverShape.state) && me.setHoverShape(hoverShape)) {
-          me.refresh()
         }
+      )
+      .on(
+        Emitter.MOUSE_MOVE,
+        function (event) {
 
-      })
-      .on('mouseup', function () {
-        if (mouseOffset) {
-          mouseOffset = null
+          let { shapes } = me
+
+          if (mouseOffset) {
+            states[ INDEX_ACTIVE ].x = event.x - mouseOffset.x
+            states[ INDEX_ACTIVE ].y = event.y - mouseOffset.y
+            emitter.fire('updating')
+            return
+          }
+
+          let selectionShape = states[ INDEX_SELECTION ]
+          if (selectionShape) {
+            updateSelection(event.x, event.y)
+            me.setActiveShapes(
+              shapes.filter(
+                function (shape) {
+                  if (getInterRect(shape.getRect(), selectionShape)) {
+                    return true
+                  }
+                }
+              )
+            )
+            me.refresh()
+            return
+          }
+
+          let hoverShape
+          array.each(
+            [ states, shapes ],
+            function (list) {
+              array.each(
+                list,
+                function (shape) {
+                  if (shape && shape.isPointInPath(painter, event.x, event.y) !== false) {
+                    hoverShape = shape
+                    return false
+                  }
+                },
+                true
+              )
+              if (hoverShape) {
+                return false
+              }
+            }
+          )
+
+          if ((!hoverShape || !hoverShape.state) && me.setHoverShape(hoverShape)) {
+            me.refresh()
+          }
+
         }
-        if (states[ INDEX_SELECTION ]) {
-          states[ INDEX_SELECTION ] = null
-          me.refresh()
+      )
+      .on(
+        Emitter.MOUSE_UP,
+        function () {
+          if (mouseOffset) {
+            mouseOffset = null
+          }
+          if (states[ INDEX_SELECTION ]) {
+            states[ INDEX_SELECTION ] = null
+            me.refresh()
+          }
         }
-      })
+      )
       .on('updateStart', function () {
         let state = states[ INDEX_ACTIVE ]
         updateRatios = me.activeShapes.map(
@@ -271,7 +171,7 @@ define(function (require, exports, module) {
         updateRatios = null
       })
       .on('updating', function () {
-        let { x, y, width, height } = states[ INDEX_ACTIVE ]
+        const { x, y, width, height } = states[ INDEX_ACTIVE ]
         array.each(
           me.activeShapes,
           function (shape, i) {
@@ -283,22 +183,29 @@ define(function (require, exports, module) {
         )
         me.refresh()
       })
-      .on('delete', function () {
-        let { shapes, activeShapes } = me
-        if (activeShapes) {
-          array.each(
-            activeShapes,
-            function (shape) {
-              array.remove(shapes, shape)
-            }
-          )
-          me.setActiveShapes()
-          me.refresh()
+      .on(
+        Emitter.ACTIVE_SHAPE_DELETE,
+        function () {
+          const { shapes, activeShapes } = me
+          if (activeShapes) {
+            array.each(
+              activeShapes,
+              function (shape) {
+                array.remove(shapes, shape)
+              }
+            )
+            me.setActiveShapes()
+            me.refresh()
+          }
         }
-      })
-      .on('canvasEdit', function (event) {
-        event.edit(canvas)
-      })
+      )
+      .on(
+        Emitter.CANVAS_DECO,
+        function (event) {
+          event.action(canvas)
+        }
+      )
+
     }
 
     /**
@@ -460,14 +367,13 @@ define(function (require, exports, module) {
         }
 
         if (length > 0) {
-          states[ INDEX_ACTIVE ] = new Active(
-            getUnionRect(shapes.map(
-              function (shape) {
-                return shape.getRect()
-              }
-            )),
-            this.emitter
-          )
+          let props = getUnionRect(shapes.map(
+            function (shape) {
+              return shape.getRect()
+            }
+          ))
+          props.shapes = shapes
+          states[ INDEX_ACTIVE ] = new Active(props, this.emitter)
         }
 
         return true
