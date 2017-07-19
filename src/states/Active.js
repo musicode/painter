@@ -189,7 +189,6 @@ define(function (require) {
           )
         }
         update = targetX = targetY = null
-        emitter.fire('updateEnd')
       }
 
       emitter

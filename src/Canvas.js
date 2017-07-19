@@ -156,6 +156,11 @@ define(function (require, exports, module) {
      */
     resize(width, height) {
 
+      const { element } = this
+
+      element.style.width = width + 'px'
+      element.style.height = height + 'px'
+
       if (devicePixelRatio > 1) {
         width *= devicePixelRatio
         height *= devicePixelRatio

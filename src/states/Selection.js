@@ -19,7 +19,7 @@ define(function (require) {
       me.emitter = emitter
 
       me.mouseDownHandler = function (event) {
-        if (!hoverShape) {
+        if (!hoverShape && event.inCanvas) {
 
           let update = updateRect(me, event.x, event.y)
 

@@ -12,7 +12,7 @@ define(function (require, exports, module) {
 
       this.listeners = { }
 
-      let me = this, cursorX, cursorY
+      let me = this, cursorX, cursorY, inCanvas
 
       let left = canvas.offsetLeft, top = canvas.offsetTop
 
@@ -25,6 +25,7 @@ define(function (require, exports, module) {
               {
                 x: cursorX,
                 y: cursorY,
+                inCanvas,
               }
             )
           }
@@ -35,17 +36,27 @@ define(function (require, exports, module) {
         'mousemove',
         function (event) {
           if (!me.disabled) {
-            cursorX = event.pageX - left
-            cursorY = event.pageY - top
+            const { pageX, pageY } = event
+
+            cursorX = pageX - left
+            cursorY = pageY - top
+
             if (devicePixelRatio > 1) {
               cursorX *= devicePixelRatio
               cursorY *= devicePixelRatio
             }
+
+            inCanvas = cursorX >= 0
+              && cursorX <= canvas.width
+              && cursorY >= 0
+              && cursorY <= canvas.height
+
             me.fire(
               Emitter.MOUSE_MOVE,
               {
                 x: cursorX,
                 y: cursorY,
+                inCanvas,
               }
             )
           }
@@ -61,6 +72,7 @@ define(function (require, exports, module) {
               {
                 x: cursorX,
                 y: cursorY,
+                inCanvas
               }
             )
           }
