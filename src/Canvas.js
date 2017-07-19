@@ -181,6 +181,16 @@ define(function (require, exports, module) {
       this.shapes.push(shape)
     }
 
+    apply(config) {
+      array.each(
+        this.states[ INDEX_ACTIVE ].getShapes(),
+        function (shape) {
+          Object.assign(shape, config)
+        }
+      )
+      this.refresh()
+    }
+
     /**
      * 全量刷新画布
      */

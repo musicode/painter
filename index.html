@@ -3,82 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <title>Document</title>
+    <link rel="stylesheet" href="./tool/style.css">
     <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+        }
         body {
             background-color: #EEE;
         }
         canvas {
             background-color: #FFF;
-            width: 2000px;
-            height: 2000px;
         }
-
-        label {
-            font-size: 12px;
-            margin-right: 10px;
+        .form-horizontal {
+            margin-top: 10px;
         }
-
     </style>
 </head>
 <body>
-    <canvas id="canvas" width="2000" height="2000"></canvas>
 
-    <form class="edit">
-
-        <p>
-            <label>
+    <div class="form-horizontal">
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-1 control-label">
+                画布宽度
+            </label>
+            <div class="col-sm-3">
+                <input name="canvasWidth" type="number" value="1000" class="form-control">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-1 control-label">
+                画布高度
+            </label>
+            <div class="col-sm-3">
+                <input name="canvasHeight" type="number" value="800" class="form-control">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-1 control-label">
                 填充颜色
             </label>
-            <input name="fillStyle" type="color">
-        </p>
-
-        <p>
-            <label>
+            <div class="col-sm-3">
+                <input name="fillStyle" type="color" value="#ffb2a7" class="form-control">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-1 control-label">
                 描边粗细
             </label>
-            <input name="lineWidth" type="number">
-        </p>
-
-        <p>
-            <label>
+            <div class="col-sm-3">
+                <input name="strokeThickness" type="range" value="20" class="form-control">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-1 control-label">
                 描边颜色
             </label>
-            <input name="strokeStyle" type="color">
-        </p>
-
-        <p>
-            <label>
+            <div class="col-sm-3">
+                <input name="strokeStyle" type="color" value="#f4f679" class="form-control">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-1 control-label">
                 描边方式
             </label>
-            <span>
-                <label>
-                    <input type="radio" name="strokePosition" value="1">
-                    inside
+            <div class="col-sm-3">
+                <label class="radio-inline">
+                    <input type="radio" name="strokePosition" value="1"> Inside
                 </label>
-                <label>
-                    <input type="radio" name="strokePosition" value="2">
-                    center
+                <label class="radio-inline">
+                    <input type="radio" name="strokePosition" value="2" checked> Center
                 </label>
-                <label>
-                    <input type="radio" name="strokePosition" value="3">
-                    outside
+                <label class="radio-inline">
+                    <input type="radio" name="strokePosition" value="3"> Outside
                 </label>
-            </span>
-        </p>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-1 col-sm-3">
+                <button type="submit" class="btn btn-info">
+                    应用
+                </button>
+            </div>
+        </div>
+    </div>
 
-    </form>
+    <canvas></canvas>
 
+    <script src="tool/jquery.js"></script>
     <script src="tool/esl.js"></script>
     <script>
 
-        var canvas = document.getElementById('canvas');
+        var canvas = $('canvas')[0];
         var context = canvas.getContext('2d');
-
-        var img = document.getElementById('img');
 
         require.config({
             baseUrl: './src'
         });
+
+        function getConfig() {
+            var canvasWidth = + $('input[name="canvasWidth"]').val().trim();
+            var canvasHeight = + $('input[name="canvasHeight"]').val().trim();
+            var fillStyle = $('input[name="fillStyle"]').val();
+            var strokeStyle = $('input[name="strokeStyle"]').val();
+            var strokePosition = + $('input[name="strokePosition"]:checked').val();
+            var strokeThickness = + $('input[name="strokeThickness"]').val();
+            return {
+                canvasWidth: canvasWidth,
+                canvasHeight: canvasHeight,
+                fillStyle: fillStyle,
+                strokeStyle: strokeStyle,
+                strokePosition: strokePosition,
+                strokeThickness: strokeThickness,
+            };
+        }
 
         require(
             [
@@ -90,16 +129,25 @@
 
                 window.instance = new Canvas(canvas);
 
+                var config = getConfig();
+                instance.resize(config.canvasWidth, config.canvasHeight);
+
+                $('.btn-info').on('click', function () {
+                    config = getConfig();
+                    instance.resize(config.canvasWidth, config.canvasHeight);
+                    instance.apply(config)
+                });
+
                 instance.addShape(
                   new Rect({
                     x: 200,
                     y: 200,
                     width: 200,
                     height: 200,
-                    strokeThickness: 20,
-                    strokePosition: 1,
-                    strokeStyle: '#f0f0f0',
-                    fillStyle: 'rgba(255,0,0,0.3)'
+                    strokeThickness: config.strokeThickness,
+                    strokePosition: config.strokePosition,
+                    strokeStyle: config.strokeStyle,
+                    fillStyle: config.fillStyle
                   })
                 )
 
@@ -109,10 +157,10 @@
                     y: 200,
                     width: 200,
                     height: 200,
-                    strokeThickness: 20,
-                    strokePosition: 2,
-                    strokeStyle: '#f0f0f0',
-                    fillStyle: 'rgba(0,255,0,0.3)'
+                    strokeThickness: config.strokeThickness,
+                    strokePosition: config.strokePosition,
+                    strokeStyle: config.strokeStyle,
+                    fillStyle: config.fillStyle
                   })
                 )
 
@@ -122,10 +170,10 @@
                     y: 200,
                     width: 200,
                     height: 200,
-                    strokeThickness: 20,
-                    strokePosition: 3,
-                    strokeStyle: '#f6f6f6',
-                    fillStyle: 'rgba(0,0,255,0.3)'
+                    strokeThickness: config.strokeThickness,
+                    strokePosition: config.strokePosition,
+                    strokeStyle: config.strokeStyle,
+                    fillStyle: config.fillStyle
                   })
                 )
 
@@ -138,10 +186,10 @@
                     y: 600,
                     width: 200,
                     height: 200,
-                    strokeThickness: 20,
-                    strokePosition: 1,
-                    strokeStyle: '#f0f0f0',
-                    fillStyle: 'rgba(255,0,0,0.3)'
+                    strokeThickness: config.strokeThickness,
+                    strokePosition: config.strokePosition,
+                    strokeStyle: config.strokeStyle,
+                    fillStyle: config.fillStyle
                   })
                 )
 
@@ -151,10 +199,10 @@
                     y: 600,
                     width: 200,
                     height: 200,
-                    strokeThickness: 20,
-                    strokePosition: 2,
-                    strokeStyle: '#f0f0f0',
-                    fillStyle: 'rgba(0,255,0,0.3)'
+                    strokeThickness: config.strokeThickness,
+                    strokePosition: config.strokePosition,
+                    strokeStyle: config.strokeStyle,
+                    fillStyle: config.fillStyle
                   })
                 )
 
@@ -164,10 +212,10 @@
                     y: 600,
                     width: 200,
                     height: 200,
-                    strokeThickness: 20,
-                    strokePosition: 3,
-                    strokeStyle: '#f6f6f6',
-                    fillStyle: 'rgba(0,0,255,0.3)'
+                    strokeThickness: config.strokeThickness,
+                    strokePosition: config.strokePosition,
+                    strokeStyle: config.strokeStyle,
+                    fillStyle: config.fillStyle
                   })
                 )
 

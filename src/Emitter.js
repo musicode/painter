@@ -146,6 +146,7 @@ define(function (require, exports, module) {
   Emitter.SELECTION_RECT_CHANGE = 'selection_rect_change'
 
   const SHORTCUT = {
+    8: Emitter.ACTIVE_SHAPE_DELETE,
     46: Emitter.ACTIVE_SHAPE_DELETE,
   }
 

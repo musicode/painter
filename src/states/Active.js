@@ -121,7 +121,7 @@ define(function (require) {
           }
           saveShapes()
         }
-        else if (me.shapes.length) {
+        else if (event.inCanvas && me.shapes.length) {
           me.setShapes([ ])
         }
       }
