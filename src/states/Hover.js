@@ -5,8 +5,64 @@
 define(function (require) {
 
   const State = require('./State')
+  const Emitter = require('../Emitter')
+
+  const array = require('../util/array')
 
   class Hover extends State {
+
+    constructor(props, emitter) {
+
+      super(props)
+
+      let me = this, activeShapes
+
+      me.emitter = emitter
+
+      me.shapeEnterHandler = function (event) {
+        let { shape } = event
+        if (!shape.state && (!activeShapes || !array.has(activeShapes, shape))) {
+          me.shape = shape
+          emitter.fire(
+            Emitter.HOVER_SHAPE_CHANGE,
+            {
+              shape,
+            }
+          )
+        }
+      }
+
+      me.shapeLeaveHandler = function () {
+        if (me.shape) {
+          me.shape = null
+          emitter.fire(
+            Emitter.HOVER_SHAPE_CHANGE,
+            {
+              shape: null
+            }
+          )
+        }
+      }
+
+      me.activeShapeChangeHandler = function (events) {
+        activeShapes = events.shapes
+        if (array.has(activeShapes, me.shape)) {
+          me.shape = null
+        }
+      }
+
+      emitter
+      .on(Emitter.SHAPE_ENTER, me.shapeEnterHandler)
+      .on(Emitter.SHAPE_LEAVE, me.shapeLeaveHandler)
+      .on(Emitter.ACTIVE_SHAPE_CHANGE, me.activeShapeChangeHandler)
+    }
+
+    destroy() {
+      this.emitter
+      .off(Emitter.SHAPE_ENTER, this.shapeEnterHandler)
+      .off(Emitter.SHAPE_LEAVE, this.shapeLeaveHandler)
+      .off(Emitter.ACTIVE_SHAPE_CHANGE, this.activeShapeChangeHandler)
+    }
 
     isPointInPath(painter, x, y) {
       return false
@@ -14,11 +70,16 @@ define(function (require) {
 
     draw(painter) {
 
+      let { shape } = this
+      if (!shape) {
+        return
+      }
+
       painter.setLineWidth(4)
       painter.setStrokeStyle('#45C0FF')
 
       painter.begin()
-      this.shape.drawPath(painter)
+      shape.drawPath(painter)
       painter.stroke()
 
     }

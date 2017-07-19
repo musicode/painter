@@ -26,12 +26,20 @@ define(function (require, exports, module) {
       }
     },
 
+    push(array, item) {
+      array.push(item)
+    },
+
     remove(array, item) {
       let index = array.indexOf(item)
       if (index >= 0) {
         array.splice(index, 1)
         return true
       }
+    },
+
+    has(array, item) {
+      return array.indexOf(item) >= 0
     }
   }
 

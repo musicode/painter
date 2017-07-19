@@ -6,7 +6,10 @@ define(function (require) {
 
   const State = require('./State')
   const Emitter = require('../Emitter')
+
   const updateRect = require('../function/updateRect')
+  const getUnionRect = require('../function/getUnionRect')
+  const array = require('../util/array')
 
   const THUMB_SIZE = 12
 
@@ -25,11 +28,54 @@ define(function (require) {
 
       super(props)
 
-      let me = this, currentBox, targetX, targetY, update
+      let me = this, currentBox, targetX, targetY, update, hoverShape, shapeRatios
 
+      me.shapes = [ ]
       me.emitter = emitter
 
-      me.downHandler = function (event) {
+      const saveShapes = function () {
+        shapeRatios = me.shapes.map(
+          function (shape) {
+            return {
+              x: (shape.x - me.x) / me.width,
+              y: (shape.y - me.y) / me.height,
+              width: shape.width / me.width,
+              height: shape.height / me.height,
+            }
+          }
+        )
+      }
+
+      const updateShapes = function () {
+        array.each(
+          me.shapes,
+          function (shape, i) {
+            shape.x = me.x + me.width * shapeRatios[ i ].x
+            shape.y = me.y + me.height * shapeRatios[ i ].y
+            shape.width = me.width * shapeRatios[ i ].width
+            shape.height = me.height * shapeRatios[ i ].height
+          }
+        )
+        emitter.fire(
+          Emitter.CANVAS_DECO,
+          {
+            action: function (canvas) {
+              canvas.refresh()
+            }
+          }
+        )
+      }
+
+      me.shapeEnterHandler = function (event) {
+        let { shape } = event
+        if (!shape.state) {
+          hoverShape = shape
+        }
+      }
+      me.shapeLeaveHandler = function () {
+        hoverShape = null
+      }
+      me.mouseDownHandler = function (event) {
         if (currentBox >= 0) {
           const left = me.x, top = me.y, right = left + me.width, bottom = top + me.height
           switch (currentBox) {
@@ -62,16 +108,28 @@ define(function (require) {
               update = updateRect(me, right, top)
               break
           }
-          emitter.fire('updateStart')
+          saveShapes()
+        }
+        else if (hoverShape) {
+          if (!array.has(me.shapes, hoverShape)) {
+            me.setShapes([ hoverShape ])
+          }
+          const offsetX = event.x - me.x, offsetY = event.y - me.y
+          update = function (x, y) {
+            me.x = x - offsetX
+            me.y = y - offsetY
+          }
+          saveShapes()
+        }
+        else if (me.shapes.length) {
+          me.setShapes([ ])
         }
       }
-      me.moveHandler = function (event) {
+      me.mouseMoveHandler = function (event) {
 
         if (update) {
           update(targetX || event.x, targetY || event.y)
-          emitter.fire(
-            Emitter.ACTIVE_RECT_CHANGE
-          )
+          updateShapes()
           return
         }
 
@@ -112,20 +170,20 @@ define(function (require) {
             Emitter.CANVAS_DECO,
             {
               action: function (canvas) {
-                canvas.style.cursor = cursor
+                canvas.element.style.cursor = cursor
               }
             }
           )
         }
       }
-      me.upHandler = function (event) {
+      me.mouseUpHandler = function (event) {
         if (currentBox >= 0) {
           currentBox = -1
           emitter.fire(
             Emitter.CANVAS_DECO,
             {
               action: function (canvas) {
-                canvas.style.cursor = ''
+                canvas.element.style.cursor = ''
               }
             }
           )
@@ -135,17 +193,53 @@ define(function (require) {
       }
 
       emitter
-      .on(Emitter.MOUSE_DOWN, me.downHandler)
-      .on(Emitter.MOUSE_MOVE, me.moveHandler)
-      .on(Emitter.MOUSE_UP, me.upHandler)
+      .on(Emitter.SHAPE_ENTER, me.shapeEnterHandler)
+      .on(Emitter.SHAPE_LEAVE, me.shapeLeaveHandler)
+      .on(Emitter.MOUSE_DOWN, me.mouseDownHandler)
+      .on(Emitter.MOUSE_MOVE, me.mouseMoveHandler)
+      .on(Emitter.MOUSE_UP, me.mouseUpHandler)
 
     }
 
     destroy() {
       this.emitter
-      .off(Emitter.MOUSE_DOWN, this.downHandler)
-      .off(Emitter.MOUSE_MOVE, this.moveHandler)
-      .off(Emitter.MOUSE_UP, this.upHandler)
+      .off(Emitter.SHAPE_ENTER, this.shapeEnterHandler)
+      .off(Emitter.SHAPE_LEAVE, this.shapeLeaveHandler)
+      .off(Emitter.MOUSE_DOWN, this.mouseDownHandler)
+      .off(Emitter.MOUSE_MOVE, this.mouseMoveHandler)
+      .off(Emitter.MOUSE_UP, this.mouseUpHandler)
+    }
+
+    getShapes() {
+      return this.shapes
+    }
+
+    // [TODO] 是否要刷新有待商榷
+    setShapes(shapes) {
+
+      if (shapes.length > 0) {
+        let rect = getUnionRect(
+          shapes.map(
+            function (shape) {
+              return shape.getRect()
+            }
+          )
+        )
+        Object.assign(this, rect)
+      }
+      else {
+        this.width = this.height = 0
+      }
+
+      this.shapes = shapes
+
+      this.emitter.fire(
+        Emitter.ACTIVE_SHAPE_CHANGE,
+        {
+          shapes: shapes
+        }
+      )
+
     }
 
     isPointInPath(painter, x, y) {
@@ -169,7 +263,24 @@ define(function (require) {
 
     draw(painter) {
 
-      let { x, y, width, height } = this
+      let { shapes, x, y, width, height } = this
+
+      if (!shapes.length) {
+        return
+      }
+
+      painter.setLineWidth(1)
+
+      if (shapes.length > 1) {
+        painter.setStrokeStyle('#C0CED8')
+        array.each(
+          shapes,
+          function (shape) {
+            let rect = shape.getRect()
+            painter.strokeRect(rect.x + 0.5, rect.y + 0.5, rect.width, rect.height)
+          }
+        )
+      }
 
       const left = x - THUMB_SIZE / 2
       const center = x + (width - THUMB_SIZE) / 2
@@ -179,7 +290,7 @@ define(function (require) {
       const middle = y + (height - THUMB_SIZE) / 2
       const bottom = y + height - THUMB_SIZE / 2
 
-      painter.setLineWidth(1)
+
       painter.setStrokeStyle('#ccc')
 
       // 矩形线框

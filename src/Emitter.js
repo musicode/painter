@@ -125,9 +125,13 @@ define(function (require, exports, module) {
 
   Emitter.SHAPE_LEAVE = 'shape_leave'
 
+  Emitter.HOVER_SHAPE_CHANGE = 'hover_shape_change'
+
+  Emitter.ACTIVE_SHAPE_CHANGE = 'active_shape_change'
+
   Emitter.ACTIVE_SHAPE_DELETE = 'active_shape_delete'
 
-  Emitter.ACTIVE_RECT_CHANGE = 'active_rect_change'
+  Emitter.SELECTION_RECT_CHANGE = 'selection_rect_change'
 
   const SHORTCUT = {
     46: Emitter.ACTIVE_SHAPE_DELETE,
