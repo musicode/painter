@@ -12,6 +12,7 @@
         }
         body {
             background-color: #EEE;
+            user-select: none;
         }
         canvas {
             background-color: #FFF;
@@ -19,7 +20,8 @@
             box-shadow: 0 0 8px rgba(0,0,0,0.2);
         }
         .form-horizontal {
-            margin-top: 10px;
+            margin: 20px;
+            width: 1200px;
         }
     </style>
 </head>
@@ -31,7 +33,7 @@
                 画布宽度
             </label>
             <div class="col-sm-3">
-                <input name="canvasWidth" type="number" value="1000" class="form-control">
+                <input name="canvasWidth" type="number" value="1200" class="form-control">
             </div>
         </div>
         <div class="form-group">
@@ -137,7 +139,12 @@
                 $('.btn-info').on('click', function () {
                     config = getConfig();
                     instance.resize(config.canvasWidth, config.canvasHeight);
-                    instance.apply(config)
+                    instance.apply({
+                        fillStyle: config.fillStyle,
+                        strokeStyle: config.strokeStyle,
+                        strokePosition: config.strokePosition,
+                        strokeThickness: config.strokeThickness,
+                    })
                 });
 
                 instance.addShape(
