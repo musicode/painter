@@ -102,7 +102,7 @@ define(function (require, exports, module) {
     }
 
     enableShadow(offsetX, offsetY, blur, color) {
-      let { context } = this
+      const { context } = this
       context.shadowColor = color
       context.shadowOffsetX = offsetX
       context.shadowOffsetY = offsetY
@@ -110,11 +110,26 @@ define(function (require, exports, module) {
     }
 
     disableShadow() {
-      let { context } = this
+      const { context } = this
       context.shadowColor =
       context.shadowOffsetX =
       context.shadowOffsetY =
       context.shadowBlur = 0
+    }
+
+    save() {
+      const { context } = this
+      const { width, height } = context.canvas
+      if (context.getImageData && width > 0 && height > 0) {
+        return context.getImageData(0, 0, width, height)
+      }
+    }
+
+    restore(data) {
+      const { context } = this
+      if (context.putImageData && data) {
+        context.putImageData(data, 0, 0)
+      }
     }
 
   }

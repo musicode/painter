@@ -90,7 +90,7 @@
             </label>
             <div class="col-sm-7">
                 <label class="radio-inline">
-                    <input type="radio" name="tool" value="0"> 无
+                    <input type="radio" name="tool" value="0" checked> 无
                 </label>
                 <label class="radio-inline">
                     <input type="radio" name="tool" value="1"> 矩形
@@ -172,10 +172,13 @@
                 window.instance = new Canvas(canvas);
 
                 var config = getConfig();
-                instance.resize(config.canvasWidth, config.canvasHeight);
 
-                $('.btn-info').on('click', function () {
-                    config = getConfig();
+                var shapeMap = {
+                  1: Rect,
+                  4: Oval,
+                };
+
+                var updateCanvas = function (config) {
                     instance.resize(config.canvasWidth, config.canvasHeight);
                     instance.apply({
                         fillStyle: config.fillStyle,
@@ -183,6 +186,19 @@
                         strokePosition: config.strokePosition,
                         strokeThickness: config.strokeThickness,
                     })
+                    var Shape = shapeMap[config.tool]
+                    if (Shape) {
+                      instance.drawing(Shape)
+                    }
+                    else {
+                      instance.undrawing()
+                    }
+                }
+
+                updateCanvas(config);
+
+                $('.btn-info').on('click', function () {
+                    updateCanvas(getConfig());
                 });
 
                 instance.addShape(

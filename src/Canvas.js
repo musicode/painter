@@ -7,6 +7,7 @@ define(function (require, exports, module) {
   const Selection = require('./states/Selection')
   const Active = require('./states/Active')
   const Hover = require('./states/Hover')
+  const Drawing = require('./states/Drawing')
 
   const getInterRect = require('./function/getInterRect')
   const array = require('./util/array')
@@ -15,16 +16,13 @@ define(function (require, exports, module) {
   const Painter = require('./Painter')
 
   const INDEX_ACTIVE = 0
+  const INDEX_SELECTION = 2
 
   let { devicePixelRatio } = window
   if (devicePixelRatio > 2) {
     devicePixelRatio = 2
   }
 
-  // [TODO]
-  // 1. 图形的 beginPath 尽量减少
-  // 2. 重构 canvas 的事件 handler
-  // 3. 把 states 做成插件机制，各自管理自己的逻辑
   class Canvas {
 
     constructor(canvas) {
@@ -40,8 +38,7 @@ define(function (require, exports, module) {
       me.shapes = [ ]
       me.states = [
         new Active({ }, emitter),
-        new Hover({ }, emitter),
-        new Selection({ }, emitter)
+        new Hover({ }, emitter)
       ]
 
       let hoverShape
@@ -111,6 +108,12 @@ define(function (require, exports, module) {
         }
       )
       .on(
+        Emitter.REFRESH,
+        function () {
+          me.refresh()
+        }
+      )
+      .on(
         Emitter.ACTIVE_SHAPE_DELETE,
         function () {
           let state = me.states[ INDEX_ACTIVE ], shapes = state.getShapes()
@@ -140,6 +143,20 @@ define(function (require, exports, module) {
         }
       )
       .on(
+        Emitter.DRAWING_START,
+        function () {
+          canvas.style.cursor = 'crosshair'
+        }
+      )
+      .on(
+        Emitter.DRAWING_END,
+        function (event) {
+          canvas.style.cursor = ''
+          me.shapes.push(event.shape)
+          me.refresh()
+        }
+      )
+      .on(
         Emitter.CANVAS_DECO,
         function (event) {
           event.action(me)
@@ -166,8 +183,8 @@ define(function (require, exports, module) {
         height *= devicePixelRatio
       }
 
-      this.element.width = Math.floor(width)
-      this.element.height = Math.floor(height)
+      this.element.width = width
+      this.element.height = height
 
     }
 
@@ -179,6 +196,26 @@ define(function (require, exports, module) {
     addShape(shape) {
       shape.draw(this.painter)
       this.shapes.push(shape)
+    }
+
+    drawing(Shape) {
+      const { states, emitter, painter } = this
+      if (states[ INDEX_SELECTION ]) {
+        states[ INDEX_SELECTION ].destroy()
+      }
+      states[ INDEX_SELECTION ] = new Drawing({ Shape }, emitter, painter)
+    }
+
+    undrawing() {
+      const { states, emitter } = this
+      let selection = states[ INDEX_SELECTION ]
+      if (selection instanceof Drawing) {
+        selection.destroy()
+        selection = null
+      }
+      if (!selection) {
+        states[ INDEX_SELECTION ] = new Selection({ }, emitter)
+      }
     }
 
     apply(config) {

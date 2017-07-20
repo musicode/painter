@@ -68,7 +68,9 @@ define(function (require) {
       }
 
       me.shapeLeaveHandler = function () {
-        hoverShape = null
+        if (hoverShape) {
+          hoverShape = null
+        }
       }
 
       emitter

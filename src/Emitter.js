@@ -125,6 +125,8 @@ define(function (require, exports, module) {
 
   }
 
+  Emitter.REFRESH = 'refresh'
+
   Emitter.MOUSE_DOWN = 'mouse_down'
 
   Emitter.MOUSE_MOVE = 'mouse_move'
@@ -144,6 +146,10 @@ define(function (require, exports, module) {
   Emitter.ACTIVE_SHAPE_DELETE = 'active_shape_delete'
 
   Emitter.SELECTION_RECT_CHANGE = 'selection_rect_change'
+
+  Emitter.DRAWING_START = 'drawing_start'
+
+  Emitter.DRAWING_END = 'drawing_end'
 
   const SHORTCUT = {
     8: Emitter.ACTIVE_SHAPE_DELETE,

@@ -88,6 +88,38 @@ define(function (require) {
       painter.fillRect(this.x, this.y, this.width, this.height)
     }
 
+    drawing(painter, startX, startY, endX, endY, restore) {
+
+      restore()
+
+      let x, y, width, height
+
+      if (startX < endX) {
+        x = startX
+        width = endX - startX
+      }
+      else {
+        x = endX
+        width = startX - endX
+      }
+
+      if (startY < endY) {
+        y = startY
+        height = endY - startY
+      }
+      else {
+        y = endY
+        height = startY - endY
+      }
+
+      this.x = x
+      this.y = y
+      this.width = width
+      this.height = height
+      this.draw(painter)
+
+    }
+
     getRect() {
       return this
     }

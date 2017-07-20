@@ -73,7 +73,9 @@ define(function (require) {
         }
       }
       me.shapeLeaveHandler = function () {
-        hoverShape = null
+        if (hoverShape) {
+          hoverShape = null
+        }
       }
       me.mouseDownHandler = function (event) {
         if (currentBox >= 0) {
@@ -198,6 +200,15 @@ define(function (require) {
       .on(Emitter.MOUSE_MOVE, me.mouseMoveHandler)
       .on(Emitter.MOUSE_UP, me.mouseUpHandler)
 
+    }
+
+    destroy() {
+      this.emitter
+      .off(Emitter.SHAPE_ENTER, this.shapeEnterHandler)
+      .off(Emitter.SHAPE_LEAVE, this.shapeLeaveHandler)
+      .off(Emitter.MOUSE_DOWN, this.mouseDownHandler)
+      .off(Emitter.MOUSE_MOVE, this.mouseMoveHandler)
+      .off(Emitter.MOUSE_UP, this.mouseUpHandler)
     }
 
     getShapes() {

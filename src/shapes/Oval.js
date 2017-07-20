@@ -99,6 +99,18 @@ define(function (require) {
       painter.fill()
     }
 
+    drawing(painter, startX, startY, endX, endY, restore) {
+
+      restore()
+
+      this.x = startX
+      this.y = startY
+      this.width = 2 * Math.abs(endX - startX)
+      this.height = 2 * Math.abs(endY - startY)
+      this.draw(painter)
+
+    }
+
     getRect() {
       const { x, y, width, height } = this
       return {
