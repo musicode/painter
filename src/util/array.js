@@ -38,6 +38,10 @@ define(function (require, exports, module) {
       }
     },
 
+    last(array) {
+      return array[ array.length - 1 ]
+    },
+
     has(array, item) {
       return array.indexOf(item) >= 0
     }

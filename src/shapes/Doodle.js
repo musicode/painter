@@ -68,7 +68,6 @@ define(function (require) {
 
       let {
         strokeStyle,
-        strokePosition,
         strokeThickness,
       } = this
 
@@ -103,6 +102,8 @@ define(function (require) {
 
       let points = this.points || (this.points = [ ])
 
+      painter.begin()
+
       if (!points.length) {
         array.push(
           points,
@@ -111,7 +112,22 @@ define(function (require) {
             y: startY,
           }
         )
+
+        let {
+          strokeStyle,
+          strokeThickness,
+        } = this
+
+        painter.setLineWidth(strokeThickness)
+        painter.setStrokeStyle(strokeStyle)
       }
+
+      const { x, y } = array.last(points)
+      painter.moveTo(x, y)
+      painter.lineTo(endX, endY)
+      painter.stroke()
+
+      console.log(endX, endY)
 
       array.push(
         points,
@@ -120,8 +136,6 @@ define(function (require) {
           y: endY,
         }
       )
-
-      this.draw(painter)
 
     }
 
