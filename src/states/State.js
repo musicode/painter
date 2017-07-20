@@ -11,10 +11,6 @@ define(function () {
       this.state = true
     }
 
-    destroy() {
-
-    }
-
   }
 
   return State

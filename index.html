@@ -32,7 +32,7 @@
             <label for="inputEmail3" class="col-sm-1 control-label">
                 画布宽度
             </label>
-            <div class="col-sm-3">
+            <div class="col-sm-7">
                 <input name="canvasWidth" type="number" value="1200" class="form-control">
             </div>
         </div>
@@ -40,7 +40,7 @@
             <label for="inputEmail3" class="col-sm-1 control-label">
                 画布高度
             </label>
-            <div class="col-sm-3">
+            <div class="col-sm-7">
                 <input name="canvasHeight" type="number" value="800" class="form-control">
             </div>
         </div>
@@ -48,7 +48,7 @@
             <label for="inputEmail3" class="col-sm-1 control-label">
                 填充颜色
             </label>
-            <div class="col-sm-3">
+            <div class="col-sm-7">
                 <input name="fillStyle" type="color" value="#ffb2a7" class="form-control">
             </div>
         </div>
@@ -56,7 +56,7 @@
             <label for="inputEmail3" class="col-sm-1 control-label">
                 描边粗细
             </label>
-            <div class="col-sm-3">
+            <div class="col-sm-7">
                 <input name="strokeThickness" type="range" value="20" class="form-control">
             </div>
         </div>
@@ -64,7 +64,7 @@
             <label for="inputEmail3" class="col-sm-1 control-label">
                 描边颜色
             </label>
-            <div class="col-sm-3">
+            <div class="col-sm-7">
                 <input name="strokeStyle" type="color" value="#f4f679" class="form-control">
             </div>
         </div>
@@ -72,7 +72,7 @@
             <label for="inputEmail3" class="col-sm-1 control-label">
                 描边方式
             </label>
-            <div class="col-sm-3">
+            <div class="col-sm-7">
                 <label class="radio-inline">
                     <input type="radio" name="strokePosition" value="1"> Inside
                 </label>
@@ -85,7 +85,43 @@
             </div>
         </div>
         <div class="form-group">
-            <div class="col-sm-offset-1 col-sm-3">
+            <label for="inputEmail3" class="col-sm-1 control-label">
+                当前工具
+            </label>
+            <div class="col-sm-7">
+                <label class="radio-inline">
+                    <input type="radio" name="tool" value="0"> 无
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="tool" value="1"> 矩形
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="tool" value="2"> 多边形
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="tool" value="3"> 线段
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="tool" value="4"> 圆
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="tool" value="5"> 箭头
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="tool" value="6"> 涂鸦
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="tool" value="7"> 文字
+                </label>
+                <label class="radio-inline">
+                    <span class="label label-danger">
+                        选中图形后按 Delete 键删除
+                    </span>
+                </label>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-1 col-sm-7">
                 <button type="submit" class="btn btn-info">
                     应用
                 </button>
@@ -113,6 +149,7 @@
             var strokeStyle = $('input[name="strokeStyle"]').val();
             var strokePosition = + $('input[name="strokePosition"]:checked').val();
             var strokeThickness = + $('input[name="strokeThickness"]').val();
+            var tool = + $('input[name="tool"]:checked').val();
             return {
                 canvasWidth: canvasWidth,
                 canvasHeight: canvasHeight,
@@ -120,6 +157,7 @@
                 strokeStyle: strokeStyle,
                 strokePosition: strokePosition,
                 strokeThickness: strokeThickness,
+                tool: tool
             };
         }
 

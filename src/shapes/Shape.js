@@ -10,10 +10,6 @@ define(function () {
       Object.assign(this, props)
     }
 
-    destroy() {
-
-    }
-
     /**
      * 绘制图形
      *

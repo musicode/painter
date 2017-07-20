@@ -57,13 +57,6 @@ define(function (require) {
       .on(Emitter.ACTIVE_SHAPE_CHANGE, me.activeShapeChangeHandler)
     }
 
-    destroy() {
-      this.emitter
-      .off(Emitter.SHAPE_ENTER, this.shapeEnterHandler)
-      .off(Emitter.SHAPE_LEAVE, this.shapeLeaveHandler)
-      .off(Emitter.ACTIVE_SHAPE_CHANGE, this.activeShapeChangeHandler)
-    }
-
     isPointInPath(painter, x, y) {
       return false
     }

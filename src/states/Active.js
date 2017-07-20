@@ -200,15 +200,6 @@ define(function (require) {
 
     }
 
-    destroy() {
-      this.emitter
-      .off(Emitter.SHAPE_ENTER, this.shapeEnterHandler)
-      .off(Emitter.SHAPE_LEAVE, this.shapeLeaveHandler)
-      .off(Emitter.MOUSE_DOWN, this.mouseDownHandler)
-      .off(Emitter.MOUSE_MOVE, this.mouseMoveHandler)
-      .off(Emitter.MOUSE_UP, this.mouseUpHandler)
-    }
-
     getShapes() {
       return this.shapes
     }
