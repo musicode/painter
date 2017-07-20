@@ -4,8 +4,8 @@
  */
 define(function (require) {
 
-  var Shape = require('./Shape')
-  var constant = require('../constant')
+  const Shape = require('./Shape')
+  const constant = require('../constant')
 
   /**
    * (x, y) 左上角

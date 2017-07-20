@@ -152,7 +152,10 @@ define(function (require, exports, module) {
         Emitter.DRAWING_END,
         function (event) {
           canvas.style.cursor = ''
-          array.push(me.shapes, event.shape)
+          const { shape } = event
+          if (shape.validate()) {
+            array.push(me.shapes, shape)
+          }
           me.refresh()
         }
       )

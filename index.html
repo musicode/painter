@@ -167,8 +167,9 @@
                 'shapes/Rect',
                 'shapes/Oval',
                 'shapes/Line',
+                'shapes/Doodle',
             ],
-            function (Canvas, Rect, Oval, Line) {
+            function (Canvas, Rect, Oval, Line, Doodle) {
 
                 window.instance = new Canvas(canvas);
 
@@ -178,6 +179,7 @@
                   1: Rect,
                   3: Line,
                   4: Oval,
+                  6: Doodle,
                 };
 
                 var updateCanvas = function (config) {

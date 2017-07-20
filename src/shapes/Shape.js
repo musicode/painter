@@ -27,6 +27,10 @@ define(function () {
 
     }
 
+    validate() {
+      return true
+    }
+
     getRect() {
 
     }
