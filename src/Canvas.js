@@ -152,7 +152,7 @@ define(function (require, exports, module) {
         Emitter.DRAWING_END,
         function (event) {
           canvas.style.cursor = ''
-          me.shapes.push(event.shape)
+          array.push(me.shapes, event.shape)
           me.refresh()
         }
       )
@@ -195,15 +195,23 @@ define(function (require, exports, module) {
      */
     addShape(shape) {
       shape.draw(this.painter)
-      this.shapes.push(shape)
+      array.push(this.shapes, shape)
     }
 
     drawing(Shape) {
-      const { states, emitter, painter } = this
+      const { states, emitter, painter, config } = this
       if (states[ INDEX_SELECTION ]) {
         states[ INDEX_SELECTION ].destroy()
       }
-      states[ INDEX_SELECTION ] = new Drawing({ Shape }, emitter, painter)
+      states[ INDEX_SELECTION ] = new Drawing(
+        {
+          createShape: function () {
+            return new Shape(config)
+          }
+        },
+        emitter,
+        painter
+      )
     }
 
     undrawing() {
@@ -226,6 +234,7 @@ define(function (require, exports, module) {
         }
       )
       this.refresh()
+      this.config = config
     }
 
     /**

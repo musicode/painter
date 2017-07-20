@@ -36,10 +36,7 @@ define(function (require) {
       }
 
       me.shapeEnterHandler = function (event) {
-        let { shape } = event
-        if (!shape.state) {
-          hoverShape = shape
-        }
+        hoverShape = event.shape
       }
       me.shapeLeaveHandler = function () {
         if (hoverShape) {
@@ -50,13 +47,7 @@ define(function (require) {
         if (event.inCanvas && !hoverShape) {
           startX = event.x
           startY = event.y
-
-          drawingShape = new me.Shape({
-            strokeStyle: '#ddd',
-            strokePosition: 2,
-            strokeThickness: 10,
-          })
-
+          drawingShape = new me.createShape()
           emitter.fire(
             Emitter.DRAWING_START
           )
