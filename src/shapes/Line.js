@@ -8,11 +8,10 @@ define(function (require) {
   var constant = require('../constant')
 
   /**
-   * (x, y) 圆心
-   * width 宽
-   * height 高
+   * (x, y) 开始点
+   * (endX, endY) 结束点
    */
-  class Oval extends Shape {
+  class Line extends Shape {
 
     /**
      * 点是否位于图形范围内
@@ -33,6 +32,7 @@ define(function (require) {
       ) {
         painter.begin()
         this.drawPath(painter)
+        console.log(painter.isPointInPath(x, y))
         return painter.isPointInPath(x, y)
       }
 
@@ -46,7 +46,8 @@ define(function (require) {
      * @param {Painter} painter
      */
     drawPath(painter) {
-      painter.drawOval(this.x, this.y, this.width, this.height)
+      painter.moveTo(this.x, this.y)
+      painter.lineTo(this.endX, this.endY)
     }
 
     /**
@@ -57,32 +58,15 @@ define(function (require) {
     stroke(painter) {
 
       let {
-        x,
-        y,
-        width,
-        height,
         strokeStyle,
         strokePosition,
         strokeThickness,
       } = this
 
-      // Canvas 的描边机制是 center
-
-      // inside
-      if (strokePosition === constant.STROKE_POSITION_INSIDE) {
-        width -= strokeThickness
-        height -= strokeThickness
-      }
-      // outside
-      else if (strokePosition === constant.STROKE_POSITION_OUTSIDE) {
-        width += strokeThickness
-        height += strokeThickness
-      }
-
       painter.setLineWidth(strokeThickness)
       painter.setStrokeStyle(strokeStyle)
       painter.begin()
-      painter.drawOval(x, y, width, height)
+      this.drawPath(painter)
       painter.stroke()
 
     }
@@ -93,10 +77,7 @@ define(function (require) {
      * @param {Painter} painter
      */
     fill(painter) {
-      painter.setFillStyle(this.fillStyle)
-      painter.begin()
-      this.drawPath(painter)
-      painter.fill()
+
     }
 
     /**
@@ -115,8 +96,8 @@ define(function (require) {
 
       this.x = startX
       this.y = startY
-      this.width = 2 * Math.abs(endX - startX)
-      this.height = 2 * Math.abs(endY - startY)
+      this.endX = endX
+      this.endY = endY
       this.draw(painter)
 
     }
@@ -125,30 +106,36 @@ define(function (require) {
       return {
         x: (this.x - rect.x) / rect.width,
         y: (this.y - rect.y) / rect.height,
-        width: this.width / rect.width,
-        height: this.height / rect.height,
+        endX: (this.endX - rect.x) / rect.width,
+        endY: (this.endY - rect.y) / rect.height,
       }
     }
 
     restore(rect, data) {
       this.x = rect.x + rect.width * data.x
       this.y = rect.y + rect.height * data.y
-      this.width = rect.width * data.width
-      this.height = rect.height * data.height
+      this.endX = rect.x + rect.width * data.endX
+      this.endY = rect.y + rect.height * data.endY
     }
 
     getRect() {
-      const { x, y, width, height } = this
+
+      const startX = Math.min(this.x, this.endX)
+      const startY = Math.min(this.y, this.endY)
+
+      const endX = Math.max(this.x, this.endX)
+      const endY = Math.max(this.y, this.endY)
+
       return {
-        x: x - width / 2,
-        y: y - height / 2,
-        width,
-        height,
+        x: startX,
+        y: startY,
+        width: endX - startX,
+        height: endY - startY
       }
     }
 
   }
 
-  return Oval
+  return Line
 
 })

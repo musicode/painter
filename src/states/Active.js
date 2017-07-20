@@ -28,20 +28,15 @@ define(function (require) {
 
       super(props)
 
-      let me = this, currentBox, targetX, targetY, update, hoverShape, shapeRatios
+      let me = this, currentBox, targetX, targetY, update, hoverShape, savedShapes
 
       me.shapes = [ ]
       me.emitter = emitter
 
       const saveShapes = function () {
-        shapeRatios = me.shapes.map(
+        savedShapes = me.shapes.map(
           function (shape) {
-            return {
-              x: (shape.x - me.x) / me.width,
-              y: (shape.y - me.y) / me.height,
-              width: shape.width / me.width,
-              height: shape.height / me.height,
-            }
+            return shape.save(me)
           }
         )
       }
@@ -50,10 +45,7 @@ define(function (require) {
         array.each(
           me.shapes,
           function (shape, i) {
-            shape.x = me.x + me.width * shapeRatios[ i ].x
-            shape.y = me.y + me.height * shapeRatios[ i ].y
-            shape.width = me.width * shapeRatios[ i ].width
-            shape.height = me.height * shapeRatios[ i ].height
+            shape.restore(me, savedShapes[ i ])
           }
         )
         emitter.fire(

@@ -166,8 +166,9 @@
                 'Canvas',
                 'shapes/Rect',
                 'shapes/Oval',
+                'shapes/Line',
             ],
-            function (Canvas, Rect, Oval) {
+            function (Canvas, Rect, Oval, Line) {
 
                 window.instance = new Canvas(canvas);
 
@@ -175,6 +176,7 @@
 
                 var shapeMap = {
                   1: Rect,
+                  3: Line,
                   4: Oval,
                 };
 

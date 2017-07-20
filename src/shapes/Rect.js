@@ -130,6 +130,22 @@ define(function (require) {
 
     }
 
+    save(rect) {
+      return {
+        x: (this.x - rect.x) / rect.width,
+        y: (this.y - rect.y) / rect.height,
+        width: this.width / rect.width,
+        height: this.height / rect.height,
+      }
+    }
+
+    restore(rect, data) {
+      this.x = rect.x + rect.width * data.x
+      this.y = rect.y + rect.height * data.y
+      this.width = rect.width * data.width
+      this.height = rect.height * data.height
+    }
+
     getRect() {
       return this
     }

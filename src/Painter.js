@@ -89,6 +89,10 @@ define(function (require, exports, module) {
       this.context.moveTo(x, y)
     }
 
+    lineTo(x, y) {
+      this.context.lineTo(x, y)
+    }
+
     arc(x, y, radius, startAngle, endAngle, CCW) {
       this.context.arc(x, y, radius, startAngle, endAngle, CCW)
     }
