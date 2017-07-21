@@ -98,6 +98,8 @@ define(function (require) {
         return
       }
 
+      painter.disableShadow()
+
       painter.setLineWidth(1)
       painter.setStrokeStyle('#ccc')
       painter.setFillStyle('rgba(180,180,180,0.1)')

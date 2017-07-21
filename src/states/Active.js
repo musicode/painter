@@ -267,6 +267,7 @@ define(function (require) {
         return
       }
 
+      painter.disableShadow()
       painter.setLineWidth(1)
 
       if (shapes.length > 1) {

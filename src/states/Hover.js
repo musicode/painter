@@ -87,6 +87,8 @@ define(function (require) {
         return
       }
 
+      painter.disableShadow()
+
       painter.setLineWidth(4)
       painter.setStrokeStyle('#45C0FF')
 
