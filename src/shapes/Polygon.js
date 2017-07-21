@@ -11,9 +11,10 @@ define(function (require) {
   const containLine = require('../contain/line')
   const containRect = require('../contain/rect')
   const containPolygon = require('../contain/polygon')
-  const getRect = require('../function/getRect')
   const getDistance = require('../function/getDistance')
   const getRectByPoints = require('../function/getRectByPoints')
+
+  const PI2 = 2 * Math.PI
 
   function getX(x, radius, angle) {
     return x + radius * Math.cos(angle)
@@ -63,13 +64,11 @@ define(function (require) {
      * @param {Painter} painter
      */
     stroke(painter) {
-
       painter.setLineWidth(this.strokeThickness)
       painter.setStrokeStyle(this.strokeStyle)
       painter.begin()
       this.drawPath(painter)
       painter.stroke()
-
     }
 
     /**
@@ -98,23 +97,16 @@ define(function (require) {
 
       restore()
 
-      const count = 5
+      const { count } = this
 
       const radius = getDistance(startX, startY, endX, endY)
 
-      // 360°
-      const fullAngle = 2 * Math.PI
-
       // 单位旋转的角度
-      const stepAngle = fullAngle / count
-
-      // 起始角度
-      let angle = Math.atan2(endY - startY, endX - startX)
-
-      // 画一圈
-      const endAngle = angle + fullAngle
+      const stepAngle = PI2 / count
 
       const points = [ ]
+
+      let angle = Math.atan2(endY - startY, endX - startX), endAngle = angle + PI2
 
       do {
         array.push(
@@ -134,23 +126,7 @@ define(function (require) {
 
       this.points = points
 
-      // 这时画出来的是正多边形
-      // 我们按照矩形范围压缩一下
-      const rect = this.getRect()
-      if (rect.width !== rect.height) {
-        this.restore(
-          rect,
-          this.save({
-            x: rect.x,
-            y: rect.y,
-            width: 2 * radius,
-            height: 2 * radius,
-          })
-        )
-      }
-
       this.draw(painter)
-
 
     }
 

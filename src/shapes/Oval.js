@@ -8,6 +8,7 @@ define(function (require) {
   const constant = require('../constant')
 
   const containRect = require('../contain/rect')
+  const getDistance = require('../function/getDistance')
 
   /**
    * (x, y) 圆心
@@ -111,8 +112,7 @@ define(function (require) {
 
       this.x = startX
       this.y = startY
-      this.width = 2 * Math.abs(endX - startX)
-      this.height = 2 * Math.abs(endY - startY)
+      this.width = this.height = 2 * getDistance(startX, startY, endX, endY)
       this.draw(painter)
 
     }

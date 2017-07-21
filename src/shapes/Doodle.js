@@ -28,7 +28,6 @@ define(function (require) {
 
       if (containRect(this.getRect(), x, y)) {
         let { points, strokeThickness } = this
-        // 太细很难碰到
         if (strokeThickness < 8) {
           strokeThickness = 8
         }
@@ -44,7 +43,6 @@ define(function (require) {
           ) {
             return true
           }
-
         }
       }
 
