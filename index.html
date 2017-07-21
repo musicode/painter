@@ -23,6 +23,9 @@
             margin: 20px;
             width: 1200px;
         }
+        .btn-danger {
+            margin-left: 10px;
+        }
     </style>
 </head>
 <body>
@@ -124,8 +127,11 @@
         </div>
         <div class="form-group">
             <div class="col-sm-offset-1 col-sm-7">
-                <button type="submit" class="btn btn-info">
+                <button class="btn btn-info">
                     应用
+                </button>
+                <button class="btn btn-danger">
+                    清空
                 </button>
             </div>
         </div>
@@ -205,6 +211,10 @@
 
                 $('.btn-info').on('click', function () {
                     updateCanvas(getConfig());
+                });
+
+                $('.btn-danger').on('click', function () {
+                    instance.clear();
                 });
 
             }
