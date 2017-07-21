@@ -9,6 +9,7 @@ define(function (require) {
 
   const getRect = require('../function/getRect')
   const containRect = require('../contain/rect')
+  const containLine = require('../contain/line')
 
   /**
    * (x, y) 左上角
@@ -25,8 +26,21 @@ define(function (require) {
      * @param {number} y
      * @return {boolean}
      */
-    isPointInPath(painter, x, y) {
-      return containRect(this, x, y)
+    isPointInPath(painter, x1, y1) {
+      if (containRect(this, x1, y1)) {
+        if (this.fillStyle) {
+          return true
+        }
+        let { x, y, width, height, strokeThickness } = this
+        if (strokeThickness < 8) {
+          strokeThickness = 8
+        }
+        return containLine(x, y, x + width, y, strokeThickness, x1, y1)
+          || containLine(x + width, y, x + width, y + height, strokeThickness, x1, y1)
+          || containLine(x + width, y + height, x, y + height, strokeThickness, x1, y1)
+          || containLine(x, y + height, x, y, strokeThickness, x1, y1)
+      }
+      return false
     }
 
     /**
@@ -99,13 +113,9 @@ define(function (require) {
      * @param {Function} 还原为鼠标按下时的画布
      */
     drawing(painter, startX, startY, endX, endY, restore) {
-
       restore()
-
       Object.assign(this, getRect(startX, startY, endX, endY))
-
       this.draw(painter)
-
     }
 
     save(rect) {

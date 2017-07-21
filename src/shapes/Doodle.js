@@ -65,13 +65,11 @@ define(function (require) {
      * @param {Painter} painter
      */
     stroke(painter) {
-
       painter.setLineWidth(this.strokeThickness)
       painter.setStrokeStyle(this.strokeStyle)
       painter.begin()
       this.drawPath(painter)
       painter.stroke()
-
     }
 
     /**

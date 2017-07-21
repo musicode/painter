@@ -134,6 +134,19 @@
             </div>
         </div>
         <div class="form-group">
+            <label for="inputEmail3" class="col-sm-1 control-label">
+                开关
+            </label>
+            <div class="col-sm-7">
+                <label class="checkbox-inline">
+                    <input type="checkbox" name="hasFill" checked> 有填充
+                </label>
+                <label class="checkbox-inline">
+                    <input type="checkbox" name="hasStroke" checked> 有描边
+                </label>
+            </div>
+        </div>
+        <div class="form-group">
             <div class="col-sm-offset-1 col-sm-7">
                 <button class="btn btn-info">
                     应用
@@ -167,6 +180,8 @@
             var strokeThickness = + $('input[name="strokeThickness"]').val();
             var tool = + $('input[name="tool"]:checked').val();
             var count = + $('input[name="count"]').val().trim();
+            var hasFill = $('input[name="hasFill"]').prop('checked');
+            var hasStroke = $('input[name="hasStroke"]').prop('checked');
             return {
                 canvasWidth: canvasWidth,
                 canvasHeight: canvasHeight,
@@ -176,6 +191,8 @@
                 strokeThickness: strokeThickness,
                 tool: tool,
                 count: count,
+                hasFill: hasFill,
+                hasStroke: hasStroke,
             };
         }
 
@@ -206,8 +223,8 @@
                     instance.resize(config.canvasWidth, config.canvasHeight);
                     instance.apply({
                         count: Math.max(config.count, 3),
-                        fillStyle: config.fillStyle,
-                        strokeStyle: config.strokeStyle,
+                        fillStyle: config.hasFill ? config.fillStyle : null,
+                        strokeStyle: config.hasStroke ? config.strokeStyle : null,
                         strokePosition: config.strokePosition,
                         strokeThickness: config.strokeThickness,
                     })
