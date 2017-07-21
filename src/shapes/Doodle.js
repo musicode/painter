@@ -32,7 +32,11 @@ define(function (require) {
         && y >= rect.y
         && y <= rect.y + rect.height
       ) {
-        const { points, strokeThickness } = this
+        let { points, strokeThickness } = this
+        // 太细很难碰到
+        if (strokeThickness < 8) {
+          strokeThickness = 8
+        }
         for (let i = 0, len = points.length; i < len; i += 2) {
           if (points[ i + 1 ]
             && containLine(

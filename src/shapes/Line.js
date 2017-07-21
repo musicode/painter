@@ -24,7 +24,11 @@ define(function (require) {
      * @return {boolean}
      */
     isPointInPath(painter, x, y) {
-      return containLine(this.x, this.y, this.endX, this.endY, this.strokeThickness, x, y)
+      let { strokeThickness } = this
+      if (strokeThickness < 8) {
+        strokeThickness = 8
+      }
+      return containLine(this.x, this.y, this.endX, this.endY, strokeThickness, x, y)
     }
 
     /**

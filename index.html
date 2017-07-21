@@ -57,7 +57,7 @@
                 描边粗细
             </label>
             <div class="col-sm-7">
-                <input name="strokeThickness" type="range" value="20" class="form-control">
+                <input name="strokeThickness" type="range" value="20" min="1" class="form-control">
             </div>
         </div>
         <div class="form-group">
@@ -65,7 +65,7 @@
                 描边颜色
             </label>
             <div class="col-sm-7">
-                <input name="strokeStyle" type="color" value="#f4f679" class="form-control">
+                <input name="strokeStyle" type="color" value="#ca39f2" class="form-control">
             </div>
         </div>
         <div class="form-group">
@@ -199,94 +199,13 @@
                     else {
                       instance.undrawing()
                     }
-                }
+                };
 
                 updateCanvas(config);
 
                 $('.btn-info').on('click', function () {
                     updateCanvas(getConfig());
                 });
-
-                instance.addShape(
-                  new Rect({
-                    x: 200,
-                    y: 200,
-                    width: 200,
-                    height: 200,
-                    strokeThickness: config.strokeThickness,
-                    strokePosition: config.strokePosition,
-                    strokeStyle: config.strokeStyle,
-                    fillStyle: config.fillStyle
-                  })
-                )
-
-                instance.addShape(
-                  new Rect({
-                    x: 500,
-                    y: 200,
-                    width: 200,
-                    height: 200,
-                    strokeThickness: config.strokeThickness,
-                    strokePosition: config.strokePosition,
-                    strokeStyle: config.strokeStyle,
-                    fillStyle: config.fillStyle
-                  })
-                )
-
-                instance.addShape(
-                  new Rect({
-                    x: 800,
-                    y: 200,
-                    width: 200,
-                    height: 200,
-                    strokeThickness: config.strokeThickness,
-                    strokePosition: config.strokePosition,
-                    strokeStyle: config.strokeStyle,
-                    fillStyle: config.fillStyle
-                  })
-                )
-
-
-
-
-                instance.addShape(
-                  new Oval({
-                    x: 300,
-                    y: 600,
-                    width: 200,
-                    height: 200,
-                    strokeThickness: config.strokeThickness,
-                    strokePosition: config.strokePosition,
-                    strokeStyle: config.strokeStyle,
-                    fillStyle: config.fillStyle
-                  })
-                )
-
-                instance.addShape(
-                  new Oval({
-                    x: 600,
-                    y: 600,
-                    width: 200,
-                    height: 200,
-                    strokeThickness: config.strokeThickness,
-                    strokePosition: config.strokePosition,
-                    strokeStyle: config.strokeStyle,
-                    fillStyle: config.fillStyle
-                  })
-                )
-
-                instance.addShape(
-                  new Oval({
-                    x: 900,
-                    y: 600,
-                    width: 200,
-                    height: 200,
-                    strokeThickness: config.strokeThickness,
-                    strokePosition: config.strokePosition,
-                    strokeStyle: config.strokeStyle,
-                    fillStyle: config.fillStyle
-                  })
-                )
 
             }
         );
