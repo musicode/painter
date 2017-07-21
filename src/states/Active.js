@@ -58,6 +58,9 @@ define(function (require) {
         )
       }
 
+      me.clearHandler = function () {
+        me.setShapes([ ])
+      }
       me.shapeEnterHandler = function (event) {
         let { shape } = event
         if (!shape.state) {
@@ -186,6 +189,7 @@ define(function (require) {
       }
 
       emitter
+      .on(Emitter.CLEAR, me.clearHandler)
       .on(Emitter.SHAPE_ENTER, me.shapeEnterHandler)
       .on(Emitter.SHAPE_LEAVE, me.shapeLeaveHandler)
       .on(Emitter.MOUSE_DOWN, me.mouseDownHandler)
@@ -196,6 +200,7 @@ define(function (require) {
 
     destroy() {
       this.emitter
+      .off(Emitter.CLEAR, this.clearHandler)
       .off(Emitter.SHAPE_ENTER, this.shapeEnterHandler)
       .off(Emitter.SHAPE_LEAVE, this.shapeLeaveHandler)
       .off(Emitter.MOUSE_DOWN, this.mouseDownHandler)

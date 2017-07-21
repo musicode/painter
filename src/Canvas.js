@@ -266,9 +266,11 @@ define(function (require, exports, module) {
      * 清空画布
      */
     clear() {
-      let { painter, shapes } = this
-      shapes.length = 0
-      painter.clear()
+      this.shapes.length = 0
+      this.painter.clear()
+      this.emitter.fire(
+        Emitter.CLEAR
+      )
     }
 
   }

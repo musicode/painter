@@ -126,6 +126,8 @@ define(function (require, exports, module) {
 
   Emitter.REFRESH = 'refresh'
 
+  Emitter.CLEAR = 'clear'
+
   Emitter.MOUSE_DOWN = 'mouse_down'
 
   Emitter.MOUSE_MOVE = 'mouse_move'
