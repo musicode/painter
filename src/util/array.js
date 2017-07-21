@@ -30,6 +30,10 @@ define(function (require, exports, module) {
       array.push(item)
     },
 
+    pop(array) {
+      array.pop(array)
+    },
+
     remove(array, item) {
       let index = array.indexOf(item)
       if (index >= 0) {

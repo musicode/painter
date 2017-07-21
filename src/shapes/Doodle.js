@@ -7,6 +7,7 @@ define(function (require) {
   const Shape = require('./Shape')
   const array = require('../util/array')
 
+  const containRect = require('../contain/rect')
   const containLine = require('../contain/line')
   const getRectByPoints = require('../function/getRectByPoints')
 
@@ -25,13 +26,7 @@ define(function (require) {
      */
     isPointInPath(painter, x, y) {
 
-      const rect = this.getRect()
-
-      if (x >= rect.x
-        && x <= rect.x + rect.width
-        && y >= rect.y
-        && y <= rect.y + rect.height
-      ) {
+      if (containRect(this.getRect(), x, y)) {
         let { points, strokeThickness } = this
         // 太细很难碰到
         if (strokeThickness < 8) {
@@ -165,7 +160,7 @@ define(function (require) {
 
     validate() {
       const { points } = this
-      return points && points.length > 0
+      return points && points.length > 1
     }
 
     getRect() {

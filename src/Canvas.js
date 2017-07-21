@@ -153,10 +153,12 @@ define(function (require, exports, module) {
         function (event) {
           canvas.style.cursor = ''
           const { shape } = event
-          if (shape.validate()) {
-            array.push(me.shapes, shape)
+          if (shape) {
+            if (shape.validate()) {
+              array.push(me.shapes, shape)
+            }
+            me.refresh()
           }
-          me.refresh()
         }
       )
       .on(

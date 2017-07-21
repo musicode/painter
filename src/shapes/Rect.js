@@ -7,6 +7,9 @@ define(function (require) {
   const Shape = require('./Shape')
   const constant = require('../constant')
 
+  const getRect = require('../function/getRect')
+  const containRect = require('../contain/rect')
+
   /**
    * (x, y) 左上角
    * width 宽
@@ -23,10 +26,7 @@ define(function (require) {
      * @return {boolean}
      */
     isPointInPath(painter, x, y) {
-      return x >= this.x
-        && x <= this.x + this.width
-        && y >= this.y
-        && y <= this.y + this.height
+      return containRect(this, x, y)
     }
 
     /**
@@ -102,30 +102,8 @@ define(function (require) {
 
       restore()
 
-      let x, y, width, height
+      Object.assign(this, getRect(startX, startY, endX, endY))
 
-      if (startX < endX) {
-        x = startX
-        width = endX - startX
-      }
-      else {
-        x = endX
-        width = startX - endX
-      }
-
-      if (startY < endY) {
-        y = startY
-        height = endY - startY
-      }
-      else {
-        y = endY
-        height = startY - endY
-      }
-
-      this.x = x
-      this.y = y
-      this.width = width
-      this.height = height
       this.draw(painter)
 
     }

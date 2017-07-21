@@ -43,10 +43,10 @@ define(function (require, exports, module) {
       const { length } = points
       if (length > 1) {
         let point = points[0]
-        painter.moveTo(point.x, point.y)
+        this.moveTo(point.x, point.y)
         for (let i = 1; i < length; i++) {
           point = points[i]
-          painter.lineTo(point.x, point.y)
+          this.lineTo(point.x, point.y)
         }
       }
     }
@@ -89,6 +89,20 @@ define(function (require, exports, module) {
       let { context } = this
       if (context.fillStyle !== value) {
         context.fillStyle = value
+      }
+    }
+
+    setLineJoin(value) {
+      let { context } = this
+      if (context.lineJoin !== value) {
+        context.lineJoin = value
+      }
+    }
+
+    setLineCap(value) {
+      let { context } = this
+      if (context.lineCap !== value) {
+        context.lineCap = value
       }
     }
 

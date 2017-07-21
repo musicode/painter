@@ -7,6 +7,8 @@ define(function (require) {
   const Shape = require('./Shape')
   const constant = require('../constant')
 
+  const containRect = require('../contain/rect')
+
   /**
    * (x, y) 圆心
    * width 宽
@@ -24,13 +26,7 @@ define(function (require) {
      */
     isPointInPath(painter, x, y) {
 
-      const rect = this.getRect()
-
-      if (x >= rect.x
-        && x <= rect.x + rect.width
-        && y >= rect.y
-        && y <= rect.y + rect.height
-      ) {
+      if (containRect(this.getRect(), x, y)) {
         painter.begin()
         this.drawPath(painter)
         return painter.isPointInPath(x, y)

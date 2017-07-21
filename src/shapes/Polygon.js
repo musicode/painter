@@ -7,10 +7,24 @@ define(function (require) {
   const Shape = require('./Shape')
   const constant = require('../constant')
 
+  const array = require('../util/array')
   const containLine = require('../contain/line')
+  const containRect = require('../contain/rect')
+  const containPolygon = require('../contain/polygon')
+  const getRect = require('../function/getRect')
+  const getDistance = require('../function/getDistance')
   const getRectByPoints = require('../function/getRectByPoints')
 
+  function getX(x, radius, angle) {
+    return x + radius * Math.cos(angle)
+  }
+
+  function getY(y, radius, angle) {
+    return y + radius * Math.sin(angle)
+  }
+
   /**
+   * count 几边形
    * points 点的数组
    */
   class Polygon extends Shape {
@@ -24,11 +38,13 @@ define(function (require) {
      * @return {boolean}
      */
     isPointInPath(painter, x, y) {
-      let { strokeThickness } = this
-      if (strokeThickness < 8) {
-        strokeThickness = 8
+
+      if (containRect(this.getRect(), x, y)) {
+        return containPolygon(this.points, x, y)
       }
-      return containLine(this.x, this.y, this.endX, this.endY, strokeThickness, x, y)
+
+      return false
+
     }
 
     /**
@@ -38,6 +54,7 @@ define(function (require) {
      */
     drawPath(painter) {
       painter.drawPoints(this.points)
+      painter.close()
     }
 
     /**
@@ -81,11 +98,59 @@ define(function (require) {
 
       restore()
 
-      this.x = startX
-      this.y = startY
-      this.endX = endX
-      this.endY = endY
+      const count = 5
+
+      const radius = getDistance(startX, startY, endX, endY)
+
+      // 360°
+      const fullAngle = 2 * Math.PI
+
+      // 单位旋转的角度
+      const stepAngle = fullAngle / count
+
+      // 起始角度
+      let angle = Math.atan2(endY - startY, endX - startX)
+
+      // 画一圈
+      const endAngle = angle + fullAngle
+
+      const points = [ ]
+
+      do {
+        array.push(
+          points,
+          {
+            x: getX(startX, radius, angle),
+            y: getY(startY, radius, angle),
+          }
+        )
+        angle += stepAngle
+      }
+      while (angle <= endAngle)
+
+      if (points.length - count === 1) {
+        array.pop(points)
+      }
+
+      this.points = points
+
+      // 这时画出来的是正多边形
+      // 我们按照矩形范围压缩一下
+      const rect = this.getRect()
+      if (rect.width !== rect.height) {
+        this.restore(
+          rect,
+          this.save({
+            x: rect.x,
+            y: rect.y,
+            width: 2 * radius,
+            height: 2 * radius,
+          })
+        )
+      }
+
       this.draw(painter)
+
 
     }
 
@@ -111,8 +176,8 @@ define(function (require) {
     }
 
     validate() {
-      const { points } = this
-      return points && points.length > 0
+      const rect = this.getRect()
+      return rect.width > 5 && rect.height > 5
     }
 
     getRect() {

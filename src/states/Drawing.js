@@ -13,7 +13,7 @@ define(function (require) {
 
       super(props)
 
-      let me = this, hoverShape, drawingShape, saved, startX, startY
+      let me = this, hoverShape, drawingShape, moving, saved, startX, startY
 
       me.emitter = emitter
 
@@ -45,6 +45,7 @@ define(function (require) {
       }
       me.mouseDownHandler = function (event) {
         if (event.inCanvas && !hoverShape) {
+          moving = 0
           startX = event.x
           startY = event.y
           drawingShape = new me.createShape()
@@ -55,6 +56,7 @@ define(function (require) {
       }
       me.mouseMoveHandler = function (event) {
         if (drawingShape) {
+          moving++
           drawingShape.drawing(painter, startX, startY, event.x, event.y, restore, refresh)
         }
       }
@@ -66,7 +68,7 @@ define(function (require) {
           emitter.fire(
             Emitter.DRAWING_END,
             {
-              shape: drawingShape
+              shape: moving > 0 ? drawingShape : null
             }
           )
           drawingShape = null
