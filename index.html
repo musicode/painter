@@ -32,7 +32,7 @@
 
     <div class="form-horizontal">
         <div class="form-group">
-            <label for="inputEmail3" class="col-sm-1 control-label">
+            <label for="inputEmail3" class="col-sm-2 control-label">
                 画布宽度
             </label>
             <div class="col-sm-7">
@@ -40,7 +40,7 @@
             </div>
         </div>
         <div class="form-group">
-            <label for="inputEmail3" class="col-sm-1 control-label">
+            <label for="inputEmail3" class="col-sm-2 control-label">
                 画布高度
             </label>
             <div class="col-sm-7">
@@ -48,7 +48,7 @@
             </div>
         </div>
         <div class="form-group">
-            <label for="inputEmail3" class="col-sm-1 control-label">
+            <label for="inputEmail3" class="col-sm-2 control-label">
                 填充颜色
             </label>
             <div class="col-sm-7">
@@ -56,7 +56,7 @@
             </div>
         </div>
         <div class="form-group">
-            <label for="inputEmail3" class="col-sm-1 control-label">
+            <label for="inputEmail3" class="col-sm-2 control-label">
                 描边粗细
             </label>
             <div class="col-sm-7">
@@ -64,7 +64,7 @@
             </div>
         </div>
         <div class="form-group">
-            <label for="inputEmail3" class="col-sm-1 control-label">
+            <label for="inputEmail3" class="col-sm-2 control-label">
                 描边颜色
             </label>
             <div class="col-sm-7">
@@ -72,7 +72,7 @@
             </div>
         </div>
         <div class="form-group">
-            <label for="inputEmail3" class="col-sm-1 control-label">
+            <label for="inputEmail3" class="col-sm-2 control-label">
                 描边方式
             </label>
             <div class="col-sm-7">
@@ -88,7 +88,55 @@
             </div>
         </div>
         <div class="form-group">
-            <label for="inputEmail3" class="col-sm-1 control-label">
+            <label for="inputEmail3" class="col-sm-2 control-label">
+                阴影 x 偏移量
+            </label>
+            <div class="col-sm-7">
+                <input name="shadowOffsetX" type="number" value="1" min="0" class="form-control">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">
+                阴影 y 偏移量
+            </label>
+            <div class="col-sm-7">
+                <input name="shadowOffsetY" type="number" value="1" min="0" class="form-control">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">
+                阴影模糊量
+            </label>
+            <div class="col-sm-7">
+                <input name="shadowBlur" type="number" value="1" min="0" class="form-control">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">
+                阴影颜色
+            </label>
+            <div class="col-sm-7">
+                <input name="shadowColor" type="color" value="#666666" class="form-control">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">
+                开关
+            </label>
+            <div class="col-sm-7">
+                <label class="checkbox-inline">
+                    <input type="checkbox" name="hasFill" checked> 有填充
+                </label>
+                <label class="checkbox-inline">
+                    <input type="checkbox" name="hasStroke" checked> 有描边
+                </label>
+                <label class="checkbox-inline">
+                    <input type="checkbox" name="hasShadow" checked> 有阴影
+                </label>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">
                 当前工具
             </label>
             <div class="col-sm-7">
@@ -96,7 +144,7 @@
                     <input type="radio" name="tool" value="0" checked> 无
                 </label>
                 <label class="radio-inline">
-                    <input type="radio" name="tool" value="1"> 线段
+                    <input type="radio" name="tool" value="1"> 直线
                 </label>
                 <label class="radio-inline">
                     <input type="radio" name="tool" value="2"> 矩形
@@ -126,24 +174,11 @@
             </div>
         </div>
         <div class="form-group">
-            <label for="inputEmail3" class="col-sm-1 control-label">
+            <label for="inputEmail3" class="col-sm-2 control-label">
                 多边形数量
             </label>
             <div class="col-sm-7">
                 <input name="count" type="number" value="3" min="3" class="form-control">
-            </div>
-        </div>
-        <div class="form-group">
-            <label for="inputEmail3" class="col-sm-1 control-label">
-                开关
-            </label>
-            <div class="col-sm-7">
-                <label class="checkbox-inline">
-                    <input type="checkbox" name="hasFill" checked> 有填充
-                </label>
-                <label class="checkbox-inline">
-                    <input type="checkbox" name="hasStroke" checked> 有描边
-                </label>
             </div>
         </div>
         <div class="form-group">
@@ -178,10 +213,16 @@
             var strokeStyle = $('input[name="strokeStyle"]').val();
             var strokePosition = + $('input[name="strokePosition"]:checked').val();
             var strokeThickness = + $('input[name="strokeThickness"]').val();
+            var shadowOffsetX = + $('input[name="shadowOffsetX"]').val().trim();
+            var shadowOffsetY = + $('input[name="shadowOffsetY"]').val().trim();
+            var shadowBlur = + $('input[name="shadowBlur"]').val().trim();
+            var shadowColor = $('input[name="shadowColor"]').val();
+
             var tool = + $('input[name="tool"]:checked').val();
             var count = + $('input[name="count"]').val().trim();
             var hasFill = $('input[name="hasFill"]').prop('checked');
             var hasStroke = $('input[name="hasStroke"]').prop('checked');
+            var hasShadow = $('input[name="hasShadow"]').prop('checked');
             return {
                 canvasWidth: canvasWidth,
                 canvasHeight: canvasHeight,
@@ -189,10 +230,16 @@
                 strokeStyle: strokeStyle,
                 strokePosition: strokePosition,
                 strokeThickness: strokeThickness,
+                shadowOffsetX: shadowOffsetX,
+                shadowOffsetY: shadowOffsetY,
+                shadowBlur: shadowBlur,
+                shadowColor: shadowColor,
+
                 tool: tool,
                 count: count,
                 hasFill: hasFill,
                 hasStroke: hasStroke,
+                hasShadow: hasShadow,
             };
         }
 
@@ -227,6 +274,10 @@
                         strokeStyle: config.hasStroke ? config.strokeStyle : null,
                         strokePosition: config.strokePosition,
                         strokeThickness: config.strokeThickness,
+                        shadowOffsetX: config.shadowOffsetX,
+                        shadowOffsetY: config.shadowOffsetY,
+                        shadowBlur: config.shadowBlur,
+                        shadowColor: config.hasShadow ? config.shadowColor : null,
                     })
                     var Shape = shapeMap[config.tool]
                     if (Shape) {

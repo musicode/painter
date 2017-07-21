@@ -17,14 +17,42 @@ define(function () {
      */
     draw(painter) {
 
-      if (this.fillStyle) {
-        this.fill(painter)
+
+
+      const needFill = this.fillStyle && this.fill
+      const needStroke = this.strokeThickness && this.strokeStyle && this.stroke
+
+      if (needFill || needStroke) {
+
+        if (needFill) {
+          if (!needStroke) {
+            this.applyShadow(painter)
+          }
+          this.fill(painter)
+        }
+
+        if (needStroke) {
+          this.applyShadow(painter)
+          this.stroke(painter)
+        }
+
       }
 
-      if (this.strokeThickness && this.strokeStyle) {
-        this.stroke(painter)
-      }
 
+    }
+
+    applyShadow(painter) {
+      if (this.shadowColor) {
+        painter.enableShadow(
+          this.shadowOffsetX,
+          this.shadowOffsetY,
+          this.shadowBlur,
+          this.shadowColor
+        )
+      }
+      else {
+        painter.disableShadow()
+      }
     }
 
     validate() {

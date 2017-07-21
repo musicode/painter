@@ -73,15 +73,6 @@ define(function (require) {
     }
 
     /**
-     * 填充
-     *
-     * @param {Painter} painter
-     */
-    fill(painter) {
-
-    }
-
-    /**
      * 正在绘制
      *
      * @param {Painter} painter
@@ -109,17 +100,10 @@ define(function (require) {
         painter.setStrokeStyle(this.strokeStyle)
       }
 
-      // 每次取最后三个点进行绘制，这样才不会有断裂感
-      const point1 = points[ points.length - 2 ]
-      const point2 = points[ points.length - 1 ]
-
-      if (point1) {
-        painter.moveTo(point1.x, point1.y)
-        painter.lineTo(point2.x, point2.y)
-      }
-      else {
-        painter.moveTo(point2.x, point2.y)
-      }
+      // 每次取最后 3 个点进行绘制，这样才不会有断裂感
+      painter.drawPoints(
+        points.slice(points.length - 3)
+      )
       painter.lineTo(endX, endY)
       painter.stroke()
 

@@ -57,15 +57,6 @@ define(function (require) {
     }
 
     /**
-     * 填充
-     *
-     * @param {Painter} painter
-     */
-    fill(painter) {
-
-    }
-
-    /**
      * 正在绘制
      *
      * @param {Painter} painter
