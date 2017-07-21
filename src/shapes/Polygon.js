@@ -41,7 +41,26 @@ define(function (require) {
     isPointInPath(painter, x, y) {
 
       if (containRect(this.getRect(), x, y)) {
-        return containPolygon(this.points, x, y)
+        let { points, strokeThickness, fillStyle } = this
+        if (fillStyle) {
+          return containPolygon(points, x, y)
+        }
+        if (strokeThickness < 8) {
+          strokeThickness = 8
+        }
+        for (let i = 0, len = points.length; i < len; i++) {
+          if (points[ i + 1 ]
+            && containLine(
+                points[ i ].x,
+                points[ i ].y,
+                points[ i + 1 ].x,
+                points[ i + 1 ].y,
+                strokeThickness, x, y
+              )
+          ) {
+            return true
+          }
+        }
       }
 
       return false

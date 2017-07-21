@@ -31,7 +31,7 @@ define(function (require) {
         if (strokeThickness < 8) {
           strokeThickness = 8
         }
-        for (let i = 0, len = points.length; i < len; i += 2) {
+        for (let i = 0, len = points.length; i < len; i++) {
           if (points[ i + 1 ]
             && containLine(
                 points[ i ].x,
@@ -83,6 +83,8 @@ define(function (require) {
      * @param {Function} 还原为鼠标按下时的画布
      */
     drawing(painter, startX, startY, endX, endY) {
+
+      painter.disableShadow()
 
       let points = this.points || (this.points = [ ])
 

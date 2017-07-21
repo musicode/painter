@@ -20,10 +20,12 @@ define(function () {
       return false
     }
 
-    if ((x > startX + lineWidth && x > endX + lineWidth)
-      || (x < startX - lineWidth && x < endX - lineWidth)
-      || (y > startY + lineWidth && y > endY + lineWidth)
-      || (y < startY - lineWidth && y < endY - lineWidth)
+    let halfWidth = lineWidth / 2
+
+    if ((x > startX + halfWidth && x > endX + halfWidth)
+      || (x < startX - halfWidth && x < endX - halfWidth)
+      || (y > startY + halfWidth && y > endY + halfWidth)
+      || (y < startY - halfWidth && y < endY - halfWidth)
     ) {
       return false
     }
@@ -35,7 +37,7 @@ define(function () {
     //
     // 因此先排除直线垂直于 x 轴的情况
     if (startX === endX) {
-      return Math.abs(x - startX) <= lineWidth / 2
+      return Math.abs(x - startX) <= halfWidth
     }
 
     // 求出公式 y = kx + b 中的 k 和 b
@@ -47,7 +49,7 @@ define(function () {
     let s = Math.pow(k * x - y + b, 2) / (k * k + 1)
 
     // 点到直线的距离应该 <= lineWidth / 2
-    return s <= Math.pow(lineWidth / 2, 2)
+    return s <= Math.pow(halfWidth, 2)
 
   }
 
