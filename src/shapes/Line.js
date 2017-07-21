@@ -7,6 +7,8 @@ define(function (require) {
   const Shape = require('./Shape')
   const constant = require('../constant')
 
+  const containLine = require('../contain/line')
+
   /**
    * (x, y) 开始点
    * (endX, endY) 结束点
@@ -22,22 +24,7 @@ define(function (require) {
      * @return {boolean}
      */
     isPointInPath(painter, x, y) {
-
-      const rect = this.getRect()
-
-      if (x >= rect.x
-        && x <= rect.x + rect.width
-        && y >= rect.y
-        && y <= rect.y + rect.height
-      ) {
-        painter.begin()
-        this.drawPath(painter)
-        console.log(painter.isPointInPath(x, y))
-        return painter.isPointInPath(x, y)
-      }
-
-      return false
-
+      return containLine(this.x, this.y, this.endX, this.endY, this.strokeThickness, x, y)
     }
 
     /**
@@ -57,14 +44,8 @@ define(function (require) {
      */
     stroke(painter) {
 
-      let {
-        strokeStyle,
-        strokePosition,
-        strokeThickness,
-      } = this
-
-      painter.setLineWidth(strokeThickness)
-      painter.setStrokeStyle(strokeStyle)
+      painter.setLineWidth(this.strokeThickness)
+      painter.setStrokeStyle(this.strokeStyle)
       painter.begin()
       this.drawPath(painter)
       painter.stroke()

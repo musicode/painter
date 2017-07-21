@@ -8,6 +8,8 @@ define(function (require) {
   const constant = require('../constant')
   const array = require('../util/array')
 
+  const containLine = require('../contain/line')
+
   /**
    * points 点数组
    */
@@ -30,7 +32,21 @@ define(function (require) {
         && y >= rect.y
         && y <= rect.y + rect.height
       ) {
-        return true
+        const { points, strokeThickness } = this
+        for (let i = 0, len = points.length; i < len; i += 2) {
+          if (points[ i + 1 ]
+            && containLine(
+                points[ i ].x,
+                points[ i ].y,
+                points[ i + 1 ].x,
+                points[ i + 1 ].y,
+                strokeThickness, x, y
+              )
+          ) {
+            return true
+          }
+
+        }
       }
 
       return false
@@ -66,13 +82,8 @@ define(function (require) {
      */
     stroke(painter) {
 
-      let {
-        strokeStyle,
-        strokeThickness,
-      } = this
-
-      painter.setLineWidth(strokeThickness)
-      painter.setStrokeStyle(strokeStyle)
+      painter.setLineWidth(this.strokeThickness)
+      painter.setStrokeStyle(this.strokeStyle)
       painter.begin()
       this.drawPath(painter)
       painter.stroke()
@@ -112,22 +123,23 @@ define(function (require) {
             y: startY,
           }
         )
-
-        let {
-          strokeStyle,
-          strokeThickness,
-        } = this
-
-        painter.setLineWidth(strokeThickness)
-        painter.setStrokeStyle(strokeStyle)
+        painter.setLineWidth(this.strokeThickness)
+        painter.setStrokeStyle(this.strokeStyle)
       }
 
-      const { x, y } = array.last(points)
-      painter.moveTo(x, y)
+      // 每次取最后三个点进行绘制，这样才不会有断裂感
+      const point1 = points[ points.length - 2 ]
+      const point2 = points[ points.length - 1 ]
+
+      if (point1) {
+        painter.moveTo(point1.x, point1.y)
+        painter.lineTo(point2.x, point2.y)
+      }
+      else {
+        painter.moveTo(point2.x, point2.y)
+      }
       painter.lineTo(endX, endY)
       painter.stroke()
-
-      console.log(endX, endY)
 
       array.push(
         points,

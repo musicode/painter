@@ -2,7 +2,7 @@
  * @file 判断点是否在线段内
  * @author musicode
  */
-define(function (require, exports, module) {
+define(function () {
 
   /**
    * @param {number} startX 线段的起始横坐标
@@ -28,17 +28,26 @@ define(function (require, exports, module) {
       return false
     }
 
+    // 直线方程
+    //
+    // 点斜式  y = kx + b
+    // 适用范围：直线不垂直于 x 轴
+    //
+    // 因此先排除直线垂直于 x 轴的情况
     if (startX === endX) {
       return Math.abs(x - startX) < lineWidth / 2
     }
-    else if (startY === endY) {
-      return Math.abs(y - startY) < lineWidth / 2
-    }
 
-    return x >= rect.x
-        && x <= rect.x + rect.width
-        && y >= rect.y
-        && y <= rect.y + rect.height
+    // 求出公式 y = kx + b 中的 k 和 b
+    let k = (endY - startY) / (endX - startX)
+    let b = (startX * endY - endX * startY) / (startX - endX)
+
+    // 然后运用点到直线距离公式
+    // s 表示点到直线距离的平方
+    let s = Math.pow(k * x - y + b, 2) / k * k + 1
+
+    // 点到直线的距离应该 <= lineWidth / 2
+    return s <= Math.pow(lineWidth / 2, 2)
 
   }
 

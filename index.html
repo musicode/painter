@@ -93,26 +93,28 @@
                     <input type="radio" name="tool" value="0" checked> 无
                 </label>
                 <label class="radio-inline">
-                    <input type="radio" name="tool" value="1"> 矩形
+                    <input type="radio" name="tool" value="1"> 线段
                 </label>
+                <label class="radio-inline">
+                    <input type="radio" name="tool" value="2"> 矩形
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="tool" value="3"> 圆
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="tool" value="4"> 涂鸦
+                </label>
+                <!--
                 <label class="radio-inline">
                     <input type="radio" name="tool" value="2"> 多边形
-                </label>
-                <label class="radio-inline">
-                    <input type="radio" name="tool" value="3"> 线段
-                </label>
-                <label class="radio-inline">
-                    <input type="radio" name="tool" value="4"> 圆
                 </label>
                 <label class="radio-inline">
                     <input type="radio" name="tool" value="5"> 箭头
                 </label>
                 <label class="radio-inline">
-                    <input type="radio" name="tool" value="6"> 涂鸦
-                </label>
-                <label class="radio-inline">
                     <input type="radio" name="tool" value="7"> 文字
                 </label>
+                -->
                 <label class="radio-inline">
                     <span class="label label-danger">
                         选中图形后按 Delete 键删除
@@ -176,10 +178,10 @@
                 var config = getConfig();
 
                 var shapeMap = {
-                  1: Rect,
-                  3: Line,
-                  4: Oval,
-                  6: Doodle,
+                  1: Line,
+                  2: Rect,
+                  3: Oval,
+                  4: Doodle,
                 };
 
                 var updateCanvas = function (config) {
