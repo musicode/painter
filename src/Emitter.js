@@ -14,8 +14,6 @@ define(function (require, exports, module) {
 
       let me = this, cursorX, cursorY, inCanvas
 
-      let left = canvas.offsetLeft, top = canvas.offsetTop
-
       document.addEventListener(
         'mousedown',
         function () {
@@ -36,10 +34,11 @@ define(function (require, exports, module) {
         'mousemove',
         function (event) {
           if (!me.disabled) {
+
             const { pageX, pageY } = event
 
-            cursorX = pageX - left
-            cursorY = pageY - top
+            cursorX = pageX - canvas.offsetLeft
+            cursorY = pageY - canvas.offsetTop
 
             if (devicePixelRatio > 1) {
               cursorX *= devicePixelRatio
