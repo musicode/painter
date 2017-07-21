@@ -5,10 +5,10 @@
 define(function (require) {
 
   const Shape = require('./Shape')
-  const constant = require('../constant')
   const array = require('../util/array')
 
   const containLine = require('../contain/line')
+  const getRectByPoints = require('../function/getRectByPoints')
 
   /**
    * points 点数组
@@ -63,20 +63,7 @@ define(function (require) {
      * @param {Painter} painter
      */
     drawPath(painter) {
-
-      const { points } = this
-
-      if (points.length > 0) {
-
-        let point = points[0]
-        painter.moveTo(point.x, point.y)
-
-        for (let i = 1, len = points.length; i < len; i++) {
-          point = points[i]
-          painter.lineTo(point.x, point.y)
-        }
-
-      }
+      painter.drawPoints(this.points)
     }
 
     /**
@@ -182,41 +169,7 @@ define(function (require) {
     }
 
     getRect() {
-
-      const { points } = this
-
-      let startX = 0, startY = 0, endX = 0, endY = 0
-
-      if (points.length > 0) {
-
-        let point = points[0]
-        startX = endX = point.x
-        startY = endY = point.y
-
-        for (let i = 1, len = points.length; i < len; i++) {
-          point = points[i]
-          if (point.x < startX) {
-            startX = point.x
-          }
-          else if (point.x > endX) {
-            endX = point.x
-          }
-          if (point.y < startY) {
-            startY = point.y
-          }
-          else if (point.y > endY) {
-            endY = point.y
-          }
-        }
-
-      }
-
-      return {
-        x: startX,
-        y: startY,
-        width: endX - startX,
-        height: endY - startY
-      }
+      return getRectByPoints(this.points)
     }
 
   }

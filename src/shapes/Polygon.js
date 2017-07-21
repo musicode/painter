@@ -5,15 +5,15 @@
 define(function (require) {
 
   const Shape = require('./Shape')
+  const constant = require('../constant')
 
   const containLine = require('../contain/line')
-  const getDistance = require('../function/getDistance')
+  const getRectByPoints = require('../function/getRectByPoints')
 
   /**
-   * (x, y) 开始点
-   * (endX, endY) 结束点
+   * points 点的数组
    */
-  class Line extends Shape {
+  class Polygon extends Shape {
 
     /**
      * 点是否位于图形范围内
@@ -37,8 +37,7 @@ define(function (require) {
      * @param {Painter} painter
      */
     drawPath(painter) {
-      painter.moveTo(this.x, this.y)
-      painter.lineTo(this.endX, this.endY)
+      painter.drawPoints(this.points)
     }
 
     /**
@@ -62,7 +61,10 @@ define(function (require) {
      * @param {Painter} painter
      */
     fill(painter) {
-
+      painter.setFillStyle(this.fillStyle)
+      painter.begin()
+      this.drawPath(painter)
+      painter.fill()
     }
 
     /**
@@ -88,43 +90,37 @@ define(function (require) {
     }
 
     save(rect) {
-      return {
-        x: (this.x - rect.x) / rect.width,
-        y: (this.y - rect.y) / rect.height,
-        endX: (this.endX - rect.x) / rect.width,
-        endY: (this.endY - rect.y) / rect.height,
-      }
+      return this.points.map(
+        function (point) {
+          return {
+            x: (point.x - rect.x) / rect.width,
+            y: (point.y - rect.y) / rect.height,
+          }
+        }
+      )
     }
 
     restore(rect, data) {
-      this.x = rect.x + rect.width * data.x
-      this.y = rect.y + rect.height * data.y
-      this.endX = rect.x + rect.width * data.endX
-      this.endY = rect.y + rect.height * data.endY
+      array.each(
+        this.points,
+        function (point, i) {
+          point.x = rect.x + rect.width * data[ i ].x
+          point.y = rect.y + rect.height * data[ i ].y
+        }
+      )
     }
 
     validate() {
-      return getDistance(this.x, this.y, this.endX, this.endY) > 2
+      const { points } = this
+      return points && points.length > 0
     }
 
     getRect() {
-
-      const startX = Math.min(this.x, this.endX)
-      const startY = Math.min(this.y, this.endY)
-
-      const endX = Math.max(this.x, this.endX)
-      const endY = Math.max(this.y, this.endY)
-
-      return {
-        x: startX,
-        y: startY,
-        width: endX - startX,
-        height: endY - startY
-      }
+      return getRectByPoints(this.points)
     }
 
   }
 
-  return Line
+  return Polygon
 
 })

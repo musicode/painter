@@ -2,7 +2,7 @@
  * @file 两个矩形的交集
  * @author musicode
  */
-define(function (require, exports, module) {
+define(function () {
 
   return function (rect1, rect2) {
     let left = Math.max(rect1.x, rect2.x)

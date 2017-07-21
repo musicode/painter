@@ -2,7 +2,7 @@
  * @file 多个矩形的并集
  * @author musicode
  */
-define(function (require, exports, module) {
+define(function () {
 
   return function (rects) {
     let { length } = rects

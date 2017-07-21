@@ -35,7 +35,7 @@ define(function () {
     //
     // 因此先排除直线垂直于 x 轴的情况
     if (startX === endX) {
-      return Math.abs(x - startX) < lineWidth / 2
+      return Math.abs(x - startX) <= lineWidth / 2
     }
 
     // 求出公式 y = kx + b 中的 k 和 b

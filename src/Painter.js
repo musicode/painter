@@ -39,6 +39,18 @@ define(function (require, exports, module) {
       }
     }
 
+    drawPoints(points) {
+      const { length } = points
+      if (length > 1) {
+        let point = points[0]
+        painter.moveTo(point.x, point.y)
+        for (let i = 1; i < length; i++) {
+          point = points[i]
+          painter.lineTo(point.x, point.y)
+        }
+      }
+    }
+
     stroke() {
       this.context.stroke()
     }
