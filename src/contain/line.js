@@ -44,7 +44,7 @@ define(function () {
 
     // 然后运用点到直线距离公式
     // s 表示点到直线距离的平方
-    let s = Math.pow(k * x - y + b, 2) / k * k + 1
+    let s = Math.pow(k * x - y + b, 2) / (k * k + 1)
 
     // 点到直线的距离应该 <= lineWidth / 2
     return s <= Math.pow(lineWidth / 2, 2)
