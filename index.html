@@ -279,13 +279,9 @@
                         shadowBlur: config.shadowBlur,
                         shadowColor: config.hasShadow ? config.shadowColor : null,
                     })
-                    var Shape = shapeMap[config.tool]
-                    if (Shape) {
-                      instance.drawing(Shape)
-                    }
-                    else {
-                      instance.undrawing()
-                    }
+                    instance.drawing(
+                      shapeMap[config.tool]
+                    )
                 };
 
                 updateCanvas(config);

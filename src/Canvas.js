@@ -208,25 +208,18 @@ define(function (require, exports, module) {
       if (states[ INDEX_SELECTION ]) {
         states[ INDEX_SELECTION ].destroy()
       }
-      states[ INDEX_SELECTION ] = new Drawing(
-        {
-          createShape: function () {
-            return new Shape(config)
-          }
-        },
-        emitter,
-        painter
-      )
-    }
-
-    undrawing() {
-      const { states, emitter } = this
-      let selection = states[ INDEX_SELECTION ]
-      if (selection instanceof Drawing) {
-        selection.destroy()
-        selection = null
+      if (Shape) {
+        states[ INDEX_SELECTION ] = new Drawing(
+          {
+            createShape: function () {
+              return new Shape(config)
+            }
+          },
+          emitter,
+          painter
+        )
       }
-      if (!selection) {
+      else {
         states[ INDEX_SELECTION ] = new Selection({ }, emitter)
       }
     }
