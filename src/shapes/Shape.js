@@ -27,7 +27,7 @@ define(function (require) {
     isPointInPath(painter, x, y) {
 
       if (containRect(this.getRect(), x, y)) {
-        let { points, strokeThickness, fillStyle } = this
+        let { fillStyle, strokeThickness, points } = this
         if (fillStyle && this.isPointInFill) {
           return this.isPointInFill(painter, x, y)
         }
