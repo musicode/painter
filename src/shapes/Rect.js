@@ -4,36 +4,14 @@
  */
 define(function (require) {
 
-  const Shape = require('./Shape')
+  const Polygon = require('./Polygon')
 
   const getRect = require('../function/getRect')
 
   /**
    * points
    */
-  class Rect extends Shape {
-
-    /**
-     * 绘制路径
-     *
-     * @param {Painter} painter
-     */
-    drawPath(painter) {
-      painter.drawPoints(this.points)
-      painter.close()
-    }
-
-    /**
-     * 填充
-     *
-     * @param {Painter} painter
-     */
-    fill(painter) {
-      painter.setFillStyle(this.fillStyle)
-      painter.begin()
-      this.drawPath(painter)
-      painter.fill()
-    }
+  class Rect extends Polygon {
 
     /**
      * 正在绘制
