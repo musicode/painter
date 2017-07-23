@@ -8,11 +8,9 @@ define(function (require) {
   const constant = require('../constant')
 
   const array = require('../util/array')
-  const containLine = require('../contain/line')
-  const containRect = require('../contain/rect')
+
   const containPolygon = require('../contain/polygon')
   const getDistance = require('../function/getDistance')
-  const getRectByPoints = require('../function/getRectByPoints')
 
   const PI2 = 2 * Math.PI
 
@@ -30,41 +28,8 @@ define(function (require) {
    */
   class Polygon extends Shape {
 
-    /**
-     * 点是否位于图形范围内
-     *
-     * @param {Painter} painter
-     * @param {number} x
-     * @param {number} y
-     * @return {boolean}
-     */
-    isPointInPath(painter, x, y) {
-
-      if (containRect(this.getRect(), x, y)) {
-        let { points, strokeThickness, fillStyle } = this
-        if (fillStyle) {
-          return containPolygon(points, x, y)
-        }
-        if (strokeThickness < 8) {
-          strokeThickness = 8
-        }
-        for (let i = 0, len = points.length; i < len; i++) {
-          if (points[ i + 1 ]
-            && containLine(
-                points[ i ].x,
-                points[ i ].y,
-                points[ i + 1 ].x,
-                points[ i + 1 ].y,
-                strokeThickness, x, y
-              )
-          ) {
-            return true
-          }
-        }
-      }
-
-      return false
-
+    isPointInFill(painter, x, y) {
+      return containPolygon(this.points, x, y)
     }
 
     /**
@@ -75,19 +40,6 @@ define(function (require) {
     drawPath(painter) {
       painter.drawPoints(this.points)
       painter.close()
-    }
-
-    /**
-     * 描边
-     *
-     * @param {Painter} painter
-     */
-    stroke(painter) {
-      painter.setLineWidth(this.strokeThickness)
-      painter.setStrokeStyle(this.strokeStyle)
-      painter.begin()
-      this.drawPath(painter)
-      painter.stroke()
     }
 
     /**
@@ -149,34 +101,9 @@ define(function (require) {
 
     }
 
-    save(rect) {
-      return this.points.map(
-        function (point) {
-          return {
-            x: (point.x - rect.x) / rect.width,
-            y: (point.y - rect.y) / rect.height,
-          }
-        }
-      )
-    }
-
-    restore(rect, data) {
-      array.each(
-        this.points,
-        function (point, i) {
-          point.x = rect.x + rect.width * data[ i ].x
-          point.y = rect.y + rect.height * data[ i ].y
-        }
-      )
-    }
-
     validate() {
       const rect = this.getRect()
       return rect.width > 5 && rect.height > 5
-    }
-
-    getRect() {
-      return getRectByPoints(this.points)
     }
 
   }

@@ -5,43 +5,13 @@
 define(function (require) {
 
   const Shape = require('./Shape')
-  const constant = require('../constant')
 
   const getRect = require('../function/getRect')
-  const containRect = require('../contain/rect')
-  const containLine = require('../contain/line')
 
   /**
-   * (x, y) 左上角
-   * width 宽
-   * height 高
+   * points
    */
   class Rect extends Shape {
-
-    /**
-     * 点是否位于图形范围内
-     *
-     * @param {Painter} painter
-     * @param {number} x
-     * @param {number} y
-     * @return {boolean}
-     */
-    isPointInPath(painter, x1, y1) {
-      if (containRect(this, x1, y1)) {
-        if (this.fillStyle) {
-          return true
-        }
-        let { x, y, width, height, strokeThickness } = this
-        if (strokeThickness < 8) {
-          strokeThickness = 8
-        }
-        return containLine(x, y, x + width, y, strokeThickness, x1, y1)
-          || containLine(x + width, y, x + width, y + height, strokeThickness, x1, y1)
-          || containLine(x + width, y + height, x, y + height, strokeThickness, x1, y1)
-          || containLine(x, y + height, x, y, strokeThickness, x1, y1)
-      }
-      return false
-    }
 
     /**
      * 绘制路径
@@ -49,47 +19,8 @@ define(function (require) {
      * @param {Painter} painter
      */
     drawPath(painter) {
-      painter.drawRect(this.x, this.y, this.width, this.height)
-    }
-
-    /**
-     * 描边
-     *
-     * @param {Painter} painter
-     */
-    stroke(painter) {
-
-      let {
-        x,
-        y,
-        width,
-        height,
-        strokeStyle,
-        strokePosition,
-        strokeThickness,
-      } = this
-
-      // Canvas 的描边机制是 center
-
-      // inside
-      if (strokePosition === constant.STROKE_POSITION_INSIDE) {
-        x += strokeThickness * 0.5
-        y += strokeThickness * 0.5
-        width -= strokeThickness
-        height -= strokeThickness
-      }
-      // outside
-      else if (strokePosition === constant.STROKE_POSITION_OUTSIDE) {
-        x -= strokeThickness * 0.5
-        y -= strokeThickness * 0.5
-        width += strokeThickness
-        height += strokeThickness
-      }
-
-      painter.setLineWidth(strokeThickness)
-      painter.setStrokeStyle(strokeStyle)
-      painter.strokeRect(x, y, width, height)
-
+      painter.drawPoints(this.points)
+      painter.close()
     }
 
     /**
@@ -99,7 +30,9 @@ define(function (require) {
      */
     fill(painter) {
       painter.setFillStyle(this.fillStyle)
-      painter.fillRect(this.x, this.y, this.width, this.height)
+      painter.begin()
+      this.drawPath(painter)
+      painter.fill()
     }
 
     /**
@@ -114,28 +47,18 @@ define(function (require) {
      */
     drawing(painter, startX, startY, endX, endY, restore) {
       restore()
-      Object.assign(this, getRect(startX, startY, endX, endY))
+
+      const points = this.points || (this.points = [ ])
+
+      const rect = getRect(startX, startY, endX, endY)
+
+      points[ 0 ] = { x: rect.x, y: rect.y }
+      points[ 1 ] = { x: rect.x + rect.width, y: rect.y }
+      points[ 2 ] = { x: rect.x + rect.width, y: rect.y + rect.height }
+      points[ 3 ] = { x: rect.x, y: rect.y + rect.height }
+
       this.draw(painter)
-    }
 
-    save(rect) {
-      return {
-        x: (this.x - rect.x) / rect.width,
-        y: (this.y - rect.y) / rect.height,
-        width: this.width / rect.width,
-        height: this.height / rect.height,
-      }
-    }
-
-    restore(rect, data) {
-      this.x = rect.x + rect.width * data.x
-      this.y = rect.y + rect.height * data.y
-      this.width = rect.width * data.width
-      this.height = rect.height * data.height
-    }
-
-    getRect() {
-      return this
     }
 
   }

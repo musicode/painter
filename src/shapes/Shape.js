@@ -2,12 +2,55 @@
  * @file 图形基类
  * @author musicode
  */
-define(function () {
+define(function (require) {
+
+  const array = require('../util/array')
+
+  const containLine = require('../contain/line')
+  const containRect = require('../contain/rect')
+  const getRectByPoints = require('../function/getRectByPoints')
 
   class Shape {
 
     constructor(props) {
       Object.assign(this, props)
+    }
+
+    /**
+     * 点是否位于图形范围内
+     *
+     * @param {Painter} painter
+     * @param {number} x
+     * @param {number} y
+     * @return {boolean}
+     */
+    isPointInPath(painter, x, y) {
+
+      if (containRect(this.getRect(), x, y)) {
+        let { points, strokeThickness, fillStyle } = this
+        if (fillStyle && this.isPointInFill) {
+          return this.isPointInFill(painter, x, y)
+        }
+        if (strokeThickness < 8) {
+          strokeThickness = 8
+        }
+        for (let i = 0, len = points.length; i < len; i++) {
+          if (points[ i + 1 ]
+            && containLine(
+                points[ i ].x,
+                points[ i ].y,
+                points[ i + 1 ].x,
+                points[ i + 1 ].y,
+                strokeThickness, x, y
+              )
+          ) {
+            return true
+          }
+        }
+      }
+
+      return false
+
     }
 
     /**
@@ -17,10 +60,8 @@ define(function () {
      */
     draw(painter) {
 
-
-
       const needFill = this.fillStyle && this.fill
-      const needStroke = this.strokeThickness && this.strokeStyle && this.stroke
+      const needStroke = this.strokeThickness && this.strokeStyle
 
       if (needFill || needStroke) {
 
@@ -38,7 +79,28 @@ define(function () {
 
       }
 
+    }
 
+    /**
+     * 绘制路径
+     *
+     * @param {Painter} painter
+     */
+    drawPath(painter) {
+      painter.drawPoints(this.points)
+    }
+
+    /**
+     * 描边
+     *
+     * @param {Painter} painter
+     */
+    stroke(painter) {
+      painter.setLineWidth(this.strokeThickness)
+      painter.setStrokeStyle(this.strokeStyle)
+      painter.begin()
+      this.drawPath(painter)
+      painter.stroke()
     }
 
     applyShadow(painter) {
@@ -55,12 +117,34 @@ define(function () {
       }
     }
 
+    save(rect) {
+      return this.points.map(
+        function (point) {
+          return {
+            x: (point.x - rect.x) / rect.width,
+            y: (point.y - rect.y) / rect.height,
+          }
+        }
+      )
+    }
+
+    restore(rect, data) {
+      array.each(
+        this.points,
+        function (point, i) {
+          point.x = rect.x + rect.width * data[ i ].x
+          point.y = rect.y + rect.height * data[ i ].y
+        }
+      )
+    }
+
     validate() {
-      return true
+      const { points } = this
+      return points && points.length > 1
     }
 
     getRect() {
-
+      return getRectByPoints(this.points)
     }
 
   }
