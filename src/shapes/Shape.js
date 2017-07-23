@@ -10,6 +10,12 @@ define(function (require) {
   const containRect = require('../contain/rect')
   const getRectByPoints = require('../function/getRectByPoints')
 
+  /**
+   * 图形是点的集合
+   * 因此图形基类默认通过 points 进行绘制
+   * 对于特殊图形，可通过子类改写某些方法实现
+   */
+
   class Shape {
 
     constructor(props) {
