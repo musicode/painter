@@ -133,6 +133,10 @@ define(function (require) {
       this.height = rect.height * data.height
     }
 
+    validate() {
+      return this.width > 5 && this.height > 5
+    }
+
     getRect() {
       const { x, y, width, height } = this
       return {
