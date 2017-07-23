@@ -37,26 +37,31 @@ define(function (require) {
         if (fillStyle && this.isPointInFill) {
           return this.isPointInFill(painter, x, y)
         }
-        if (strokeThickness < 8) {
-          strokeThickness = 8
-        }
-        for (let i = 0, len = points.length; i < len; i++) {
-          if (points[ i + 1 ]
-            && containLine(
-                points[ i ].x,
-                points[ i ].y,
-                points[ i + 1 ].x,
-                points[ i + 1 ].y,
-                strokeThickness, x, y
-              )
-          ) {
-            return true
-          }
-        }
+        return this.isPointInStroke(painter, x, y)
       }
 
       return false
 
+    }
+
+    isPointInStroke(painter, x, y) {
+      if (strokeThickness < 8) {
+        strokeThickness = 8
+      }
+      for (let i = 0, len = points.length; i < len; i++) {
+        if (points[ i + 1 ]
+          && containLine(
+              points[ i ].x,
+              points[ i ].y,
+              points[ i + 1 ].x,
+              points[ i + 1 ].y,
+              strokeThickness, x, y
+            )
+        ) {
+          return true
+        }
+      }
+      return false
     }
 
     /**

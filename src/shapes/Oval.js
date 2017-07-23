@@ -25,16 +25,14 @@ define(function (require) {
      * @param {number} y
      * @return {boolean}
      */
-    isPointInPath(painter, x, y) {
+    isPointInFill(painter, x, y) {
+      painter.begin()
+      this.drawPath(painter)
+      return painter.isPointInPath(x, y)
+    }
 
-      if (containRect(this.getRect(), x, y)) {
-        painter.begin()
-        this.drawPath(painter)
-        return painter.isPointInPath(x, y)
-      }
-
-      return false
-
+    isPointInStroke(painter, x, y) {
+      return true
     }
 
     /**
