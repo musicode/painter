@@ -43,6 +43,10 @@ define(function (require, exports, module) {
 
       let hoverShape
 
+      let refresh = function () {
+        me.refresh()
+      }
+
       emitter
       .on(
         Emitter.MOUSE_MOVE,
@@ -97,21 +101,19 @@ define(function (require, exports, module) {
       )
       .on(
         Emitter.HOVER_SHAPE_CHANGE,
-        function () {
-          me.refresh()
-        }
+        refresh
       )
       .on(
         Emitter.ACTIVE_SHAPE_CHANGE,
-        function () {
-          me.refresh()
-        }
+        refresh
+      )
+      .on(
+        Emitter.ACTIVE_RECT_CHANGE,
+        refresh
       )
       .on(
         Emitter.REFRESH,
-        function () {
-          me.refresh()
-        }
+        refresh
       )
       .on(
         Emitter.ACTIVE_SHAPE_DELETE,
@@ -140,6 +142,19 @@ define(function (require, exports, module) {
               }
             )
           )
+        }
+      )
+      .on(
+        Emitter.SELECTION_START,
+        function () {
+          canvas.style.cursor = 'crosshair'
+        }
+      )
+      .on(
+        Emitter.SELECTION_END,
+        function () {
+          canvas.style.cursor = ''
+          me.refresh()
         }
       )
       .on(

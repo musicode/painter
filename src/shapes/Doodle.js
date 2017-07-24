@@ -35,9 +35,9 @@ define(function (require) {
         painter.setStrokeStyle(this.strokeStyle)
       }
 
-      // 每次取最后 3 个点进行绘制，这样才不会有断裂感
+      // 每次取最后 2 个点进行绘制，这样才不会有断裂感
       painter.drawPoints(
-        points.slice(points.length - 3)
+        points.slice(points.length - 2)
       )
       painter.lineTo(endX, endY)
       painter.stroke()

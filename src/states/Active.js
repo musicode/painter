@@ -48,14 +48,6 @@ define(function (require) {
             shape.restore(me, savedShapes[ i ])
           }
         )
-        emitter.fire(
-          Emitter.CANVAS_DECO,
-          {
-            action: function (canvas) {
-              canvas.refresh()
-            }
-          }
-        )
       }
 
       me.clearHandler = function () {
@@ -127,6 +119,9 @@ define(function (require) {
         if (update) {
           update(targetX || event.x, targetY || event.y)
           updateShapes()
+          emitter.fire(
+            Emitter.ACTIVE_RECT_CHANGE
+          )
           return
         }
 

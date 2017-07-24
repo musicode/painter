@@ -24,12 +24,7 @@ define(function (require) {
           let update = updateRect(me, event.x, event.y)
 
           emitter.fire(
-            Emitter.CANVAS_DECO,
-            {
-              action: function (canvas) {
-                canvas.element.style.cursor = 'crosshair'
-              }
-            }
+            Emitter.SELECTION_START
           )
 
           const mouseMoveHandler = function (event) {
@@ -47,13 +42,7 @@ define(function (require) {
             emitter.off(Emitter.MOUSE_UP, mouseUpHandler)
             me.x = me.y = me.width = me.height = update = null
             emitter.fire(
-              Emitter.CANVAS_DECO,
-              {
-                action: function (canvas) {
-                  canvas.element.style.cursor = ''
-                  canvas.refresh()
-                }
-              }
+              Emitter.SELECTION_END
             )
           }
 

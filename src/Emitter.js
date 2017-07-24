@@ -146,7 +146,13 @@ define(function (require, exports, module) {
 
   Emitter.ACTIVE_SHAPE_DELETE = 'active_shape_delete'
 
+  Emitter.ACTIVE_RECT_CHANGE = 'active_rect_change'
+
   Emitter.SELECTION_RECT_CHANGE = 'selection_rect_change'
+
+  Emitter.SELECTION_START = 'selection_start'
+
+  Emitter.SELECTION_END = 'selection_end'
 
   Emitter.DRAWING_START = 'drawing_start'
 
