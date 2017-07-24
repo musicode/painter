@@ -5,16 +5,17 @@
 define(function () {
 
   return function (rects) {
+
     let { length } = rects
     if (!length) {
       throw new Error(`getUnionRect rects array length have to be large than 1.`)
     }
 
-    let rect = rects[ 0 ],
-    left = rect.x,
-    top = rect.y,
-    right = left + rect.width,
-    bottom = top + rect.height
+    let rect = rects[ 0 ]
+    let left = rect.x
+    let top = rect.y
+    let right = left + rect.width
+    let bottom = top + rect.height
 
     for (let i = 1; i < length; i++) {
       rect = rects[ i ]

@@ -11,8 +11,7 @@ define(function (require) {
     let result = [ ], { length } = points
 
     // 前一个点
-    let px = points[ length - 1 ].x
-    let py = points[ length - 1 ].y
+    let px = points[ length - 1 ].x, py = points[ length - 1 ].y
     for (let i = 0; i < length; i++) {
       let { x, y } = points[ i ]
 
@@ -23,14 +22,14 @@ define(function (require) {
 
       let dx0 = x - px, dy0 = y - py
 
-      // Normalize
+      // 求单位向量
       let l = Math.sqrt(dx0 * dx0 + dy0 * dy0)
       dx0 /= l
       dy0 /= l
 
       let dx1 = x - nx, dy1 = y - ny
 
-      // Normalize
+      // 求单位向量
       l = Math.sqrt(dx1 * dx1 + dy1 * dy1)
       dx1 /= l
       dy1 /= l
@@ -38,7 +37,7 @@ define(function (require) {
       // 相加两个向量计算出顶点需要移动的位置
       let moveX = dx0 + dx1, moveY = dy0 + dy1
 
-      // Normalize
+      // 求单位向量
       l = Math.sqrt(moveX * moveX + moveY * moveY)
       moveX /= l
       moveY /= l
@@ -49,8 +48,8 @@ define(function (require) {
       array.push(
         result,
         {
-          x: x + moveX * offset / sinTheta,
-          y: y + moveY * offset / sinTheta,
+          x: x + offset * moveX / sinTheta,
+          y: y + offset * moveY / sinTheta,
         }
       )
 
