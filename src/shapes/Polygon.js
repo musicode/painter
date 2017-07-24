@@ -10,6 +10,7 @@ define(function (require) {
   const array = require('../util/array')
 
   const containPolygon = require('../contain/polygon')
+  const offsetPoints = require('../function/offsetPoints')
   const getDistance = require('../function/getDistance')
 
   const PI2 = 2 * Math.PI
@@ -40,6 +41,32 @@ define(function (require) {
     drawPath(painter) {
       painter.drawPoints(this.points)
       painter.close()
+    }
+
+    /**
+     * 描边
+     *
+     * @param {Painter} painter
+     */
+    stroke(painter) {
+
+      let { points, strokePosition, strokeThickness, strokeStyle } = this
+
+      painter.setLineWidth(strokeThickness)
+      painter.setStrokeStyle(strokeStyle)
+      painter.begin()
+
+      if (strokePosition === constant.STROKE_POSITION_INSIDE) {
+        points = offsetPoints(points, strokeThickness / -2)
+      }
+      else if (strokePosition === constant.STROKE_POSITION_OUTSIDE) {
+        points = offsetPoints(points, strokeThickness / 2)
+      }
+
+      painter.drawPoints(points)
+      painter.close()
+
+      painter.stroke()
     }
 
     /**

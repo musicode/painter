@@ -31,8 +31,49 @@ define(function (require) {
       return painter.isPointInPath(x, y)
     }
 
-    isPointInStroke(painter, x, y) {
-      return true
+    isPointInStroke(painter, x1, y1) {
+
+      let {
+        x,
+        y,
+        width,
+        height,
+        strokeStyle,
+        strokePosition,
+        strokeThickness,
+      } = this
+
+      switch (strokePosition) {
+        case constant.STROKE_POSITION_OUTSIDE:
+          painter.begin()
+          painter.drawOval(x, y, width, height)
+          return painter.isPointInPath(x1, y1)
+        case constant.STROKE_POSITION_CENTER:
+          painter.begin()
+          painter.drawOval(x, y, width, height)
+          if (painter.isPointInPath(x1, y1)) {
+            width -= strokeThickness
+            height -= strokeThickness
+            painter.begin()
+            painter.drawOval(x, y, width, height)
+            return !painter.isPointInPath(x1, y1)
+          }
+          break
+        case constant.STROKE_POSITION_INSIDE:
+          painter.begin()
+          painter.drawOval(x, y, width, height)
+          if (painter.isPointInPath(x1, y1)) {
+            width -= 2 * strokeThickness
+            height -= 2 * strokeThickness
+            painter.begin()
+            painter.drawOval(x, y, width, height)
+            return !painter.isPointInPath(x1, y1)
+          }
+          break
+      }
+
+      return false
+
     }
 
     /**
@@ -67,6 +108,9 @@ define(function (require) {
       if (strokePosition === constant.STROKE_POSITION_INSIDE) {
         width -= strokeThickness
         height -= strokeThickness
+        if (width < 0 || height < 0) {
+          return
+        }
       }
       // outside
       else if (strokePosition === constant.STROKE_POSITION_OUTSIDE) {

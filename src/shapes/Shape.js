@@ -33,8 +33,7 @@ define(function (require) {
     isPointInPath(painter, x, y) {
 
       if (containRect(this.getRect(), x, y)) {
-        let { fillStyle, strokeThickness, points } = this
-        if (fillStyle && this.isPointInFill) {
+        if (this.fillStyle && this.isPointInFill) {
           return this.isPointInFill(painter, x, y)
         }
         return this.isPointInStroke(painter, x, y)
@@ -45,6 +44,7 @@ define(function (require) {
     }
 
     isPointInStroke(painter, x, y) {
+      let { strokeThickness, points } = this
       if (strokeThickness < 8) {
         strokeThickness = 8
       }
