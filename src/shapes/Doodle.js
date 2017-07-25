@@ -12,6 +12,11 @@ define(function (require) {
    */
   class Doodle extends Shape {
 
+    setLineStyle(painter) {
+      painter.setLineJoin('round')
+      painter.setLineCap('round')
+    }
+
     /**
      * 正在绘制
      *
@@ -31,6 +36,7 @@ define(function (require) {
       painter.begin()
 
       if (points.length === 1) {
+        this.setLineStyle(painter)
         painter.setLineWidth(this.strokeThickness)
         painter.setStrokeStyle(this.strokeStyle)
       }

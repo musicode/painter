@@ -85,6 +85,7 @@ define(function (require) {
 
         if (needStroke) {
           this.applyShadow(painter)
+          this.setLineStyle(painter)
           this.stroke(painter)
         }
 
@@ -126,6 +127,10 @@ define(function (require) {
       else {
         painter.disableShadow()
       }
+    }
+
+    setLineStyle(painter) {
+
     }
 
     save(rect) {

@@ -13,6 +13,10 @@ define(function (require) {
    */
   class Line extends Shape {
 
+    setLineStyle(painter) {
+      painter.setLineCap('square')
+    }
+
     /**
      * 正在绘制
      *
