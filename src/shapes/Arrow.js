@@ -28,6 +28,18 @@ define(function (require) {
     }
 
     /**
+     * 填充
+     *
+     * @param {Painter} painter
+     */
+    fill(painter) {
+      painter.setFillStyle(this.fillStyle)
+      painter.begin()
+      this.drawPath(painter)
+      painter.fill()
+    }
+
+    /**
      * 正在绘制
      *
      * @param {Painter} painter
@@ -55,7 +67,7 @@ define(function (require) {
 
       point = {
         x: point.x + distance - header,
-        y: point.y - 20,
+        y: point.y - header / 7,
       }
       array.push(points, point)
 
