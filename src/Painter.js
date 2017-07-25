@@ -4,6 +4,8 @@
  */
 define(function (require, exports, module) {
 
+  const array = require('./util/array')
+
   class Painter {
 
     constructor(context) {
@@ -12,12 +14,10 @@ define(function (require, exports, module) {
 
     begin() {
       this.context.beginPath()
-      this.isBegin = true
     }
 
     close() {
       this.context.closePath()
-      this.isBegin = false
     }
 
     drawRect(x, y, width, height) {
@@ -71,41 +71,6 @@ define(function (require, exports, module) {
       return this.context.isPointInPath(x, y)
     }
 
-    setLineWidth(value) {
-      let { context } = this
-      if (context.lineWidth !== value) {
-        context.lineWidth = value
-      }
-    }
-
-    setStrokeStyle(value) {
-      let { context } = this
-      if (context.strokeStyle !== value) {
-        context.strokeStyle = value
-      }
-    }
-
-    setFillStyle(value) {
-      let { context } = this
-      if (context.fillStyle !== value) {
-        context.fillStyle = value
-      }
-    }
-
-    setLineJoin(value) {
-      let { context } = this
-      if (context.lineJoin !== value) {
-        context.lineJoin = value
-      }
-    }
-
-    setLineCap(value) {
-      let { context } = this
-      if (context.lineCap !== value) {
-        context.lineCap = value
-      }
-    }
-
     clear() {
       let { context } = this
       context.clearRect(0, 0, context.canvas.width, context.canvas.height)
@@ -132,19 +97,17 @@ define(function (require, exports, module) {
     }
 
     enableShadow(offsetX, offsetY, blur, color) {
-      const { context } = this
-      context.shadowColor = color
-      context.shadowOffsetX = offsetX
-      context.shadowOffsetY = offsetY
-      context.shadowBlur = blur
+      this.setShadowColor(color)
+      this.setShadowOffsetX(offsetX)
+      this.setShadowOffsetY(offsetY)
+      this.setShadowBlur(blur)
     }
 
     disableShadow() {
-      const { context } = this
-      context.shadowColor =
-      context.shadowOffsetX =
-      context.shadowOffsetY =
-      context.shadowBlur = 0
+      this.setShadowColor(0)
+      this.setShadowOffsetX(0)
+      this.setShadowOffsetY(0)
+      this.setShadowBlur(0)
     }
 
     save() {
@@ -163,6 +126,24 @@ define(function (require, exports, module) {
     }
 
   }
+
+  const { prototype } = Painter
+
+  array.each(
+    [
+      'lineWidth', 'lineJoin', 'lineCap',
+      'strokeStyle', 'fillStyle',
+      'shadowColor', 'shadowOffsetX', 'shadowOffsetY', 'shadowBlur'
+    ],
+    function (name) {
+      prototype[ 'set' + name.charAt(0).toUpperCase() + name.slice(1) ] = function (value) {
+        let { context } = this
+        if (context[ name ] !== value) {
+          context[ name ] = value
+        }
+      }
+    }
+  )
 
   return Painter
 
