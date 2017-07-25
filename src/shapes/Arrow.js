@@ -4,7 +4,7 @@
  */
 define(function (require) {
 
-  const Shape = require('./Shape')
+  const Polygon = require('./Polygon')
 
   const getDistance = require('../function/getDistance')
   const getPointOfCircle = require('../function/getPointOfCircle')
@@ -15,29 +15,7 @@ define(function (require) {
   /**
    * points 点数组
    */
-  class Arrow extends Shape {
-
-    /**
-     * 绘制路径
-     *
-     * @param {Painter} painter
-     */
-    drawPath(painter) {
-      painter.drawPoints(this.points)
-      painter.close()
-    }
-
-    /**
-     * 填充
-     *
-     * @param {Painter} painter
-     */
-    fill(painter) {
-      painter.setFillStyle(this.fillStyle)
-      painter.begin()
-      this.drawPath(painter)
-      painter.fill()
-    }
+  class Arrow extends Polygon {
 
     /**
      * 正在绘制
@@ -53,9 +31,21 @@ define(function (require) {
 
       restore()
 
-      const thickness = 30
       const distance = getDistance(startX, startY, endX, endY)
-      const header = distance / 5
+      // 下面这些数字都是不断尝试调出的参数
+      // 没有理由，就是试
+      let thickness = 20, threshold = thickness * 10, header
+
+      if (distance < threshold) {
+        thickness *= distance / (2 * threshold)
+        header = Math.max(thickness, 50)
+      }
+      else {
+        header = Math.max(distance / 8, 80)
+      }
+
+      this.valid = distance - header > 20
+
       const points = [ ]
 
       // 以 (startX, startY) 为圆心向 x 轴正方向画箭头
@@ -67,7 +57,7 @@ define(function (require) {
 
       point = {
         x: point.x + distance - header,
-        y: point.y - header / 7,
+        y: point.y - header / 8,
       }
       array.push(points, point)
 
@@ -98,8 +88,10 @@ define(function (require) {
     }
 
     validate() {
-      const { points } = this
-      return points && points.length > 0
+      if (this.valid) {
+        delete this.valid
+        return true
+      }
     }
 
   }
