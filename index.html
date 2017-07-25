@@ -158,10 +158,10 @@
                 <label class="radio-inline">
                     <input type="radio" name="tool" value="5"> 多边形
                 </label>
-                <!--
                 <label class="radio-inline">
-                    <input type="radio" name="tool" value="5"> 箭头
+                    <input type="radio" name="tool" value="6"> 箭头
                 </label>
+                <!--
                 <label class="radio-inline">
                     <input type="radio" name="tool" value="7"> 文字
                 </label>
@@ -251,8 +251,9 @@
                 'shapes/Line',
                 'shapes/Doodle',
                 'shapes/Polygon',
+                'shapes/Arrow',
             ],
-            function (Canvas, Rect, Oval, Line, Doodle, Polygon) {
+            function (Canvas, Rect, Oval, Line, Doodle, Polygon, Arrow) {
 
                 window.instance = new Canvas(canvas);
 
@@ -264,6 +265,7 @@
                   3: Oval,
                   4: Doodle,
                   5: Polygon,
+                  6: Arrow,
                 };
 
                 var updateCanvas = function (config) {

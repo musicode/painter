@@ -7,11 +7,25 @@ define(function (require) {
   const Shape = require('./Shape')
 
   const getDistance = require('../function/getDistance')
+  const getPointOfCircle = require('../function/getPointOfCircle')
+  const getRotatePoints = require('../function/getRotatePoints')
+
+  const array = require('../util/array')
 
   /**
    * points 点数组
    */
   class Arrow extends Shape {
+
+    /**
+     * 绘制路径
+     *
+     * @param {Painter} painter
+     */
+    drawPath(painter) {
+      painter.drawPoints(this.points)
+      painter.close()
+    }
 
     /**
      * 正在绘制
@@ -27,13 +41,53 @@ define(function (require) {
 
       restore()
 
+      const thickness = 30
+      const distance = getDistance(startX, startY, endX, endY)
+      const header = distance / 5
+      const points = [ ]
+
+      // 以 (startX, startY) 为圆心向 x 轴正方向画箭头
+      let point = {
+        x: startX,
+        y: startY - thickness
+      }
+      array.push(points, point)
+
+      point = {
+        x: point.x + distance - header,
+        y: point.y - 20,
+      }
+      array.push(points, point)
+
+      array.push(
+        points,
+        getPointOfCircle(point.x, point.y, 0.5 * header, 250 * Math.PI / 180),
+      )
+
+      array.push(
+        points,
+        {
+          x: startX + distance,
+          y: startY,
+        }
+      )
+
+      for (let i = points.length - 2; i >= 0; i--) {
+        points.push({
+          x: points[ i ].x,
+          y: 2 * startY - points[ i ].y,
+        })
+      }
+
+      this.points = getRotatePoints(startX, startY, Math.atan2(endY - startY, endX - startX), points)
+
       this.draw(painter)
 
     }
 
     validate() {
       const { points } = this
-      return points && points.length === 7
+      return points && points.length > 0
     }
 
   }

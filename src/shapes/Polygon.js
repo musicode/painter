@@ -10,18 +10,11 @@ define(function (require) {
   const array = require('../util/array')
 
   const containPolygon = require('../contain/polygon')
-  const offsetPoints = require('../function/offsetPoints')
+  const getOffsetPoints = require('../function/getOffsetPoints')
   const getDistance = require('../function/getDistance')
+  const getPointOfCircle = require('../function/getPointOfCircle')
 
   const PI2 = 2 * Math.PI
-
-  function getX(x, radius, angle) {
-    return x + radius * Math.cos(angle)
-  }
-
-  function getY(y, radius, angle) {
-    return y + radius * Math.sin(angle)
-  }
 
   /**
    * count 几边形
@@ -57,10 +50,10 @@ define(function (require) {
       painter.begin()
 
       if (strokePosition === constant.STROKE_POSITION_INSIDE) {
-        points = offsetPoints(points, strokeThickness / -2)
+        points = getOffsetPoints(points, strokeThickness / -2)
       }
       else if (strokePosition === constant.STROKE_POSITION_OUTSIDE) {
-        points = offsetPoints(points, strokeThickness / 2)
+        points = getOffsetPoints(points, strokeThickness / 2)
       }
 
       painter.drawPoints(points)
@@ -100,23 +93,20 @@ define(function (require) {
       const radius = getDistance(startX, startY, endX, endY)
 
       // 单位旋转的角度
-      const stepAngle = PI2 / count
+      const stepRadian = PI2 / count
 
       const points = [ ]
 
-      let angle = Math.atan2(endY - startY, endX - startX), endAngle = angle + PI2
+      let radian = Math.atan2(endY - startY, endX - startX), endRadian = radian + PI2
 
       do {
         array.push(
           points,
-          {
-            x: getX(startX, radius, angle),
-            y: getY(startY, radius, angle),
-          }
+          getPointOfCircle(startX, startY, radius, radian)
         )
-        angle += stepAngle
+        radian += stepRadian
       }
-      while (angle <= endAngle)
+      while (radian <= endRadian)
 
       if (points.length - count === 1) {
         array.pop(points)
