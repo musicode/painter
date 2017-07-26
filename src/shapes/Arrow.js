@@ -32,8 +32,8 @@ define(function (require) {
       restore()
 
       const distance = getDistance(startX, startY, endX, endY)
-      // 下面这些数字都是不断尝试调出的参数
-      // 没有理由，就是试
+
+      // 下面这些数字都是不断尝试调出的参数，没有理由，就是试
       let thickness = 20, threshold = thickness * 10, header
 
       if (distance < threshold) {
@@ -43,8 +43,6 @@ define(function (require) {
       else {
         header = Math.max(distance / 8, 80)
       }
-
-      this.valid = distance - header > 20
 
       const points = [ ]
 
@@ -81,17 +79,19 @@ define(function (require) {
         })
       }
 
-      this.points = getRotatePoints(startX, startY, Math.atan2(endY - startY, endX - startX), points)
+      this.points = getRotatePoints(
+        startX,
+        startY,
+        Math.atan2(endY - startY, endX - startX),
+        points
+      )
 
       this.draw(painter)
 
     }
 
     validate() {
-      if (this.valid) {
-        delete this.valid
-        return true
-      }
+      return true
     }
 
   }
