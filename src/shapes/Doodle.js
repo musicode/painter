@@ -29,10 +29,9 @@ define(function (require) {
      */
     drawing(painter, startX, startY, endX, endY) {
 
-      painter.disableShadow()
-
       const points = this.points || (this.points = [ { x: startX, y: startY } ])
 
+      painter.disableShadow()
       painter.begin()
 
       if (points.length === 1) {
