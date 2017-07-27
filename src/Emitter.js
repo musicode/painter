@@ -4,6 +4,7 @@
  */
 define(function (require, exports, module) {
 
+  const getDevicePixelRatio = require('./function/getDevicePixelRatio')
   const array = require('./util/array')
 
   class Emitter {
@@ -40,6 +41,7 @@ define(function (require, exports, module) {
             cursorX = pageX - canvas.offsetLeft
             cursorY = pageY - canvas.offsetTop
 
+            const devicePixelRatio = getDevicePixelRatio()
             if (devicePixelRatio > 1) {
               cursorX *= devicePixelRatio
               cursorY *= devicePixelRatio

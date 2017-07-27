@@ -10,6 +10,7 @@ define(function (require, exports, module) {
   const Drawing = require('./states/Drawing')
 
   const getInterRect = require('./function/getInterRect')
+  const getDevicePixelRatio = require('./function/getDevicePixelRatio')
   const array = require('./util/array')
 
   const Emitter = require('./Emitter')
@@ -17,11 +18,6 @@ define(function (require, exports, module) {
 
   const INDEX_ACTIVE = 0
   const INDEX_SELECTION = 2
-
-  let { devicePixelRatio } = window
-  if (devicePixelRatio > 2) {
-    devicePixelRatio = 2
-  }
 
   class Canvas {
 
@@ -198,6 +194,7 @@ define(function (require, exports, module) {
       element.style.width = width + 'px'
       element.style.height = height + 'px'
 
+      const devicePixelRatio = getDevicePixelRatio()
       if (devicePixelRatio > 1) {
         width *= devicePixelRatio
         height *= devicePixelRatio
