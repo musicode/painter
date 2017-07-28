@@ -207,7 +207,6 @@ define(function (require) {
       return this.shapes
     }
 
-    // [TODO] 是否要刷新有待商榷
     setShapes(shapes) {
 
       if (shapes.length > 0) {
