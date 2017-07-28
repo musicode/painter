@@ -39,9 +39,7 @@ define(function (require) {
 
     validate() {
       const { points } = this
-      if (points && points.length === 2) {
-        return getDistance(points[ 0 ].x, points[ 0 ].y, points[ 1 ].x, points[ 1 ].y) > 5
-      }
+      return points && points.length === 2
     }
 
   }

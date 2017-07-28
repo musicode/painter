@@ -90,10 +90,6 @@ define(function (require) {
 
     }
 
-    validate() {
-      return true
-    }
-
   }
 
   return Arrow
