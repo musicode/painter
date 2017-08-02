@@ -2,53 +2,314 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Document</title>
+    <title>画图板</title>
+    <link rel="stylesheet" href="./demo/style.css">
     <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+        }
         body {
             background-color: #EEE;
+            user-select: none;
         }
         canvas {
             background-color: #FFF;
-            width: 1400px;
-            height: 650px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.2);
+            margin: 20px;
+        }
+        .form-horizontal {
+            margin: 20px;
+            width: 1200px;
+        }
+        .btn-danger {
+            margin-left: 10px;
         }
     </style>
 </head>
 <body>
-    <canvas id="canvas"></canvas>
 
+    <div class="form-horizontal">
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">
+                画布宽度
+            </label>
+            <div class="col-sm-7">
+                <input name="canvasWidth" type="number" value="1200" class="form-control">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">
+                画布高度
+            </label>
+            <div class="col-sm-7">
+                <input name="canvasHeight" type="number" value="800" class="form-control">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">
+                填充颜色
+            </label>
+            <div class="col-sm-7">
+                <input name="fillStyle" type="color" value="#fccbc9" class="form-control">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">
+                描边粗细
+            </label>
+            <div class="col-sm-7">
+                <input name="strokeThickness" type="range" value="2" min="1" class="form-control">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">
+                描边颜色
+            </label>
+            <div class="col-sm-7">
+                <input name="strokeStyle" type="color" value="#e5efee" class="form-control">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">
+                描边方式
+            </label>
+            <div class="col-sm-7">
+                <label class="radio-inline">
+                    <input type="radio" name="strokePosition" value="1"> Inside
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="strokePosition" value="2" checked> Center
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="strokePosition" value="3"> Outside
+                </label>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">
+                阴影 x 偏移量
+            </label>
+            <div class="col-sm-7">
+                <input name="shadowOffsetX" type="number" value="1" min="0" class="form-control">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">
+                阴影 y 偏移量
+            </label>
+            <div class="col-sm-7">
+                <input name="shadowOffsetY" type="number" value="1" min="0" class="form-control">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">
+                阴影模糊量
+            </label>
+            <div class="col-sm-7">
+                <input name="shadowBlur" type="number" value="2" min="0" class="form-control">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">
+                阴影颜色
+            </label>
+            <div class="col-sm-7">
+                <input name="shadowColor" type="color" value="#8f8f8f" class="form-control">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">
+                开关
+            </label>
+            <div class="col-sm-7">
+                <label class="checkbox-inline">
+                    <input type="checkbox" name="hasFill" checked> 有填充
+                </label>
+                <label class="checkbox-inline">
+                    <input type="checkbox" name="hasStroke" checked> 有描边
+                </label>
+                <label class="checkbox-inline">
+                    <input type="checkbox" name="hasShadow" checked> 有阴影
+                </label>
+            </div>
+        </div>
 
-    <script src="tool/esl.js"></script>
-    <script src="tool/jquery.js"></script>
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">
+                字体大小
+            </label>
+            <div class="col-sm-7">
+                <input name="fontSize" type="number" value="30" min="12" class="form-control">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">
+                当前工具
+            </label>
+            <div class="col-sm-7">
+                <label class="radio-inline">
+                    <input type="radio" name="tool" value="0"> 无
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="tool" value="1"> 直线
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="tool" value="2"> 矩形
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="tool" value="3"> 圆
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="tool" value="4"> 涂鸦
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="tool" value="5"> 多边形
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="tool" value="6"> 箭头
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="tool" value="7" checked> 文字
+                </label>
+                <label class="radio-inline">
+                    <span class="label label-danger">
+                        选中图形后按 Delete 键删除
+                    </span>
+                </label>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">
+                多边形数量
+            </label>
+            <div class="col-sm-7">
+                <input name="count" type="number" value="3" min="3" class="form-control">
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-7">
+                <button class="btn btn-info">
+                    应用
+                </button>
+                <button class="btn btn-danger">
+                    清空
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <canvas></canvas>
+
+    <script src="./demo/jquery.js"></script>
+    <script src="./demo/esl.js"></script>
     <script>
+
+        var canvas = $('canvas')[0];
+        var context = canvas.getContext('2d');
+
         require.config({
             baseUrl: './src'
         });
 
+        function getConfig() {
+            var canvasWidth = + $('input[name="canvasWidth"]').val().trim();
+            var canvasHeight = + $('input[name="canvasHeight"]').val().trim();
+            var fillStyle = $('input[name="fillStyle"]').val();
+            var strokeStyle = $('input[name="strokeStyle"]').val();
+            var strokePosition = + $('input[name="strokePosition"]:checked').val();
+            var strokeThickness = + $('input[name="strokeThickness"]').val();
+            var shadowOffsetX = + $('input[name="shadowOffsetX"]').val().trim();
+            var shadowOffsetY = + $('input[name="shadowOffsetY"]').val().trim();
+            var shadowBlur = + $('input[name="shadowBlur"]').val().trim();
+            var shadowColor = $('input[name="shadowColor"]').val();
+            var fontSize = + $('input[name="fontSize"]').val();
+
+            var tool = + $('input[name="tool"]:checked').val();
+            var count = + $('input[name="count"]').val().trim();
+            var hasFill = $('input[name="hasFill"]').prop('checked');
+            var hasStroke = $('input[name="hasStroke"]').prop('checked');
+            var hasShadow = $('input[name="hasShadow"]').prop('checked');
+
+            return {
+                canvasWidth: canvasWidth,
+                canvasHeight: canvasHeight,
+                fillStyle: fillStyle,
+                strokeStyle: strokeStyle,
+                strokePosition: strokePosition,
+                strokeThickness: strokeThickness,
+                shadowOffsetX: shadowOffsetX,
+                shadowOffsetY: shadowOffsetY,
+                shadowBlur: shadowBlur,
+                shadowColor: shadowColor,
+                fontSize: fontSize,
+
+                tool: tool,
+                count: count,
+                hasFill: hasFill,
+                hasStroke: hasStroke,
+                hasShadow: hasShadow,
+            };
+        }
+
         require(
             [
-                'Main',
-                'eventEmitter'
+                'Canvas',
+                'shapes/Rect',
+                'shapes/Oval',
+                'shapes/Line',
+                'shapes/Doodle',
+                'shapes/Polygon',
+                'shapes/Arrow',
+                'shapes/Text'
             ],
-            function (Painter, eventEmitter, Arrow, Doodle, Rect, Text, Eraser) {
+            function (Canvas, Rect, Oval, Line, Doodle, Polygon, Arrow, Text) {
 
-                var canvas = $('#canvas');
-                var context = canvas[0].getContext('2d');
+                window.instance = new Canvas(canvas);
 
-                var painter = new Painter({
-                    context: context,
-                    stage: function (context) {
-                        var canvas = context.canvas;
-                        context.lineCap = 'round';
-                        context.clearRect(0, 0, canvas.width, canvas.height);
-                    }
+                var config = getConfig();
+
+                var shapeMap = {
+                  1: Line,
+                  2: Rect,
+                  3: Oval,
+                  4: Doodle,
+                  5: Polygon,
+                  6: Arrow,
+                  7: Text
+                };
+
+                var updateCanvas = function (config) {
+                    instance.resize(config.canvasWidth, config.canvasHeight);
+                    instance.apply({
+                        count: Math.max(config.count, 3),
+                        fillStyle: config.hasFill ? config.fillStyle : null,
+                        strokeStyle: config.hasStroke ? config.strokeStyle : null,
+                        strokePosition: config.strokePosition,
+                        strokeThickness: config.strokeThickness,
+                        shadowOffsetX: config.shadowOffsetX,
+                        shadowOffsetY: config.shadowOffsetY,
+                        shadowBlur: config.shadowBlur,
+                        shadowColor: config.hasShadow ? config.shadowColor : null,
+                        fontSize: config.fontSize,
+                        fontFamily: 'sans-serif'
+                    })
+                    instance.drawing(
+                      shapeMap[config.tool]
+                    )
+                };
+
+                updateCanvas(config);
+
+                $('.btn-info').on('click', function () {
+                    updateCanvas(getConfig());
                 });
 
-                painter.resize(
-                    canvas.width(),
-                    canvas.height()
-                );
-
+                $('.btn-danger').on('click', function () {
+                    instance.clear();
+                });
 
             }
         );
