@@ -14,9 +14,11 @@ define(function (require) {
   const CURSOR_COLOR = 'rgba(0,0,0,1)'
 
   let textarea
+  let p
+
   function createTextarea(painter, emitter, event, shape) {
 
-    const { fontSize, fontFamily } = shape
+    const { fontSize, fontFamily, x, y } = shape
     const parentElement = document.body
 
     textarea = document.createElement('textarea')
@@ -32,6 +34,8 @@ define(function (require) {
       outline: none;
       resize: none;
       padding: 0;
+      overflow: hidden;
+      wrap:physical;
     `
     parentElement.appendChild(textarea)
 
@@ -41,7 +45,7 @@ define(function (require) {
       }
     )
 
-    let p = document.createElement('p')
+    p = document.createElement('p')
     p.style.cssText = `
       position: absolute;
       visibility: hidden;
@@ -61,8 +65,15 @@ define(function (require) {
 
     textarea.addEventListener('input', function () {
       p.innerHTML = textarea.value
-      console.log(p.offsetWidth)
-      textarea.style.width = (p.offsetWidth + fontSize) + 'px'
+
+      if (textareaIsInCanvas(painter, p.offsetWidth + x + fontSize, p.offsetHeight + y)) {
+        textarea.style.width = (p.offsetWidth + fontSize) + 'px'
+      }
+      else {
+        // 如果超出画布就substring text 之后绘制
+        // textarea.style.height = p.offsetHeight * 2 + 'px'
+      }
+
       if (!locked) {
         updateCanvas()
       }
@@ -78,12 +89,11 @@ define(function (require) {
     })
 
     textarea.addEventListener('blur', function () {
-      console.log('blur')
+
       parentElement.removeChild(p)
       parentElement.removeChild(textarea)
 
       p = textarea = null
-
       emitter.fire(
         Emitter.DRAWING_END,
         {
@@ -91,13 +101,27 @@ define(function (require) {
         }
       )
     })
-console.log('create', event)
+
     emitter.fire(
       Emitter.DRAWING_START,
       {
         cursor: 'text'
       }
     )
+
+    emitter.on(
+      Emitter.ACTIVE_SHAPE_ENTER,
+      function (event) {
+        let row = textarea.value.split('\n').length
+        textarea.style.height = p.offsetHeight * row + 'px'
+      }
+    )
+  }
+
+  function textareaIsInCanvas(painter, offsetWidth, offsetHeight) {
+    const { width, height } = painter.getCanvasSize()
+    return offsetWidth < width
+        && offsetHeight < height
   }
 
   class Text extends Shape {
@@ -113,23 +137,39 @@ console.log('create', event)
 
     fill(painter) {
       const dpr = getDevicePixelRatio()
+      const { x, y, fontSize, fontFamily, text} = this
       painter.setFillStyle(this.fillStyle)
       painter.setFont(
-        this.fontSize * dpr,
-        this.fontFamily
+        fontSize * dpr,
+        fontFamily
       )
-      painter.fillText(this.x, this.y + this.fontSize * dpr, this.text)
+
+      const height = fontSize + fontSize / 6
+      array.each(
+        text.split('\n'),
+        function (value, index) {
+          painter.fillText(x, y + fontSize * dpr + height * index, value)
+        }
+      )
     }
 
     stroke(painter) {
       const dpr = getDevicePixelRatio()
-      painter.setLineWidth(this.strokeThickness)
-      painter.setStrokeStyle(this.strokeStyle)
+      const { x, y, fontSize, fontFamily, text, strokeThickness, strokeStyle } = this
+      painter.setLineWidth(strokeThickness)
+      painter.setStrokeStyle(strokeStyle)
       painter.setFont(
-        this.fontSize * dpr,
-        this.fontFamily
+        fontSize * dpr,
+        fontFamily
       )
-      painter.strokeText(this.x, this.y + this.fontSize * dpr, this.text)
+      const height = fontSize + fontSize / 6
+
+      array.each(
+        text.split('\n'),
+        function (value, index) {
+          painter.strokeText(x, y + fontSize * dpr + height * index, value)
+        }
+      )
     }
 
     startDrawing (painter, emitter, event) {

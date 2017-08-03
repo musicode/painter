@@ -12,6 +12,14 @@ define(function (require, exports, module) {
       this.context = context
     }
 
+    getCanvasSize() {
+      const { width, height } = this.context.canvas
+      return {
+        width: width,
+        height: height
+      }
+    }
+
     begin() {
       this.context.beginPath()
     }
