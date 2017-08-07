@@ -132,23 +132,23 @@ define(function (require) {
             switch (index) {
               case CENTER_TOP:
               case CENTER_BOTTOM:
-                cursor = 'row-resize'
+                cursor = 'ns-resize'
                 break
               case RIGHT_MIDDLE:
               case LEFT_MIDDLE:
-                cursor = 'col-resize'
+                cursor = 'ew-resize'
                 break
               case LEFT_TOP:
-                cursor = 'nw-resize'
+                cursor = 'nwse-resize'
                 break
               case RIGHT_TOP:
-                cursor = 'ne-resize'
+                cursor = 'nesw-resize'
                 break
               case RIGHT_BOTTOM:
-                cursor = 'se-resize'
+                cursor = 'nwse-resize'
                 break
               case LEFT_BOTTOM:
-                cursor = 'sw-resize'
+                cursor = 'nesw-resize'
                 break
             }
           }

@@ -13,12 +13,44 @@ define(function (require) {
   const TRANSPARENT = 'rgba(0,0,0,0)'
   const CURSOR_COLOR = 'rgba(0,0,0,1)'
 
+  const dpr = getDevicePixelRatio()
+
   let textarea
   let p
 
+  function getTextSize (shape, text) {
+
+    const { fontSize, fontFamily, lineHeight, x, y } = shape
+    const parentElement = document.body
+    p = document.createElement('p')
+    p.style.cssText = `
+      position: absolute;
+      visibility: hidden;
+      font: ${fontSize * dpr}px ${fontFamily};
+    `
+    parentElement.appendChild(p)
+
+    let textLines = (text + '').split('\n')
+    let width = 0
+    let height = 0
+    let rows = textLines.length
+
+    for (let i = 0, l = rows; i < l; i++) {
+      p.innerHTML = textLines[i]
+      height = Math.max(p.offsetHeight, height)
+      width = Math.max(p.offsetWidth, width)
+    }
+    parentElement.removeChild(p)
+
+    return {
+      width: width,
+      height: height * rows
+    }
+  }
+
   function createTextarea(painter, emitter, event, shape) {
 
-    const { fontSize, fontFamily, x, y } = shape
+    const { fontSize, fontFamily, lineHeight, x, y } = shape
     const parentElement = document.body
 
     textarea = document.createElement('textarea')
@@ -30,12 +62,14 @@ define(function (require) {
       caret-color: ${CURSOR_COLOR};
       background-color: ${TRANSPARENT};
       font: ${fontSize}px ${fontFamily};
+      line-height: ${lineHeight}px;
       border: none;
       outline: none;
       resize: none;
       padding: 0;
       overflow: hidden;
-      wrap:physical;
+      width: ${fontSize}px;
+      wrap: physical;
     `
     parentElement.appendChild(textarea)
 
@@ -44,14 +78,6 @@ define(function (require) {
         textarea.focus()
       }
     )
-
-    p = document.createElement('p')
-    p.style.cssText = `
-      position: absolute;
-      visibility: hidden;
-      font: ${fontSize}px ${fontFamily};
-    `
-    parentElement.appendChild(p)
 
     let savedData = painter.save()
 
@@ -64,14 +90,16 @@ define(function (require) {
     }
 
     textarea.addEventListener('input', function () {
-      p.innerHTML = textarea.value
 
-      if (textareaIsInCanvas(painter, p.offsetWidth + x + fontSize, p.offsetHeight + y)) {
-        textarea.style.width = (p.offsetWidth + fontSize) + 'px'
-      }
-      else {
-        // 如果超出画布就substring text 之后绘制
-        // textarea.style.height = p.offsetHeight * 2 + 'px'
+      let length = textarea.value.length
+      let textareaSize = getTextSize(shape, textarea.value)
+
+      textarea.style.width = (textareaSize.width / dpr + fontSize) + 'px'
+
+      if (!textareaIsInCanvas(painter, textareaSize.width + x, textareaSize.height + y)) {
+        textarea.maxLength = length
+        textarea.blur()
+        return
       }
 
       if (!locked) {
@@ -90,7 +118,6 @@ define(function (require) {
 
     textarea.addEventListener('blur', function () {
 
-      parentElement.removeChild(p)
       parentElement.removeChild(textarea)
 
       p = textarea = null
@@ -112,8 +139,10 @@ define(function (require) {
     emitter.on(
       Emitter.ACTIVE_SHAPE_ENTER,
       function (event) {
-        let row = textarea.value.split('\n').length
-        textarea.style.height = p.offsetHeight * row + 'px'
+        if (!textarea) {
+          return
+        }
+        textarea.style.height = getTextSize(shape, textarea.value).height + 'px'
       }
     )
   }
@@ -136,7 +165,6 @@ define(function (require) {
     }
 
     fill(painter) {
-      const dpr = getDevicePixelRatio()
       const { x, y, fontSize, fontFamily, text} = this
       painter.setFillStyle(this.fillStyle)
       painter.setFont(
@@ -144,7 +172,7 @@ define(function (require) {
         fontFamily
       )
 
-      const height = fontSize + fontSize / 6
+      const height = fontSize * dpr + fontSize * dpr / 6
       array.each(
         text.split('\n'),
         function (value, index) {
@@ -154,7 +182,6 @@ define(function (require) {
     }
 
     stroke(painter) {
-      const dpr = getDevicePixelRatio()
       const { x, y, fontSize, fontFamily, text, strokeThickness, strokeStyle } = this
       painter.setLineWidth(strokeThickness)
       painter.setStrokeStyle(strokeStyle)
@@ -162,7 +189,7 @@ define(function (require) {
         fontSize * dpr,
         fontFamily
       )
-      const height = fontSize + fontSize / 6
+      const height = fontSize * dpr + fontSize * dpr / 6
 
       array.each(
         text.split('\n'),
@@ -175,8 +202,15 @@ define(function (require) {
     startDrawing (painter, emitter, event) {
 
       if (!textarea) {
+
+        const { fontSize } = this
+
         this.x = event.x
         this.y = event.y
+        this.lineHeight = fontSize + fontSize / 6
+        if (!textareaIsInCanvas(painter, fontSize + this.x, this.lineHeight + this.y)) {
+          return
+        }
         createTextarea(painter, emitter, event, this)
       }
 
@@ -204,15 +238,14 @@ define(function (require) {
     getRect(painter) {
 
       const { x, y, text, fontSize, fontFamily } = this
-
+      let row = text.split('\n')
       painter.setFont(
-        fontSize * getDevicePixelRatio(),
+        fontSize * dpr,
         fontFamily
       )
 
-      let width = painter.measureText(text).width
-      let height = painter.measureText('W').width
-      height += height / 6
+      let width = getTextSize(this, text).width
+      let height = getTextSize(this, text).height
 
       return {
         x: x,
