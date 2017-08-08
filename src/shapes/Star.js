@@ -1,6 +1,6 @@
 /**
- * @file 多边形
- * @author musicode
+ * @file 内多边形
+ * @author wth
  */
 define(function (require) {
 
@@ -88,30 +88,34 @@ define(function (require) {
 
       restore()
 
-      const { count } = this
+      const { count, starRadius } = this
 
       const radius = getDistance(startX, startY, endX, endY)
-
-      // 单位旋转的角度
       const stepRadian = PI2 / count
+
+      if (!starRadius) {
+        starRadius = radius / 2
+      }
 
       const points = [ ]
 
       let radian = Math.atan2(endY - startY, endX - startX), endRadian = radian + PI2
-
       do {
         array.push(
           points,
           getPointOfCircle(startX, startY, radius, radian)
         )
+        array.push(
+          points,
+          getPointOfCircle(startX, startY, starRadius, radian + stepRadian / 2)
+        )
         radian += stepRadian
       }
       while (radian <= endRadian)
 
-      if (points.length - count === 1) {
+      if (points.length - count * 2 === 2) {
         array.pop(points)
       }
-
       this.points = points
 
       this.draw(painter)

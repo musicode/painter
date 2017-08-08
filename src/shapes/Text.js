@@ -171,7 +171,6 @@ define(function (require) {
         fontSize * dpr,
         fontFamily
       )
-
       const height = fontSize * dpr + fontSize * dpr / 6
       array.each(
         text.split('\n'),
