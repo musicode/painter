@@ -197,7 +197,7 @@
                 内半径
             </label>
             <div class="col-sm-7">
-                <input name="starRadius" type="number" value="90" min="10" class="form-control">
+                <input name="innerRadius" type="number" value="90" min="10" class="form-control">
             </div>
         </div>
         <div class="form-group">
@@ -240,7 +240,7 @@
 
             var tool = + $('input[name="tool"]:checked').val();
             var count = + $('input[name="count"]').val().trim();
-            var starRadius = + $('input[name="starRadius"]').val().trim();
+            var innerRadius = + $('input[name="innerRadius"]').val().trim();
             var hasFill = $('input[name="hasFill"]').prop('checked');
             var hasStroke = $('input[name="hasStroke"]').prop('checked');
             var hasShadow = $('input[name="hasShadow"]').prop('checked');
@@ -260,7 +260,7 @@
 
                 tool: tool,
                 count: count,
-                starRadius: starRadius,
+                innerRadius: innerRadius,
                 hasFill: hasFill,
                 hasStroke: hasStroke,
                 hasShadow: hasShadow,
@@ -299,7 +299,7 @@
                 var updateCanvas = function (config) {
                     instance.resize(config.canvasWidth, config.canvasHeight);
                     instance.apply({
-                        starRadius: Math.max(config.starRadius, 10),
+                        innerRadius: Math.max(config.innerRadius, 10),
                         count: Math.max(config.count, 3),
                         fillStyle: config.hasFill ? config.fillStyle : null,
                         strokeStyle: config.hasStroke ? config.strokeStyle : null,

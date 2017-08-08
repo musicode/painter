@@ -88,13 +88,13 @@ define(function (require) {
 
       restore()
 
-      const { count, starRadius } = this
+      const { count, innerRadius } = this
 
-      const radius = getDistance(startX, startY, endX, endY)
+      const outerRadius = getDistance(startX, startY, endX, endY)
       const stepRadian = PI2 / count
 
-      if (!starRadius) {
-        starRadius = radius / 2
+      if (!innerRadius) {
+        innerRadius = outerRadius / 2
       }
 
       const points = [ ]
@@ -103,11 +103,11 @@ define(function (require) {
       do {
         array.push(
           points,
-          getPointOfCircle(startX, startY, radius, radian)
+          getPointOfCircle(startX, startY, outerRadius, radian)
         )
         array.push(
           points,
-          getPointOfCircle(startX, startY, starRadius, radian + stepRadian / 2)
+          getPointOfCircle(startX, startY, innerRadius, radian + stepRadian / 2)
         )
         radian += stepRadian
       }
