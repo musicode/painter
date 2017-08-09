@@ -34,7 +34,6 @@ define(function (require) {
     let width = 0
     let height = 0
     let rows = textLines.length
-
     for (let i = 0, l = rows; i < l; i++) {
       p.innerHTML = textLines[i]
       height = Math.max(p.offsetHeight, height)
@@ -249,8 +248,8 @@ define(function (require) {
       return {
         x: x,
         y: y,
-        width: width + 20,
-        height: height + 20,
+        width: width,
+        height: height,
       }
     }
 

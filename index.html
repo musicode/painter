@@ -175,7 +175,10 @@
                     <input type="radio" name="tool" value="7"> 文字
                 </label>
                 <label class="radio-inline">
-                    <input type="radio" name="tool" value="8" checked> 内多边形
+                    <input type="radio" name="tool" value="8"> 内多边形
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="tool" value="9" checked> 桃心
                 </label>
                 <label class="radio-inline">
                     <span class="label label-danger">
@@ -197,7 +200,7 @@
                 内半径
             </label>
             <div class="col-sm-7">
-                <input name="innerRadius" type="number" value="90" min="10" class="form-control">
+                <input name="radius" type="number" value="90" min="10" class="form-control">
             </div>
         </div>
         <div class="form-group">
@@ -240,7 +243,7 @@
 
             var tool = + $('input[name="tool"]:checked').val();
             var count = + $('input[name="count"]').val().trim();
-            var innerRadius = + $('input[name="innerRadius"]').val().trim();
+            var radius = + $('input[name="radius"]').val().trim();
             var hasFill = $('input[name="hasFill"]').prop('checked');
             var hasStroke = $('input[name="hasStroke"]').prop('checked');
             var hasShadow = $('input[name="hasShadow"]').prop('checked');
@@ -260,7 +263,7 @@
 
                 tool: tool,
                 count: count,
-                innerRadius: innerRadius,
+                radius: radius,
                 hasFill: hasFill,
                 hasStroke: hasStroke,
                 hasShadow: hasShadow,
@@ -277,9 +280,10 @@
                 'shapes/Polygon',
                 'shapes/Arrow',
                 'shapes/Text',
-                'shapes/Star'
+                'shapes/Star',
+                'shapes/Heart'
             ],
-            function (Canvas, Rect, Oval, Line, Doodle, Polygon, Arrow, Text, Star) {
+            function (Canvas, Rect, Oval, Line, Doodle, Polygon, Arrow, Text, Star, Heart) {
 
                 window.instance = new Canvas(canvas);
 
@@ -293,13 +297,14 @@
                   5: Polygon,
                   6: Arrow,
                   7: Text,
-                  8: Star
+                  8: Star,
+                  9: Heart
                 };
 
                 var updateCanvas = function (config) {
                     instance.resize(config.canvasWidth, config.canvasHeight);
                     instance.apply({
-                        innerRadius: Math.max(config.innerRadius, 10),
+                        radius: config.radius,
                         count: Math.max(config.count, 3),
                         fillStyle: config.hasFill ? config.fillStyle : null,
                         strokeStyle: config.hasStroke ? config.strokeStyle : null,

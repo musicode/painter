@@ -1,6 +1,6 @@
 /**
  * @file 内多边形
- * @author wth
+ * @author wangtianhua
  */
 define(function (require) {
 
@@ -16,31 +16,17 @@ define(function (require) {
 
   const PI2 = 2 * Math.PI
 
-  /**
-   * count 几边形
-   * points 点的数组
-   */
-  class Polygon extends Shape {
+  class Star extends Shape {
 
     isPointInFill(painter, x, y) {
       return containPolygon(this.points, x, y)
     }
 
-    /**
-     * 绘制路径
-     *
-     * @param {Painter} painter
-     */
     drawPath(painter) {
       painter.drawPoints(this.points)
       painter.close()
     }
 
-    /**
-     * 描边
-     *
-     * @param {Painter} painter
-     */
     stroke(painter) {
 
       let { points, strokePosition, strokeThickness, strokeStyle } = this
@@ -62,11 +48,6 @@ define(function (require) {
       painter.stroke()
     }
 
-    /**
-     * 填充
-     *
-     * @param {Painter} painter
-     */
     fill(painter) {
       painter.setFillStyle(this.fillStyle)
       painter.begin()
@@ -74,24 +55,15 @@ define(function (require) {
       painter.fill()
     }
 
-    /**
-     * 正在绘制
-     *
-     * @param {Painter} painter
-     * @param {number} startX 起始点 x 坐标
-     * @param {number} startY 起始点 y 坐标
-     * @param {number} endX 结束点 x 坐标
-     * @param {number} endX 结束点 y 坐标
-     * @param {Function} 还原为鼠标按下时的画布
-     */
     drawing(painter, startX, startY, endX, endY, restore) {
 
       restore()
 
-      const { count, innerRadius } = this
+      const { count, radius } = this
 
       const outerRadius = getDistance(startX, startY, endX, endY)
       const stepRadian = PI2 / count
+      let innerRadius = radius
 
       if (!innerRadius) {
         innerRadius = outerRadius / 2
@@ -129,6 +101,6 @@ define(function (require) {
 
   }
 
-  return Polygon
+  return Star
 
 })
