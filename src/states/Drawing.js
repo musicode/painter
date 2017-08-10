@@ -49,13 +49,23 @@ define(function (require) {
           startX = event.x
           startY = event.y
           drawingShape = new me.createShape()
-          emitter.fire(
-            Emitter.DRAWING_START
-          )
+          if (drawingShape.startDrawing
+            && drawingShape.startDrawing(painter, emitter, event) === false
+          ) {
+            drawingShape = null
+          }
+          else {
+            emitter.fire(
+              Emitter.DRAWING_START,
+              {
+                cursor: 'crosshair'
+              }
+            )
+          }
         }
       }
       me.mouseMoveHandler = function (event) {
-        if (drawingShape) {
+        if (drawingShape && drawingShape.drawing) {
           moving++
           drawingShape.drawing(painter, startX, startY, event.x, event.y, restore, refresh)
         }
@@ -65,6 +75,10 @@ define(function (require) {
           saved = null
         }
         if (drawingShape) {
+          if (drawingShape.endDrawing) {
+            drawingShape.endDrawing()
+            return
+          }
           emitter.fire(
             Emitter.DRAWING_END,
             {

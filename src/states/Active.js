@@ -24,7 +24,7 @@ define(function (require) {
 
   class Active extends State {
 
-    constructor(props, emitter) {
+    constructor(props, emitter, painter) {
 
       super(props)
 
@@ -51,7 +51,7 @@ define(function (require) {
       }
 
       me.clearHandler = function () {
-        me.setShapes([ ])
+        me.setShapes(painter, [ ])
       }
       me.shapeEnterHandler = function (event) {
         let { shape } = event
@@ -101,7 +101,7 @@ define(function (require) {
         }
         else if (hoverShape) {
           if (!array.has(me.shapes, hoverShape)) {
-            me.setShapes([ hoverShape ])
+            me.setShapes(painter, [ hoverShape ])
           }
           const offsetX = event.x - me.x, offsetY = event.y - me.y
           update = function (x, y) {
@@ -111,7 +111,7 @@ define(function (require) {
           saveShapes()
         }
         else if (event.inCanvas && me.shapes.length) {
-          me.setShapes([ ])
+          me.setShapes(painter, [ ])
         }
       }
       me.mouseMoveHandler = function (event) {
@@ -132,23 +132,23 @@ define(function (require) {
             switch (index) {
               case CENTER_TOP:
               case CENTER_BOTTOM:
-                cursor = 'row-resize'
+                cursor = 'ns-resize'
                 break
               case RIGHT_MIDDLE:
               case LEFT_MIDDLE:
-                cursor = 'col-resize'
+                cursor = 'ew-resize'
                 break
               case LEFT_TOP:
-                cursor = 'nw-resize'
+                cursor = 'nwse-resize'
                 break
               case RIGHT_TOP:
-                cursor = 'ne-resize'
+                cursor = 'nesw-resize'
                 break
               case RIGHT_BOTTOM:
-                cursor = 'se-resize'
+                cursor = 'nwse-resize'
                 break
               case LEFT_BOTTOM:
-                cursor = 'sw-resize'
+                cursor = 'nesw-resize'
                 break
             }
           }
@@ -207,13 +207,12 @@ define(function (require) {
       return this.shapes
     }
 
-    setShapes(shapes) {
-
+    setShapes(painter, shapes) {
       if (shapes.length > 0) {
         let rect = getUnionRect(
           shapes.map(
             function (shape) {
-              return shape.getRect()
+              return shape.getRect(painter)
             }
           )
         )
@@ -269,7 +268,7 @@ define(function (require) {
         array.each(
           shapes,
           function (shape) {
-            let rect = shape.getRect()
+            let rect = shape.getRect(painter)
             painter.strokeRect(rect.x + 0.5, rect.y + 0.5, rect.width, rect.height)
           }
         )

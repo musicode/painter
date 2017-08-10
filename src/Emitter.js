@@ -12,18 +12,21 @@ define(function (require, exports, module) {
     constructor(canvas) {
 
       this.listeners = { }
-
-      let me = this, cursorX, cursorY, inCanvas
+      
+      let me = this, cursorX, cursorY, pageX, pageY, inCanvas
 
       document.addEventListener(
         'mousedown',
-        function () {
+        function (event) {
           if (!me.disabled) {
             me.fire(
               Emitter.MOUSE_DOWN,
               {
                 x: cursorX,
                 y: cursorY,
+                pageX: pageX,
+                pageY: pageY,
+                target: event.target,
                 inCanvas,
               }
             )
@@ -35,9 +38,8 @@ define(function (require, exports, module) {
         'mousemove',
         function (event) {
           if (!me.disabled) {
-
-            const { pageX, pageY } = event
-
+            pageX = event.pageX
+            pageY = event.pageY
             cursorX = pageX - canvas.offsetLeft
             cursorY = pageY - canvas.offsetTop
 
@@ -57,6 +59,8 @@ define(function (require, exports, module) {
               {
                 x: cursorX,
                 y: cursorY,
+                pageX: pageX,
+                pageY: pageY,
                 inCanvas,
               }
             )
@@ -73,6 +77,8 @@ define(function (require, exports, module) {
               {
                 x: cursorX,
                 y: cursorY,
+                pageX: pageX,
+                pageY: pageY,
                 inCanvas
               }
             )
@@ -148,6 +154,8 @@ define(function (require, exports, module) {
 
   Emitter.ACTIVE_SHAPE_DELETE = 'active_shape_delete'
 
+  Emitter.ACTIVE_SHAPE_ENTER = 'active_shape_enter'
+
   Emitter.ACTIVE_RECT_CHANGE = 'active_rect_change'
 
   Emitter.SELECTION_RECT_CHANGE = 'selection_rect_change'
@@ -162,7 +170,8 @@ define(function (require, exports, module) {
 
   const SHORTCUT = {
     8: Emitter.ACTIVE_SHAPE_DELETE,
-    46: Emitter.ACTIVE_SHAPE_DELETE,
+    13: Emitter.ACTIVE_SHAPE_ENTER,
+    46: Emitter.ACTIVE_SHAPE_DELETE
   }
 
   return Emitter

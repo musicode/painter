@@ -32,7 +32,7 @@ define(function (require) {
      */
     isPointInPath(painter, x, y) {
 
-      if (containRect(this.getRect(), x, y)) {
+      if (containRect(this.getRect(painter), x, y)) {
         if (this.fillStyle && this.isPointInFill) {
           return this.isPointInFill(painter, x, y)
         }
@@ -89,6 +89,9 @@ define(function (require) {
           this.stroke(painter)
         }
 
+      }
+      else {
+        this.draw(painter)
       }
 
     }

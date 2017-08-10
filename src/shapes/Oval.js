@@ -32,7 +32,6 @@ define(function (require) {
     }
 
     isPointInStroke(painter, x1, y1) {
-
       let {
         x,
         y,
@@ -91,7 +90,6 @@ define(function (require) {
      * @param {Painter} painter
      */
     stroke(painter) {
-
       let {
         x,
         y,
@@ -149,7 +147,7 @@ define(function (require) {
      * @param {Function} 还原为鼠标按下时的画布
      */
     drawing(painter, startX, startY, endX, endY, restore) {
-
+      
       restore()
 
       this.x = startX

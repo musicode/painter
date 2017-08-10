@@ -16,8 +16,8 @@
         }
         canvas {
             background-color: #FFF;
-            margin: 20px;
             box-shadow: 0 0 8px rgba(0,0,0,0.2);
+            margin: 20px;
         }
         .form-horizontal {
             margin: 20px;
@@ -60,7 +60,7 @@
                 描边粗细
             </label>
             <div class="col-sm-7">
-                <input name="strokeThickness" type="range" value="20" min="1" class="form-control">
+                <input name="strokeThickness" type="range" value="2" min="1" class="form-control">
             </div>
         </div>
         <div class="form-group">
@@ -137,11 +137,19 @@
         </div>
         <div class="form-group">
             <label for="inputEmail3" class="col-sm-2 control-label">
+                字体大小
+            </label>
+            <div class="col-sm-7">
+                <input name="fontSize" type="number" value="30" min="12" class="form-control">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">
                 当前工具
             </label>
             <div class="col-sm-7">
                 <label class="radio-inline">
-                    <input type="radio" name="tool" value="0" checked> 无
+                    <input type="radio" name="tool" value="0"> 无
                 </label>
                 <label class="radio-inline">
                     <input type="radio" name="tool" value="1"> 直线
@@ -161,11 +169,15 @@
                 <label class="radio-inline">
                     <input type="radio" name="tool" value="6"> 箭头
                 </label>
-                <!--
                 <label class="radio-inline">
                     <input type="radio" name="tool" value="7"> 文字
                 </label>
-                -->
+                <label class="radio-inline">
+                    <input type="radio" name="tool" value="8"> 内多边形
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="tool" value="9" checked> 桃心
+                </label>
                 <label class="radio-inline">
                     <span class="label label-danger">
                         选中图形后按 Delete 键删除
@@ -178,7 +190,15 @@
                 多边形数量
             </label>
             <div class="col-sm-7">
-                <input name="count" type="number" value="3" min="3" class="form-control">
+                <input name="count" type="number" value="5" min="3" class="form-control">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">
+                内半径
+            </label>
+            <div class="col-sm-7">
+                <input name="radius" type="number" value="90" min="10" class="form-control">
             </div>
         </div>
         <div class="form-group">
@@ -192,9 +212,7 @@
             </div>
         </div>
     </div>
-
     <canvas></canvas>
-
     <script src="./demo/jquery.js"></script>
     <script src="./demo/esl.js"></script>
     <script>
@@ -217,12 +235,15 @@
             var shadowOffsetY = + $('input[name="shadowOffsetY"]').val().trim();
             var shadowBlur = + $('input[name="shadowBlur"]').val().trim();
             var shadowColor = $('input[name="shadowColor"]').val();
+            var fontSize = + $('input[name="fontSize"]').val();
 
             var tool = + $('input[name="tool"]:checked').val();
             var count = + $('input[name="count"]').val().trim();
+            var radius = + $('input[name="radius"]').val().trim();
             var hasFill = $('input[name="hasFill"]').prop('checked');
             var hasStroke = $('input[name="hasStroke"]').prop('checked');
             var hasShadow = $('input[name="hasShadow"]').prop('checked');
+
             return {
                 canvasWidth: canvasWidth,
                 canvasHeight: canvasHeight,
@@ -234,9 +255,11 @@
                 shadowOffsetY: shadowOffsetY,
                 shadowBlur: shadowBlur,
                 shadowColor: shadowColor,
+                fontSize: fontSize,
 
                 tool: tool,
                 count: count,
+                radius: radius,
                 hasFill: hasFill,
                 hasStroke: hasStroke,
                 hasShadow: hasShadow,
@@ -252,9 +275,11 @@
                 'shapes/Doodle',
                 'shapes/Polygon',
                 'shapes/Arrow',
+                'shapes/Text',
+                'shapes/Star',
+                'shapes/Heart'
             ],
-            function (Canvas, Rect, Oval, Line, Doodle, Polygon, Arrow) {
-
+            function (Canvas, Rect, Oval, Line, Doodle, Polygon, Arrow, Text, Star, Heart) {
                 window.instance = new Canvas(canvas);
 
                 var config = getConfig();
@@ -266,11 +291,15 @@
                   4: Doodle,
                   5: Polygon,
                   6: Arrow,
+                  7: Text,
+                  8: Star,
+                  9: Heart
                 };
 
                 var updateCanvas = function (config) {
                     instance.resize(config.canvasWidth, config.canvasHeight);
                     instance.apply({
+                        radius: config.radius,
                         count: Math.max(config.count, 3),
                         fillStyle: config.hasFill ? config.fillStyle : null,
                         strokeStyle: config.hasStroke ? config.strokeStyle : null,
@@ -280,12 +309,13 @@
                         shadowOffsetY: config.shadowOffsetY,
                         shadowBlur: config.shadowBlur,
                         shadowColor: config.hasShadow ? config.shadowColor : null,
+                        fontSize: config.fontSize,
+                        fontFamily: 'sans-serif'
                     })
                     instance.drawing(
                       shapeMap[config.tool]
                     )
                 };
-
                 updateCanvas(config);
 
                 $('.btn-info').on('click', function () {

@@ -12,6 +12,14 @@ define(function (require, exports, module) {
       this.context = context
     }
 
+    getCanvasSize() {
+      const { width, height } = this.context.canvas
+      return {
+        width: width,
+        height: height
+      }
+    }
+  
     begin() {
       this.context.beginPath()
     }
@@ -32,6 +40,49 @@ define(function (require, exports, module) {
         context.arc(x, y, radius, 0, 2 * Math.PI, true)
       }
       else {
+        let { context } = this
+        if (width === height) {
+          const radius = width / 2
+          context.moveTo(x + radius, y)
+          context.arc(x, y, radius, 0, 2 * Math.PI, true)
+        }
+        else {
+          const w = (width / 0.75) / 2, h = height / 2
+          const points = [
+              {
+                'x': x,
+                'y': y - h
+              },
+
+              {
+                'x': x + w,
+                'y': y - h
+              },
+
+              {
+                'x': x + w,
+                'y': y + h
+              },
+
+              {
+                'x': x,
+                'y': y + h
+              },
+
+              {
+                'x': x - w,
+                'y': y + h
+              },
+
+              {
+                'x': x - w,
+                'y': y - h
+              }
+          ];
+          context.moveTo(points[0].x, points[0].y)
+          context.bezierCurveTo(points[1].x, points[1].y, points[2].x, points[2].y, points[3].x, points[3].y)
+          context.bezierCurveTo(points[4].x, points[4].y, points[5].x, points[5].y, points[0].x, points[0].y)
+        }
         const w = (width / 0.75) / 2, h = height / 2
         context.moveTo(x, y - h)
         context.bezierCurveTo(x + w, y - h, x + w, y + h, x, y + h)
@@ -67,6 +118,17 @@ define(function (require, exports, module) {
       this.context.fillRect(x, y, width, height)
     }
 
+    strokeText(x, y, text) {
+      this.context.strokeText(text, x, y)
+    }
+
+    fillText(x, y, text) {
+      this.context.fillText(text, x, y)
+    }
+
+    measureText(text) {
+      return this.context.measureText(text)
+    }
     isPointInPath(x, y) {
       return this.context.isPointInPath(x, y)
     }
@@ -125,6 +187,9 @@ define(function (require, exports, module) {
       }
     }
 
+    setFont(fontSize, fontFamily) {
+      this.context.font = fontSize + 'px ' + fontFamily
+    }
   }
 
   const { prototype } = Painter

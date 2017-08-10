@@ -28,12 +28,14 @@ define(function (require, exports, module) {
       me.element = canvas
       me.resize(canvas.width, canvas.height)
 
-      me.painter = new Painter(canvas.getContext('2d'))
+      const painter = me.painter = new Painter(canvas.getContext('2d'))
+
       const emitter = me.emitter = new Emitter(canvas)
 
       me.shapes = [ ]
       me.states = [
-        new Active({ }, emitter),
+        new Active({ }, emitter, painter),
+
         new Hover({ }, emitter)
       ]
 
@@ -56,7 +58,7 @@ define(function (require, exports, module) {
               array.each(
                 list,
                 function (shape) {
-                  if (shape && shape.isPointInPath(me.painter, event.x, event.y) !== false) {
+                  if (shape && shape.isPointInPath(painter, event.x, event.y) !== false) {
                     newHoverShape = shape
                     return false
                   }
@@ -112,6 +114,15 @@ define(function (require, exports, module) {
         refresh
       )
       .on(
+        Emitter.ACTIVE_SHAPE_ENTER,
+        function () {
+          let state = me.states[ INDEX_ACTIVE ], shapes = state.getShapes()
+          if (shapes.length) {
+            debugger
+          }
+        }
+      )
+      .on(
         Emitter.ACTIVE_SHAPE_DELETE,
         function () {
           let state = me.states[ INDEX_ACTIVE ], shapes = state.getShapes()
@@ -122,7 +133,7 @@ define(function (require, exports, module) {
                 array.remove(me.shapes, shape)
               }
             )
-            state.setShapes([])
+            state.setShapes(painter, [])
           }
         }
       )
@@ -130,9 +141,10 @@ define(function (require, exports, module) {
         Emitter.SELECTION_RECT_CHANGE,
         function (event) {
           me.states[ INDEX_ACTIVE ].setShapes(
+            painter,
             me.shapes.filter(
               function (shape) {
-                if (getInterRect(shape.getRect(), event.rect)) {
+                if (getInterRect(shape.getRect(painter), event.rect)) {
                   return true
                 }
               }
@@ -155,8 +167,8 @@ define(function (require, exports, module) {
       )
       .on(
         Emitter.DRAWING_START,
-        function () {
-          canvas.style.cursor = 'crosshair'
+        function (event) {
+          canvas.style.cursor = event.cursor
         }
       )
       .on(
@@ -165,7 +177,7 @@ define(function (require, exports, module) {
           canvas.style.cursor = ''
           const { shape } = event
           if (shape) {
-            if (shape.validate()) {
+            if (shape.validate(painter)) {
               array.push(me.shapes, shape)
             }
             me.refresh()
