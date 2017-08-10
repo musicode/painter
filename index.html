@@ -135,7 +135,6 @@
                 </label>
             </div>
         </div>
-
         <div class="form-group">
             <label for="inputEmail3" class="col-sm-2 control-label">
                 字体大小
@@ -144,7 +143,6 @@
                 <input name="fontSize" type="number" value="30" min="12" class="form-control">
             </div>
         </div>
-
         <div class="form-group">
             <label for="inputEmail3" class="col-sm-2 control-label">
                 当前工具
@@ -214,9 +212,7 @@
             </div>
         </div>
     </div>
-
     <canvas></canvas>
-
     <script src="./demo/jquery.js"></script>
     <script src="./demo/esl.js"></script>
     <script>
@@ -284,7 +280,6 @@
                 'shapes/Heart'
             ],
             function (Canvas, Rect, Oval, Line, Doodle, Polygon, Arrow, Text, Star, Heart) {
-
                 window.instance = new Canvas(canvas);
 
                 var config = getConfig();
@@ -321,7 +316,6 @@
                       shapeMap[config.tool]
                     )
                 };
-
                 updateCanvas(config);
 
                 $('.btn-info').on('click', function () {

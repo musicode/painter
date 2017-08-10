@@ -90,7 +90,6 @@ define(function (require) {
         }
 
       }
-
       else {
         this.draw(painter)
       }

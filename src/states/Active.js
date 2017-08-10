@@ -208,7 +208,6 @@ define(function (require) {
     }
 
     setShapes(painter, shapes) {
-
       if (shapes.length > 0) {
         let rect = getUnionRect(
           shapes.map(

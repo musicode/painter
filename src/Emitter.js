@@ -12,7 +12,7 @@ define(function (require, exports, module) {
     constructor(canvas) {
 
       this.listeners = { }
-
+      
       let me = this, cursorX, cursorY, pageX, pageY, inCanvas
 
       document.addEventListener(
@@ -38,7 +38,6 @@ define(function (require, exports, module) {
         'mousemove',
         function (event) {
           if (!me.disabled) {
-
             pageX = event.pageX
             pageY = event.pageY
             cursorX = pageX - canvas.offsetLeft

@@ -26,14 +26,12 @@ define(function (require) {
      * @return {boolean}
      */
     isPointInFill(painter, x, y) {
-        console.log('isPointInFill')
       painter.begin()
       this.drawPath(painter)
       return painter.isPointInPath(x, y)
     }
 
     isPointInStroke(painter, x1, y1) {
-        console.log('isPointInStroke')
       let {
         x,
         y,
@@ -83,7 +81,6 @@ define(function (require) {
      * @param {Painter} painter
      */
     drawPath(painter) {
-        console.log('drawPath')
       painter.drawOval(this.x, this.y, this.width, this.height)
     }
 
@@ -93,7 +90,6 @@ define(function (require) {
      * @param {Painter} painter
      */
     stroke(painter) {
-        console.log('stroke')
       let {
         x,
         y,
@@ -134,7 +130,6 @@ define(function (require) {
      * @param {Painter} painter
      */
     fill(painter) {
-        console.log('fill')
       painter.setFillStyle(this.fillStyle)
       painter.begin()
       this.drawPath(painter)
@@ -152,7 +147,7 @@ define(function (require) {
      * @param {Function} 还原为鼠标按下时的画布
      */
     drawing(painter, startX, startY, endX, endY, restore) {
-        console.log('drawing')
+      
       restore()
 
       this.x = startX

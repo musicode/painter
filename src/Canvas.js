@@ -29,11 +29,13 @@ define(function (require, exports, module) {
       me.resize(canvas.width, canvas.height)
 
       const painter = me.painter = new Painter(canvas.getContext('2d'))
+
       const emitter = me.emitter = new Emitter(canvas)
 
       me.shapes = [ ]
       me.states = [
         new Active({ }, emitter, painter),
+
         new Hover({ }, emitter)
       ]
 

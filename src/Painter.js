@@ -19,7 +19,7 @@ define(function (require, exports, module) {
         height: height
       }
     }
-
+  
     begin() {
       this.context.beginPath()
     }
@@ -83,6 +83,10 @@ define(function (require, exports, module) {
           context.bezierCurveTo(points[1].x, points[1].y, points[2].x, points[2].y, points[3].x, points[3].y)
           context.bezierCurveTo(points[4].x, points[4].y, points[5].x, points[5].y, points[0].x, points[0].y)
         }
+        const w = (width / 0.75) / 2, h = height / 2
+        context.moveTo(x, y - h)
+        context.bezierCurveTo(x + w, y - h, x + w, y + h, x, y + h)
+        context.bezierCurveTo(x - w, y + h, x - w, y - h, x, y - h)
       }
     }
 
@@ -125,7 +129,6 @@ define(function (require, exports, module) {
     measureText(text) {
       return this.context.measureText(text)
     }
-
     isPointInPath(x, y) {
       return this.context.isPointInPath(x, y)
     }
@@ -187,7 +190,6 @@ define(function (require, exports, module) {
     setFont(fontSize, fontFamily) {
       this.context.font = fontSize + 'px ' + fontFamily
     }
-
   }
 
   const { prototype } = Painter
