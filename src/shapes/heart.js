@@ -26,16 +26,15 @@ define(function (require) {
       let width = getDistance(startX, 0, endX, 0)
       let height = getDistance(0, startY, 0, endY)
 
-      const points = [ ]
-      const PI = Math.PI, PI2 = Math.PI * 2
-      const radius = width / 32
-      let radian = PI, stepRadian = PI2 / (radius * 10), endRadian = -PI
-      console.log(heart.getOffsetY(this.y + height, radius, radian), this.y + height)
+      const points = [ ], radius = width / 32, PI = Math.PI, PI2 = Math.PI * 2
+
+      let radian = PI, stepRadian = PI2 / Math.max(radius * 16, 30), endRadian = -PI
+
       array.push(
         points,
         {
           x: heart.getOffsetX(this.x + width / 2, radius, radian),
-          y: heart.getOffsetY(this.y + height, radius, radian)
+          y: heart.getOffsetY(this.y, radius, radian)
         }
       )
       do {
@@ -43,17 +42,13 @@ define(function (require) {
             points,
             {
               x: heart.getOffsetX(this.x + width / 2, radius, radian),
-              y: heart.getOffsetY(this.y + height, radius, radian)
+              y: heart.getOffsetY(this.y, radius, radian)
             }
           )
           radian -= stepRadian
       }
       while (radian >= endRadian)
-      if (points.length - 360 === 2) {
-        array.pop(points)
-      }
       this.points = points
-
       this.draw(painter)
 
     }
