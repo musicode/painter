@@ -114,15 +114,6 @@ define(function (require, exports, module) {
         refresh
       )
       .on(
-        Emitter.ACTIVE_SHAPE_ENTER,
-        function () {
-          let state = me.states[ INDEX_ACTIVE ], shapes = state.getShapes()
-          if (shapes.length) {
-            debugger
-          }
-        }
-      )
-      .on(
         Emitter.ACTIVE_SHAPE_DELETE,
         function () {
           let state = me.states[ INDEX_ACTIVE ], shapes = state.getShapes()
@@ -244,7 +235,10 @@ define(function (require, exports, module) {
         )
       }
       else {
-        states[ INDEX_SELECTION ] = new Selection({ }, emitter)
+        states[ INDEX_SELECTION ] = new Selection(
+          { },
+          emitter
+        )
       }
     }
 
@@ -264,7 +258,7 @@ define(function (require, exports, module) {
      */
     refresh() {
 
-      const { painter, shapes, states, activeShapes } = this
+      const { painter } = this
 
       painter.clear()
 
@@ -274,8 +268,8 @@ define(function (require, exports, module) {
         }
       }
 
-      array.each(shapes, drawShape)
-      array.each(states, drawShape)
+      array.each(this.shapes, drawShape)
+      array.each(this.states, drawShape)
 
     }
 
