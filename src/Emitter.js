@@ -12,26 +12,70 @@ define(function (require, exports, module) {
     constructor(canvas) {
 
       this.listeners = { }
-      
+
       let me = this, cursorX, cursorY, pageX, pageY, inCanvas
+
+      let updatePosition = function () {
+        cursorX = pageX - canvas.offsetLeft
+        cursorY = pageY - canvas.offsetTop
+
+        const devicePixelRatio = getDevicePixelRatio()
+        if (devicePixelRatio > 1) {
+          cursorX *= devicePixelRatio
+          cursorY *= devicePixelRatio
+        }
+
+        inCanvas = cursorX >= 0
+            && cursorX <= canvas.width
+            && cursorY >= 0
+            && cursorY <= canvas.height
+      }
+
+      let updatePositionByTouchEvent = function (event) {
+        let { touches } = event;
+        if (touches) {
+          pageX = touches[ 0 ].pageX
+          pageY = touches[ 0 ].pageY
+          updatePosition()
+        }
+      }
+
+      let onMouseDown = function (event) {
+        if (!me.disabled) {
+          updatePositionByTouchEvent(event)
+
+          me.fire(
+            Emitter.MOUSE_DOWN,
+            {
+              x: cursorX,
+              y: cursorY,
+              pageX: pageX,
+              pageY: pageY,
+              target: event.target,
+              inCanvas,
+            }
+          )
+        }
+      }
+
+      let onMouseUp = function (event) {
+        if (!me.disabled) {
+          me.fire(
+            Emitter.MOUSE_UP,
+            {
+              x: cursorX,
+              y: cursorY,
+              pageX: pageX,
+              pageY: pageY,
+              inCanvas
+            }
+          )
+        }
+      }
 
       document.addEventListener(
         'mousedown',
-        function (event) {
-          if (!me.disabled) {
-            me.fire(
-              Emitter.MOUSE_DOWN,
-              {
-                x: cursorX,
-                y: cursorY,
-                pageX: pageX,
-                pageY: pageY,
-                target: event.target,
-                inCanvas,
-              }
-            )
-          }
-        }
+        onMouseDown
       )
 
       document.addEventListener(
@@ -40,19 +84,7 @@ define(function (require, exports, module) {
           if (!me.disabled) {
             pageX = event.pageX
             pageY = event.pageY
-            cursorX = pageX - canvas.offsetLeft
-            cursorY = pageY - canvas.offsetTop
-
-            const devicePixelRatio = getDevicePixelRatio()
-            if (devicePixelRatio > 1) {
-              cursorX *= devicePixelRatio
-              cursorY *= devicePixelRatio
-            }
-
-            inCanvas = cursorX >= 0
-              && cursorX <= canvas.width
-              && cursorY >= 0
-              && cursorY <= canvas.height
+            updatePosition()
 
             me.fire(
               Emitter.MOUSE_MOVE,
@@ -70,21 +102,58 @@ define(function (require, exports, module) {
 
       document.addEventListener(
         'mouseup',
-        function () {
-          if (!me.disabled) {
-            me.fire(
-              Emitter.MOUSE_UP,
-              {
-                x: cursorX,
-                y: cursorY,
-                pageX: pageX,
-                pageY: pageY,
-                inCanvas
-              }
-            )
-          }
-        }
+        onMouseUp
       )
+
+      if ('ontouchstart' in document) {
+        document.addEventListener(
+          'touchstart',
+          onMouseDown
+        )
+        document.addEventListener(
+          'touchmove',
+          function (event) {
+            if (!me.disabled) {
+              updatePositionByTouchEvent(event)
+              me.fire(
+                Emitter.MOUSE_MOVE,
+                {
+                  x: cursorX,
+                  y: cursorY,
+                  pageX: pageX,
+                  pageY: pageY,
+                  inCanvas,
+                }
+              )
+            }
+          }
+        )
+        canvas.addEventListener(
+          'touchmove',
+          function (event) {
+            if (!me.disabled) {
+              updatePositionByTouchEvent(event)
+              me.fire(
+                Emitter.MOUSE_MOVE,
+                {
+                  x: cursorX,
+                  y: cursorY,
+                  pageX: pageX,
+                  pageY: pageY,
+                  inCanvas,
+                }
+              )
+              // 在 canvas 画画时禁止页面滚动
+              event.preventDefault()
+              event.stopPropagation()
+            }
+          }
+        )
+        document.addEventListener(
+          'touchend',
+          onMouseUp
+        )
+      }
 
       if (SHORTCUT) {
         document.addEventListener(
