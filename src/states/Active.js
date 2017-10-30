@@ -200,7 +200,7 @@ define(function (require) {
       .off(Emitter.MOUSE_DOWN, this.mouseDownHandler)
       .off(Emitter.MOUSE_MOVE, this.mouseMoveHandler)
       .off(Emitter.MOUSE_UP, this.mouseUpHandler)
-      .on(Emitter.RESET, this.resetUpHandler)
+      .off(Emitter.RESET, this.resetUpHandler)
     }
 
     getShapes() {

@@ -76,8 +76,8 @@ define(function (require) {
       this.emitter
       .off(Emitter.SHAPE_ENTER, this.shapeEnterHandler)
       .off(Emitter.SHAPE_LEAVE, this.shapeLeaveHandler)
-      .on(Emitter.DRAWING_START, this.drawingStartHandler)
-      .on(Emitter.DRAWING_END, this.drawingEndHandler)
+      .off(Emitter.DRAWING_START, this.drawingStartHandler)
+      .off(Emitter.DRAWING_END, this.drawingEndHandler)
       .off(Emitter.ACTIVE_SHAPE_CHANGE, this.activeShapeChangeHandler)
       .off(Emitter.RESET, this.resetHandler)
     }
