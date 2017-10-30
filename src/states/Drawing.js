@@ -95,6 +95,7 @@ define(function (require) {
       .on(Emitter.MOUSE_DOWN, me.mouseDownHandler)
       .on(Emitter.MOUSE_MOVE, me.mouseMoveHandler)
       .on(Emitter.MOUSE_UP, me.mouseUpHandler)
+      .on(Emitter.RESET, me.mouseUpHandler)
 
     }
 
@@ -105,14 +106,11 @@ define(function (require) {
       .off(Emitter.MOUSE_DOWN, this.mouseDownHandler)
       .off(Emitter.MOUSE_MOVE, this.mouseMoveHandler)
       .off(Emitter.MOUSE_UP, this.mouseUpHandler)
+      .off(Emitter.RESET, this.mouseUpHandler)
     }
 
     isPointInPath(painter, x, y) {
       return false
-    }
-
-    draw(painter) {
-
     }
 
   }

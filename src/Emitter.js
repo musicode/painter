@@ -203,6 +203,8 @@ define(function (require, exports, module) {
 
   Emitter.REFRESH = 'refresh'
 
+  Emitter.RESET = 'reset'
+
   Emitter.CLEAR = 'clear'
 
   Emitter.MOUSE_DOWN = 'mouse_down'
@@ -210,8 +212,6 @@ define(function (require, exports, module) {
   Emitter.MOUSE_MOVE = 'mouse_move'
 
   Emitter.MOUSE_UP = 'mouse_up'
-
-  Emitter.CANVAS_DECO = 'canvas_deco'
 
   Emitter.SHAPE_ENTER = 'shape_enter'
 
@@ -226,6 +226,8 @@ define(function (require, exports, module) {
   Emitter.ACTIVE_SHAPE_ENTER = 'active_shape_enter'
 
   Emitter.ACTIVE_RECT_CHANGE = 'active_rect_change'
+
+  Emitter.ACTIVE_DRAG_BOX_HOVER = 'active_drag_box_hover'
 
   Emitter.SELECTION_RECT_CHANGE = 'selection_rect_change'
 

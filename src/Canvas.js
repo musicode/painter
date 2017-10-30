@@ -176,9 +176,13 @@ define(function (require, exports, module) {
         }
       )
       .on(
-        Emitter.CANVAS_DECO,
+        Emitter.ACTIVE_DRAG_BOX_HOVER,
         function (event) {
-          event.action(me)
+          let { name } = event
+          if (name) {
+            name += '-resize'
+          }
+          canvas.style.cursor = name
         }
       )
 

@@ -125,30 +125,26 @@ define(function (require) {
           return
         }
 
-        let index = me.isPointInPath(null, event.x, event.y), cursor
+        let index = me.isPointInPath(painter, event.x, event.y), cursor
         if (index !== false) {
           if (currentBox !== index) {
             currentBox = index
             switch (index) {
               case CENTER_TOP:
               case CENTER_BOTTOM:
-                cursor = 'ns-resize'
+                cursor = 'ns'
                 break
               case RIGHT_MIDDLE:
               case LEFT_MIDDLE:
-                cursor = 'ew-resize'
+                cursor = 'ew'
                 break
               case LEFT_TOP:
-                cursor = 'nwse-resize'
+              case RIGHT_BOTTOM:
+                cursor = 'nwse'
                 break
               case RIGHT_TOP:
-                cursor = 'nesw-resize'
-                break
-              case RIGHT_BOTTOM:
-                cursor = 'nwse-resize'
-                break
               case LEFT_BOTTOM:
-                cursor = 'nesw-resize'
+                cursor = 'nesw'
                 break
             }
           }
@@ -159,11 +155,9 @@ define(function (require) {
         }
         if (cursor != null) {
           emitter.fire(
-            Emitter.CANVAS_DECO,
+            Emitter.ACTIVE_DRAG_BOX_HOVER,
             {
-              action: function (canvas) {
-                canvas.element.style.cursor = cursor
-              }
+              name: cursor
             }
           )
         }
@@ -172,15 +166,19 @@ define(function (require) {
         if (currentBox >= 0) {
           currentBox = -1
           emitter.fire(
-            Emitter.CANVAS_DECO,
+            Emitter.ACTIVE_DRAG_BOX_HOVER,
             {
-              action: function (canvas) {
-                canvas.element.style.cursor = ''
-              }
+              name: ''
             }
           )
         }
         update = targetX = targetY = null
+      }
+      me.resetUpHandler = function (event) {
+        if (currentBox >= 0) {
+          me.mouseUpHandler(event)
+        }
+        me.setShapes(painter, [ ])
       }
 
       emitter
@@ -190,6 +188,7 @@ define(function (require) {
       .on(Emitter.MOUSE_DOWN, me.mouseDownHandler)
       .on(Emitter.MOUSE_MOVE, me.mouseMoveHandler)
       .on(Emitter.MOUSE_UP, me.mouseUpHandler)
+      .on(Emitter.RESET, me.resetUpHandler)
 
     }
 
@@ -201,6 +200,7 @@ define(function (require) {
       .off(Emitter.MOUSE_DOWN, this.mouseDownHandler)
       .off(Emitter.MOUSE_MOVE, this.mouseMoveHandler)
       .off(Emitter.MOUSE_UP, this.mouseUpHandler)
+      .on(Emitter.RESET, this.resetUpHandler)
     }
 
     getShapes() {

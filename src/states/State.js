@@ -15,6 +15,10 @@ define(function () {
 
     }
 
+    draw() {
+
+    }
+
   }
 
   return State

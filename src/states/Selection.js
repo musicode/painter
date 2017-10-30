@@ -49,6 +49,7 @@ define(function (require) {
           emitter
           .on(Emitter.MOUSE_MOVE, mouseMoveHandler)
           .on(Emitter.MOUSE_UP, mouseUpHandler)
+          .on(Emitter.RESET, mouseUpHandler)
         }
       }
 
