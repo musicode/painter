@@ -37,8 +37,8 @@ define(function (require) {
       let thickness = 20, threshold = thickness * 10, header
 
       if (distance < threshold) {
-        thickness *= distance / (2 * threshold)
-        header = Math.max(thickness, 50)
+        thickness *= distance / threshold
+        header = distance / 3
       }
       else {
         header = Math.max(distance / 8, 80)
@@ -55,7 +55,7 @@ define(function (require) {
 
       point = {
         x: point.x + distance - header,
-        y: point.y - header / 8,
+        y: point.y,
       }
       array.push(points, point)
 
