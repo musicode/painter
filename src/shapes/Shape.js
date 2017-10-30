@@ -5,6 +5,7 @@
 define(function (require) {
 
   const array = require('../util/array')
+  const object = require('../util/object')
 
   const containLine = require('../contain/line')
   const containRect = require('../contain/rect')
@@ -164,6 +165,13 @@ define(function (require) {
 
     getRect() {
       return getRectByPoints(this.points)
+    }
+
+    clone() {
+      return Object.assign(
+        new this.constructor(),
+        object.copy(this, true)
+      )
     }
 
   }

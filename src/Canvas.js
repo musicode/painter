@@ -12,6 +12,7 @@ define(function (require, exports, module) {
   const getInterRect = require('./function/getInterRect')
   const getDevicePixelRatio = require('./function/getDevicePixelRatio')
   const array = require('./util/array')
+  const object = require('./util/object')
 
   const Emitter = require('./Emitter')
   const Painter = require('./Painter')
@@ -21,7 +22,7 @@ define(function (require, exports, module) {
 
   class Canvas {
 
-    constructor(canvas) {
+    constructor(canvas, maxHistorySize = 10) {
 
       const me = this
 
@@ -32,12 +33,15 @@ define(function (require, exports, module) {
 
       const emitter = me.emitter = new Emitter(canvas)
 
-      me.shapes = [ ]
       me.states = [
         new Active({ }, emitter, painter),
 
         new Hover({ }, emitter)
       ]
+
+      me.histories = [ [ ] ]
+      me.historyIndex = 0
+      me.maxHistorySize = maxHistorySize
 
       let hoverShape
 
@@ -53,7 +57,7 @@ define(function (require, exports, module) {
           let newHoverShape
 
           array.each(
-            [ me.states, me.shapes ],
+            [ me.states, me.getShapes() ],
             function (list) {
               array.each(
                 list,
@@ -106,24 +110,28 @@ define(function (require, exports, module) {
         refresh
       )
       .on(
-        Emitter.ACTIVE_RECT_CHANGE,
+        Emitter.REFRESH,
         refresh
       )
       .on(
-        Emitter.REFRESH,
+        Emitter.ACTIVE_RECT_CHANGE_END,
         refresh
+      )
+      .on(
+        Emitter.ACTIVE_RECT_CHANGE_START,
+        function () {
+          let state = me.states[ INDEX_ACTIVE ], shapes = state.getShapes()
+          if (shapes.length) {
+            me.editShapes(shapes, null, true)
+          }
+        }
       )
       .on(
         Emitter.ACTIVE_SHAPE_DELETE,
         function () {
           let state = me.states[ INDEX_ACTIVE ], shapes = state.getShapes()
           if (shapes.length) {
-            array.each(
-              shapes,
-              function (shape) {
-                array.remove(me.shapes, shape)
-              }
-            )
+            me.removeShapes(shapes, true)
             state.setShapes(painter, [])
           }
         }
@@ -133,7 +141,7 @@ define(function (require, exports, module) {
         function (event) {
           me.states[ INDEX_ACTIVE ].setShapes(
             painter,
-            me.shapes.filter(
+            me.getShapes().filter(
               function (shape) {
                 if (getInterRect(shape.getRect(painter), event.rect)) {
                   return true
@@ -169,7 +177,7 @@ define(function (require, exports, module) {
           const { shape } = event
           if (shape) {
             if (shape.validate(painter)) {
-              array.push(me.shapes, shape)
+              me.addShape(shape, true)
             }
             me.refresh()
           }
@@ -216,10 +224,86 @@ define(function (require, exports, module) {
      * 添加图形
      *
      * @param {Shape} shape
+     * @param {bolean} silent
      */
-    addShape(shape) {
-      shape.draw(this.painter)
-      array.push(this.shapes, shape)
+    addShape(shape, silent) {
+      this.addShapes([ shape ], silent)
+    }
+
+    /**
+     * 批量添加图形
+     *
+     * @param {Array.<Shape>} shapes
+     * @param {bolean} silent
+     */
+    addShapes(shapes, silent) {
+      let me = this
+      me.save()
+      array.each(
+        shapes,
+        function (shape) {
+          array.push(me.getShapes(), shape)
+        }
+      )
+      if (!silent) {
+        me.refresh()
+      }
+    }
+
+    /**
+     * 删除图形
+     *
+     * @param {Shape} shape
+     * @param {bolean} silent
+     */
+    removeShape(shape, silent) {
+      this.removeShapes([ shape ], silent)
+    }
+
+    /**
+     * 批量删除图形
+     *
+     * @param {Array.<Shape>} shapes
+     * @param {bolean} silent
+     */
+    removeShapes(shapes, silent) {
+      let me = this
+      me.save()
+      array.each(
+        shapes,
+        function (shape) {
+          array.remove(me.getShapes(), shape)
+        }
+      )
+      if (!silent) {
+        me.refresh()
+      }
+    }
+
+    editShapes(shapes, props, silent) {
+      this.save()
+      const allShapes = this.getShapes()
+      array.each(
+        shapes,
+        function (shape, i) {
+          let index = allShapes.indexOf(shape)
+          if (index >= 0) {
+            let newShape = shape.clone()
+            if (props) {
+              Object.assign(newShape, props)
+            }
+            allShapes[ index ] = shapes[ i ] = newShape
+          }
+        }
+      )
+      if (!silent) {
+        this.refresh()
+      }
+    }
+
+    getShapes() {
+      const { histories, historyIndex } = this
+      return histories[ historyIndex ]
     }
 
     drawing(Shape) {
@@ -247,14 +331,28 @@ define(function (require, exports, module) {
     }
 
     apply(config) {
-      array.each(
-        this.states[ INDEX_ACTIVE ].getShapes(),
-        function (shape) {
-          Object.assign(shape, config)
+
+      let isChange
+
+      const oldConfig = this.config || { }
+      object.each(
+        config,
+        function (value, key) {
+          if (value !== oldConfig[ key ]) {
+            isChange = true
+            return false
+          }
         }
       )
-      this.refresh()
-      this.config = config
+
+      if (isChange) {
+        const shapes = this.states[ INDEX_ACTIVE ].getShapes()
+        if (shapes.length) {
+          this.editShapes(shapes, config)
+        }
+        this.config = config
+      }
+
     }
 
     /**
@@ -272,7 +370,7 @@ define(function (require, exports, module) {
         }
       }
 
-      array.each(this.shapes, drawShape)
+      array.each(this.getShapes(), drawShape)
       array.each(this.states, drawShape)
 
     }
@@ -281,11 +379,80 @@ define(function (require, exports, module) {
      * 清空画布
      */
     clear() {
-      this.shapes.length = 0
+      this.getShapes().length = 0
       this.painter.clear()
       this.emitter.fire(
         Emitter.CLEAR
       )
+    }
+
+    /**
+     * 修改操作前先保存，便于 prev 和 next 操作
+     */
+    save() {
+      // 当前 shapes 必须存在于 histories
+      // 否则无法进行 prev 和 next
+      const { histories, maxHistorySize, historyIndex } = this
+
+      if (histories.length > historyIndex + 1) {
+        histories.splice(historyIndex + 1)
+      }
+
+      const shapes = this.getShapes()
+      if (histories.length > 0) {
+        histories.splice(
+          histories.length - 1, 0, object.copy(shapes)
+        )
+      }
+      else {
+        histories.push(
+          object.copy(shapes),
+          shapes
+        )
+      }
+
+      if (histories.length > maxHistorySize + 1) {
+        histories.splice(0, 1)
+      }
+
+      this.historyIndex = histories.length - 1
+
+    }
+
+    /**
+     * 上一步，用于撤销
+     *
+     * @return {boolean} 是否撤销成功
+     */
+    prev() {
+      let { histories, historyIndex, emitter } = this
+      historyIndex--
+      if (histories[ historyIndex ]) {
+        this.historyIndex = historyIndex
+        emitter.fire(
+          Emitter.RESET
+        )
+        this.refresh()
+        return true
+      }
+    }
+
+    /**
+     * 下一步，用于恢复
+     *
+     * @return {boolean} 是否恢复成功
+     */
+    next() {
+      let { histories, historyIndex, emitter } = this
+      historyIndex++
+      if (histories[ historyIndex ]) {
+        this.historyIndex = historyIndex
+        emitter.fire(
+          Emitter.RESET
+        )
+        this.refresh()
+        return true
+      }
     }
 
   }

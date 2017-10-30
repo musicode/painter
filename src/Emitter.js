@@ -225,7 +225,9 @@ define(function (require, exports, module) {
 
   Emitter.ACTIVE_SHAPE_ENTER = 'active_shape_enter'
 
-  Emitter.ACTIVE_RECT_CHANGE = 'active_rect_change'
+  Emitter.ACTIVE_RECT_CHANGE_START = 'active_rect_change_start'
+
+  Emitter.ACTIVE_RECT_CHANGE_END = 'active_rect_change_end'
 
   Emitter.ACTIVE_DRAG_BOX_HOVER = 'active_drag_box_hover'
 

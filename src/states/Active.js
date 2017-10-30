@@ -118,9 +118,12 @@ define(function (require) {
 
         if (update) {
           update(targetX || event.x, targetY || event.y)
+          emitter.fire(
+            Emitter.ACTIVE_RECT_CHANGE_START,
+          )
           updateShapes()
           emitter.fire(
-            Emitter.ACTIVE_RECT_CHANGE
+            Emitter.ACTIVE_RECT_CHANGE_END
           )
           return
         }

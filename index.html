@@ -23,8 +23,8 @@
             margin: 20px;
             width: 1200px;
         }
-        .btn-danger {
-            margin-left: 10px;
+        .btn {
+            margin-right: 10px;
         }
     </style>
 </head>
@@ -36,7 +36,7 @@
                 画布宽度
             </label>
             <div class="col-sm-7">
-                <input name="canvasWidth" type="number" value="1200" class="form-control">
+                <input name="canvasWidth" type="number" value="1800" class="form-control">
             </div>
         </div>
         <div class="form-group">
@@ -44,7 +44,7 @@
                 画布高度
             </label>
             <div class="col-sm-7">
-                <input name="canvasHeight" type="number" value="800" class="form-control">
+                <input name="canvasHeight" type="number" value="1600" class="form-control">
             </div>
         </div>
         <div class="form-group">
@@ -161,7 +161,7 @@
                     <input type="radio" name="tool" value="3"> 圆
                 </label>
                 <label class="radio-inline">
-                    <input type="radio" name="tool" value="4"> 涂鸦
+                    <input type="radio" name="tool" value="4" checked> 涂鸦
                 </label>
                 <label class="radio-inline">
                     <input type="radio" name="tool" value="5"> 多边形
@@ -176,7 +176,7 @@
                     <input type="radio" name="tool" value="8"> 内多边形
                 </label>
                 <label class="radio-inline">
-                    <input type="radio" name="tool" value="9" checked> 桃心
+                    <input type="radio" name="tool" value="9"> 桃心
                 </label>
                 <label class="radio-inline">
                     <span class="label label-danger">
@@ -203,11 +203,17 @@
         </div>
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-7">
-                <button class="btn btn-info">
+                <button class="btn btn-info btn-apply">
                     应用
                 </button>
-                <button class="btn btn-danger">
+                <button class="btn btn-danger btn-clear">
                     清空
+                </button>
+                <button class="btn btn-warning btn-prev">
+                    撤销
+                </button>
+                <button class="btn btn-warning btn-next">
+                    恢复
                 </button>
             </div>
         </div>
@@ -318,12 +324,20 @@
                 };
                 updateCanvas(config);
 
-                $('.btn-info').on('click', function () {
+                $('.btn-apply').on('click', function () {
                     updateCanvas(getConfig());
                 });
 
-                $('.btn-danger').on('click', function () {
+                $('.btn-clear').on('click', function () {
                     instance.clear();
+                });
+
+                $('.btn-prev').on('click', function () {
+                    instance.prev();
+                });
+
+                $('.btn-next').on('click', function () {
+                    instance.next();
                 });
 
             }
