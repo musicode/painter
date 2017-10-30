@@ -303,21 +303,25 @@
                 };
 
                 var updateCanvas = function (config) {
-                    instance.resize(config.canvasWidth, config.canvasHeight);
-                    instance.apply({
-                        radius: config.radius,
-                        count: Math.max(config.count, 3),
-                        fillStyle: config.hasFill ? config.fillStyle : null,
-                        strokeStyle: config.hasStroke ? config.strokeStyle : null,
-                        strokePosition: config.strokePosition,
-                        strokeThickness: config.strokeThickness,
-                        shadowOffsetX: config.shadowOffsetX,
-                        shadowOffsetY: config.shadowOffsetY,
-                        shadowBlur: config.shadowBlur,
-                        shadowColor: config.hasShadow ? config.shadowColor : null,
-                        fontSize: config.fontSize,
-                        fontFamily: 'sans-serif'
-                    });
+                    instance.resize(config.canvasWidth, config.canvasHeight, true);
+                    if (
+                      !instance.apply({
+                          radius: config.radius,
+                          count: Math.max(config.count, 3),
+                          fillStyle: config.hasFill ? config.fillStyle : null,
+                          strokeStyle: config.hasStroke ? config.strokeStyle : null,
+                          strokePosition: config.strokePosition,
+                          strokeThickness: config.strokeThickness,
+                          shadowOffsetX: config.shadowOffsetX,
+                          shadowOffsetY: config.shadowOffsetY,
+                          shadowBlur: config.shadowBlur,
+                          shadowColor: config.hasShadow ? config.shadowColor : null,
+                          fontSize: config.fontSize,
+                          fontFamily: 'sans-serif'
+                      })
+                    ) {
+                        instance.refresh();
+                    }
                     instance.drawing(
                       shapeMap[config.tool]
                     );

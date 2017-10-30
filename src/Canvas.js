@@ -27,7 +27,7 @@ define(function (require, exports, module) {
       const me = this
 
       me.element = canvas
-      me.resize(canvas.width, canvas.height)
+      me.resize(canvas.width, canvas.height, true)
 
       const painter = me.painter = new Painter(canvas.getContext('2d'))
 
@@ -201,8 +201,9 @@ define(function (require, exports, module) {
      *
      * @param {number} width
      * @param {number} height
+     * @param {boolean} silent
      */
-    resize(width, height) {
+    resize(width, height, silent) {
 
       const { element } = this
 
@@ -217,6 +218,10 @@ define(function (require, exports, module) {
 
       this.element.width = width
       this.element.height = height
+
+      if (!silent) {
+        this.refresh()
+      }
 
     }
 
@@ -351,6 +356,7 @@ define(function (require, exports, module) {
           this.editShapes(shapes, config)
         }
         this.config = config
+        return true
       }
 
     }
