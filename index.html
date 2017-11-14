@@ -170,13 +170,16 @@
                     <input type="radio" name="tool" value="6"> 箭头
                 </label>
                 <label class="radio-inline">
-                    <input type="radio" name="tool" value="7"> 文字
+                    <input type="radio" name="tool" value="7"> 双向箭头
                 </label>
                 <label class="radio-inline">
-                    <input type="radio" name="tool" value="8"> 内多边形
+                    <input type="radio" name="tool" value="8"> 文字
                 </label>
                 <label class="radio-inline">
-                    <input type="radio" name="tool" value="9"> 桃心
+                    <input type="radio" name="tool" value="9"> 内多边形
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="tool" value="10"> 桃心
                 </label>
                 <label class="radio-inline">
                     <span class="label label-danger">
@@ -296,10 +299,17 @@
                   3: Oval,
                   4: Doodle,
                   5: Polygon,
-                  6: Arrow,
-                  7: Text,
-                  8: Star,
-                  9: Heart
+                  6: function (props) {
+                      props.double = false;
+                      return new Arrow(props)
+                  },
+                  7: function (props) {
+                      props.double = true;
+                      return new Arrow(props)
+                  },
+                  8: Text,
+                  9: Star,
+                  10: Heart
                 };
 
                 var updateCanvas = function (config) {

@@ -12,6 +12,8 @@ define(function (require) {
 
   const array = require('../util/array')
 
+  const RADIANS = Math.PI / 180
+
   /**
    * points 点数组
    */
@@ -41,36 +43,65 @@ define(function (require) {
         header = distance / 3
       }
       else {
-        header = Math.max(distance / 8, 80)
+        header = distance / 8
+        if (header > 80) {
+          header = 80
+        }
       }
 
       const points = [ ]
+      const { double } = this
+      const arrowRadians = 70
+      const arrowRadius = 0.5 * header
+      const arrowDistance = Math.cos(arrowRadians * RADIANS) * arrowRadius
 
-      // 以 (startX, startY) 为圆心向 x 轴正方向画箭头
-      let point = {
-        x: startX,
-        y: startY - thickness
-      }
-      array.push(points, point)
-
-      point = {
-        x: point.x + distance - header,
-        y: point.y,
-      }
-      array.push(points, point)
-
-      array.push(
-        points,
-        getPointOfCircle(point.x, point.y, 0.5 * header, 250 * Math.PI / 180),
-      )
-
-      array.push(
-        points,
-        {
-          x: startX + distance,
-          y: startY,
+      let drawSingleArrow = function (point) {
+        array.push(points, point)
+        point = {
+          x: point.x + distance - header,
+          y: point.y,
         }
-      )
+        if (double) {
+          point.x -= header
+        }
+        array.push(points, point)
+        array.push(
+          points,
+          getPointOfCircle(point.x, point.y, arrowRadius, (180 + arrowRadians) * RADIANS),
+        )
+        array.push(
+          points,
+          {
+            x: startX + distance,
+            y: startY,
+          }
+        )
+      }
+
+      if (double) {
+        array.push(
+          points,
+          {
+            x: startX,
+            y: startY,
+          }
+        )
+        let point = {
+          x: startX + header,
+          y: startY - thickness,
+        }
+        array.push(
+          points,
+          getPointOfCircle(point.x, point.y, arrowRadius, (360 - arrowRadians) * RADIANS)
+        )
+        drawSingleArrow(point)
+      }
+      else {
+        drawSingleArrow({
+          x: startX,
+          y: startY - thickness,
+        })
+      }
 
       for (let i = points.length - 2; i >= 0; i--) {
         points.push({
