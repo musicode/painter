@@ -2,110 +2,104 @@
  * @file Hover 状态
  * @author musicode
  */
-define(function (require) {
+import State from './State'
+import Emitter from '../Emitter'
 
-  const State = require('./State')
-  const Emitter = require('../Emitter')
+import array from '../util/array'
 
-  const array = require('../util/array')
+export default class Hover extends State {
 
-  class Hover extends State {
+  constructor(props, emitter) {
 
-    constructor(props, emitter) {
+    super(props)
 
-      super(props)
+    let me = this, activeShapes, drawing
 
-      let me = this, activeShapes, drawing
+    me.emitter = emitter
 
-      me.emitter = emitter
-
-      me.shapeEnterHandler = function (event) {
-        let { shape } = event
-        if (!drawing && !shape.state && (!activeShapes || !array.has(activeShapes, shape))) {
-          me.shape = shape
-          emitter.fire(
-            Emitter.HOVER_SHAPE_CHANGE,
-            {
-              shape,
-            }
-          )
-        }
+    me.shapeEnterHandler = function (event) {
+      let { shape } = event
+      if (!drawing && !shape.state && (!activeShapes || !array.has(activeShapes, shape))) {
+        me.shape = shape
+        emitter.fire(
+          Emitter.HOVER_SHAPE_CHANGE,
+          {
+            shape,
+          }
+        )
       }
+    }
 
-      me.shapeLeaveHandler = function () {
-        if (me.shape) {
-          me.shape = null
-          emitter.fire(
-            Emitter.HOVER_SHAPE_CHANGE,
-            {
-              shape: null
-            }
-          )
-        }
+    me.shapeLeaveHandler = function () {
+      if (me.shape) {
+        me.shape = null
+        emitter.fire(
+          Emitter.HOVER_SHAPE_CHANGE,
+          {
+            shape: null
+          }
+        )
       }
+    }
 
-      me.drawingStartHandler = function () {
-        drawing = true
-      }
+    me.drawingStartHandler = function () {
+      drawing = true
+    }
 
-      me.drawingEndHandler = function () {
-        drawing = false
-      }
+    me.drawingEndHandler = function () {
+      drawing = false
+    }
 
-      me.activeShapeChangeHandler = function (events) {
-        activeShapes = events.shapes
-        if (array.has(activeShapes, me.shape)) {
-          me.shape = null
-        }
-      }
-
-      me.resetHandler = function () {
+    me.activeShapeChangeHandler = function (events) {
+      activeShapes = events.shapes
+      if (array.has(activeShapes, me.shape)) {
         me.shape = null
       }
-
-      emitter
-      .on(Emitter.SHAPE_ENTER, me.shapeEnterHandler)
-      .on(Emitter.SHAPE_LEAVE, me.shapeLeaveHandler)
-      .on(Emitter.DRAWING_START, me.drawingStartHandler)
-      .on(Emitter.DRAWING_END, me.drawingEndHandler)
-      .on(Emitter.ACTIVE_SHAPE_CHANGE, me.activeShapeChangeHandler)
-      .on(Emitter.RESET, me.resetHandler)
     }
 
-    destroy() {
-      this.emitter
-      .off(Emitter.SHAPE_ENTER, this.shapeEnterHandler)
-      .off(Emitter.SHAPE_LEAVE, this.shapeLeaveHandler)
-      .off(Emitter.DRAWING_START, this.drawingStartHandler)
-      .off(Emitter.DRAWING_END, this.drawingEndHandler)
-      .off(Emitter.ACTIVE_SHAPE_CHANGE, this.activeShapeChangeHandler)
-      .off(Emitter.RESET, this.resetHandler)
+    me.resetHandler = function () {
+      me.shape = null
     }
 
-    isPointInPath(painter, x, y) {
-      return false
+    emitter
+    .on(Emitter.SHAPE_ENTER, me.shapeEnterHandler)
+    .on(Emitter.SHAPE_LEAVE, me.shapeLeaveHandler)
+    .on(Emitter.DRAWING_START, me.drawingStartHandler)
+    .on(Emitter.DRAWING_END, me.drawingEndHandler)
+    .on(Emitter.ACTIVE_SHAPE_CHANGE, me.activeShapeChangeHandler)
+    .on(Emitter.RESET, me.resetHandler)
+  }
+
+  destroy() {
+    this.emitter
+    .off(Emitter.SHAPE_ENTER, this.shapeEnterHandler)
+    .off(Emitter.SHAPE_LEAVE, this.shapeLeaveHandler)
+    .off(Emitter.DRAWING_START, this.drawingStartHandler)
+    .off(Emitter.DRAWING_END, this.drawingEndHandler)
+    .off(Emitter.ACTIVE_SHAPE_CHANGE, this.activeShapeChangeHandler)
+    .off(Emitter.RESET, this.resetHandler)
+  }
+
+  isPointInPath(painter, x, y) {
+    return false
+  }
+
+  draw(painter) {
+
+    let { shape } = this
+    if (!shape) {
+      return
     }
 
-    draw(painter) {
+    painter.disableShadow()
 
-      let { shape } = this
-      if (!shape) {
-        return
-      }
+    painter.setLineWidth(4)
+    painter.setStrokeStyle('#45C0FF')
 
-      painter.disableShadow()
-
-      painter.setLineWidth(4)
-      painter.setStrokeStyle('#45C0FF')
-
-      painter.begin()
-      shape.drawPath(painter)
-      painter.stroke()
-
-    }
+    painter.begin()
+    shape.drawPath(painter)
+    painter.stroke()
 
   }
 
-  return Hover
-
-})
+}

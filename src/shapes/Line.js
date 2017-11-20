@@ -2,48 +2,43 @@
  * @file 椭圆
  * @author musicode
  */
-define(function (require) {
 
-  const Shape = require('./Shape')
+import Shape from './Shape'
 
-  const getDistance = require('../function/getDistance')
+import getDistance from '../function/getDistance'
+
+/**
+ * points 点数组
+ */
+export default class Line extends Shape {
+
+  setLineStyle(painter) {
+    painter.setLineCap('square')
+  }
 
   /**
-   * points 点数组
+   * 正在绘制
+   *
+   * @param {Painter} painter
+   * @param {number} startX 起始点 x 坐标
+   * @param {number} startY 起始点 y 坐标
+   * @param {number} endX 结束点 x 坐标
+   * @param {number} endX 结束点 y 坐标
+   * @param {Function} 还原为鼠标按下时的画布
    */
-  class Line extends Shape {
+  drawing(painter, startX, startY, endX, endY, restore) {
 
-    setLineStyle(painter) {
-      painter.setLineCap('square')
-    }
+    restore()
 
-    /**
-     * 正在绘制
-     *
-     * @param {Painter} painter
-     * @param {number} startX 起始点 x 坐标
-     * @param {number} startY 起始点 y 坐标
-     * @param {number} endX 结束点 x 坐标
-     * @param {number} endX 结束点 y 坐标
-     * @param {Function} 还原为鼠标按下时的画布
-     */
-    drawing(painter, startX, startY, endX, endY, restore) {
-
-      restore()
-
-      const points = this.points || (this.points = [ { x: startX, y: startY } ])
-      points[ 1 ] = { x: endX, y: endY }
-      this.draw(painter)
-
-    }
-
-    validate() {
-      const { points } = this
-      return points && points.length === 2
-    }
+    const points = this.points || (this.points = [ { x: startX, y: startY } ])
+    points[ 1 ] = { x: endX, y: endY }
+    this.draw(painter)
 
   }
 
-  return Line
+  validate() {
+    const { points } = this
+    return points && points.length === 2
+  }
 
-})
+}

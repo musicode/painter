@@ -223,15 +223,12 @@
     </div>
     <canvas></canvas>
     <script src="./demo/jquery.js"></script>
-    <script src="./demo/esl.js"></script>
+    <script src="./dist/painter.js"></script>
     <script>
 
         var canvas = $('canvas')[0];
         var context = canvas.getContext('2d');
 
-        require.config({
-            baseUrl: './src'
-        });
 
         function getConfig() {
             var canvasWidth = + $('input[name="canvasWidth"]').val().trim();
@@ -275,87 +272,72 @@
             };
         }
 
-        require(
-            [
-                'Canvas',
-                'shapes/Rect',
-                'shapes/Oval',
-                'shapes/Line',
-                'shapes/Doodle',
-                'shapes/Polygon',
-                'shapes/Arrow',
-                'shapes/Text',
-                'shapes/Star',
-                'shapes/Heart'
-            ],
-            function (Canvas, Rect, Oval, Line, Doodle, Polygon, Arrow, Text, Star, Heart) {
-                window.instance = new Canvas(canvas);
 
-                var config = getConfig();
+        window.instance = new Painter(canvas);
 
-                var shapeMap = {
-                  1: Line,
-                  2: Rect,
-                  3: Oval,
-                  4: Doodle,
-                  5: Polygon,
-                  6: function (props) {
-                      props.double = false;
-                      return new Arrow(props)
-                  },
-                  7: function (props) {
-                      props.double = true;
-                      return new Arrow(props)
-                  },
-                  8: Text,
-                  9: Star,
-                  10: Heart
-                };
+        var config = getConfig();
 
-                var updateCanvas = function (config) {
-                    instance.resize(config.canvasWidth, config.canvasHeight, true);
-                    if (
-                      !instance.apply({
-                          radius: config.radius,
-                          count: Math.max(config.count, 3),
-                          fillStyle: config.hasFill ? config.fillStyle : null,
-                          strokeStyle: config.hasStroke ? config.strokeStyle : null,
-                          strokePosition: config.strokePosition,
-                          strokeThickness: config.strokeThickness,
-                          shadowOffsetX: config.shadowOffsetX,
-                          shadowOffsetY: config.shadowOffsetY,
-                          shadowBlur: config.shadowBlur,
-                          shadowColor: config.hasShadow ? config.shadowColor : null,
-                          fontSize: config.fontSize,
-                          fontFamily: 'sans-serif'
-                      })
-                    ) {
-                        instance.refresh();
-                    }
-                    instance.drawing(
-                      shapeMap[config.tool]
-                    );
-                };
-                updateCanvas(config);
+        var shapeMap = {
+          1: Painter.shapes.Line,
+          2: Painter.shapes.Rect,
+          3: Painter.shapes.Oval,
+          4: Painter.shapes.Doodle,
+          5: Painter.shapes.Polygon,
+          6: function (props) {
+              props.double = false;
+              return new Painter.shapes.Arrow(props)
+          },
+          7: function (props) {
+              props.double = true;
+              return new Painter.shapes.Arrow(props)
+          },
+          8: Painter.shapes.Text,
+          9: Painter.shapes.Star,
+          10: Painter.shapes.Heart
+        };
 
-                $('.btn-apply').on('click', function () {
-                    updateCanvas(getConfig());
-                });
-
-                $('.btn-clear').on('click', function () {
-                    instance.clear();
-                });
-
-                $('.btn-prev').on('click', function () {
-                    instance.prev();
-                });
-
-                $('.btn-next').on('click', function () {
-                    instance.next();
-                });
-
+        var updateCanvas = function (config) {
+            instance.resize(config.canvasWidth, config.canvasHeight, true);
+            if (
+              !instance.apply({
+                  radius: config.radius,
+                  count: Math.max(config.count, 3),
+                  fillStyle: config.hasFill ? config.fillStyle : null,
+                  strokeStyle: config.hasStroke ? config.strokeStyle : null,
+                  strokePosition: config.strokePosition,
+                  strokeThickness: config.strokeThickness,
+                  shadowOffsetX: config.shadowOffsetX,
+                  shadowOffsetY: config.shadowOffsetY,
+                  shadowBlur: config.shadowBlur,
+                  shadowColor: config.hasShadow ? config.shadowColor : null,
+                  fontSize: config.fontSize,
+                  fontFamily: 'sans-serif'
+              })
+            ) {
+                instance.refresh();
             }
-        );
+            instance.drawing(
+              shapeMap[config.tool]
+            );
+        };
+        updateCanvas(config);
+
+        $('.btn-apply').on('click', function () {
+            updateCanvas(getConfig());
+        });
+
+        $('.btn-clear').on('click', function () {
+            instance.clear();
+        });
+
+        $('.btn-prev').on('click', function () {
+            instance.prev();
+        });
+
+        $('.btn-next').on('click', function () {
+            instance.next();
+        });
+
     </script>
 </body>
 </html>
