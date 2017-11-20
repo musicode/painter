@@ -19,7 +19,7 @@ define(function (require, exports, module) {
         height: height
       }
     }
-  
+
     begin() {
       this.context.beginPath()
     }
@@ -50,33 +50,33 @@ define(function (require, exports, module) {
           const w = (width / 0.75) / 2, h = height / 2
           const points = [
               {
-                'x': x,
-                'y': y - h
+                x: x,
+                y: y - h
               },
 
               {
-                'x': x + w,
-                'y': y - h
+                x: x + w,
+                y: y - h
               },
 
               {
-                'x': x + w,
-                'y': y + h
+                x: x + w,
+                y: y + h
               },
 
               {
-                'x': x,
-                'y': y + h
+                x: x,
+                y: y + h
               },
 
               {
-                'x': x - w,
-                'y': y + h
+                x: x - w,
+                y: y + h
               },
 
               {
-                'x': x - w,
-                'y': y - h
+                x: x - w,
+                y: y - h
               }
           ];
           context.moveTo(points[0].x, points[0].y)

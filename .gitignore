@@ -3,3 +3,4 @@ edp-*
 *.conf
 dep/
 doc/
+node_modules/
