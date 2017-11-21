@@ -225,7 +225,7 @@ export default class Canvas {
    * 添加图形
    *
    * @param {Shape} shape
-   * @param {bolean} silent
+   * @param {boolean} silent
    */
   addShape(shape, silent) {
     this.addShapes([ shape ], silent)
@@ -235,7 +235,7 @@ export default class Canvas {
    * 批量添加图形
    *
    * @param {Array.<Shape>} shapes
-   * @param {bolean} silent
+   * @param {boolean} silent
    */
   addShapes(shapes, silent) {
     let me = this
@@ -255,7 +255,7 @@ export default class Canvas {
    * 删除图形
    *
    * @param {Shape} shape
-   * @param {bolean} silent
+   * @param {boolean} silent
    */
   removeShape(shape, silent) {
     this.removeShapes([ shape ], silent)
@@ -265,7 +265,7 @@ export default class Canvas {
    * 批量删除图形
    *
    * @param {Array.<Shape>} shapes
-   * @param {bolean} silent
+   * @param {boolean} silent
    */
   removeShapes(shapes, silent) {
     let me = this
