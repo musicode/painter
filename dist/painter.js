@@ -2857,7 +2857,7 @@ var Canvas = function () {
         me.editShapes(shapes, null, true);
       }
     }).on(Emitter.ACTIVE_SHAPE_DELETE, function () {
-      me.removeSelectedShapes();
+      me.removeActiveShapes();
     }).on(Emitter.SELECTION_RECT_CHANGE, function (event) {
       me.states[INDEX_ACTIVE].setShapes(painter, me.getShapes().filter(function (shape) {
         if (getInterRect(shape.getRect(painter), event.rect)) {
@@ -2994,7 +2994,7 @@ var Canvas = function () {
    */
 
 
-  Canvas.prototype.removeSelectedShapes = function () {
+  Canvas.prototype.removeActiveShapes = function () {
     var state = this.states[INDEX_ACTIVE];
     if (state) {
       var shapes = state.getShapes();
@@ -3228,6 +3228,7 @@ var Canvas = function () {
   return Canvas;
 }();
 
+Canvas.Emitter = Emitter;
 Canvas.shapes = {
   Arrow: Arrow,
   Doodle: Doodle,

@@ -121,7 +121,7 @@ export default class Canvas {
     .on(
       Emitter.ACTIVE_SHAPE_DELETE,
       function () {
-        me.removeSelectedShapes()
+        me.removeActiveShapes()
       }
     )
     .on(
@@ -292,7 +292,7 @@ export default class Canvas {
   /**
    * 删除选中的图形
    */
-  removeSelectedShapes() {
+  removeActiveShapes() {
     let state = this.states[ INDEX_ACTIVE ]
     if (state) {
       let shapes = state.getShapes()
@@ -555,6 +555,7 @@ import Rect from './shapes/Rect'
 import Star from './shapes/Star'
 import Text from './shapes/Text'
 
+Canvas.Emitter = Emitter
 Canvas.shapes = {
   Arrow,
   Doodle,
