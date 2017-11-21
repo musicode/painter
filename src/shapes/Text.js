@@ -123,7 +123,7 @@ function createTextarea(painter, emitter, event, shape) {
 
     p = textarea = null
     emitter.fire(
-      Emitter.DRAWING_END,
+      Emitter.SHAPE_DRAWING_END,
       {
         shape,
       }
@@ -131,7 +131,7 @@ function createTextarea(painter, emitter, event, shape) {
   })
 
   emitter.fire(
-    Emitter.DRAWING_START,
+    Emitter.SHAPE_DRAWING_START,
     {
       cursor: 'text'
     }

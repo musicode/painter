@@ -333,8 +333,6 @@ var Emitter = function () {
   return Emitter;
 }();
 
-Emitter.REFRESH = 'refresh';
-
 Emitter.RESET = 'reset';
 
 Emitter.CLEAR = 'clear';
@@ -369,9 +367,17 @@ Emitter.SELECTION_START = 'selection_start';
 
 Emitter.SELECTION_END = 'selection_end';
 
-Emitter.DRAWING_START = 'drawing_start';
+Emitter.SHAPE_DRAWING_START = 'shape_drawing_start';
 
-Emitter.DRAWING_END = 'drawing_end';
+Emitter.SHAPE_DRAWING = 'shape_drawing';
+
+Emitter.SHAPE_DRAWING_END = 'shape_drawing_end';
+
+Emitter.SHAPE_ADD = 'shape_add';
+
+Emitter.SHAPE_REMOVE = 'shape_remove';
+
+Emitter.SHAPE_UPDATE = 'shape_update';
 
 var SHORTCUT = {
   8: Emitter.ACTIVE_SHAPE_DELETE,
@@ -872,12 +878,12 @@ var Hover = function (_State) {
       me.shape = null;
     };
 
-    me.on(Emitter.SHAPE_ENTER, me.shapeEnterHandler).on(Emitter.SHAPE_LEAVE, me.shapeLeaveHandler).on(Emitter.DRAWING_START, me.drawingStartHandler).on(Emitter.DRAWING_END, me.drawingEndHandler).on(Emitter.ACTIVE_SHAPE_CHANGE, me.activeShapeChangeHandler).on(Emitter.RESET, me.resetHandler);
+    me.on(Emitter.SHAPE_ENTER, me.shapeEnterHandler).on(Emitter.SHAPE_LEAVE, me.shapeLeaveHandler).on(Emitter.SHAPE_DRAWING_START, me.drawingStartHandler).on(Emitter.SHAPE_DRAWING_END, me.drawingEndHandler).on(Emitter.ACTIVE_SHAPE_CHANGE, me.activeShapeChangeHandler).on(Emitter.RESET, me.resetHandler);
     return _this;
   }
 
   Hover.prototype.destroy = function () {
-    this.off(Emitter.SHAPE_ENTER, this.shapeEnterHandler).off(Emitter.SHAPE_LEAVE, this.shapeLeaveHandler).off(Emitter.DRAWING_START, this.drawingStartHandler).off(Emitter.DRAWING_END, this.drawingEndHandler).off(Emitter.ACTIVE_SHAPE_CHANGE, this.activeShapeChangeHandler).off(Emitter.RESET, this.resetHandler);
+    this.off(Emitter.SHAPE_ENTER, this.shapeEnterHandler).off(Emitter.SHAPE_LEAVE, this.shapeLeaveHandler).off(Emitter.SHAPE_DRAWING_START, this.drawingStartHandler).off(Emitter.SHAPE_DRAWING_END, this.drawingEndHandler).off(Emitter.ACTIVE_SHAPE_CHANGE, this.activeShapeChangeHandler).off(Emitter.RESET, this.resetHandler);
   };
 
   Hover.prototype.isPointInPath = function (painter, x, y) {
@@ -936,8 +942,8 @@ var Drawing = function (_State) {
       }
     };
 
-    var refresh = function () {
-      emitter.fire(Emitter.REFRESH);
+    var drawing = function () {
+      emitter.fire(Emitter.SHAPE_DRAWING);
     };
 
     me.shapeEnterHandler = function (event) {
@@ -957,7 +963,7 @@ var Drawing = function (_State) {
         if (drawingShape.startDrawing && drawingShape.startDrawing(painter, emitter, event) === false) {
           drawingShape = null;
         } else {
-          emitter.fire(Emitter.DRAWING_START, {
+          emitter.fire(Emitter.SHAPE_DRAWING_START, {
             cursor: 'crosshair'
           });
         }
@@ -966,7 +972,7 @@ var Drawing = function (_State) {
     me.mouseMoveHandler = function (event) {
       if (drawingShape && drawingShape.drawing) {
         moving++;
-        drawingShape.drawing(painter, startX, startY, event.x, event.y, restore, refresh);
+        drawingShape.drawing(painter, startX, startY, event.x, event.y, restore, drawing);
       }
     };
     me.mouseUpHandler = function () {
@@ -978,7 +984,7 @@ var Drawing = function (_State) {
           drawingShape.endDrawing();
           return;
         }
-        emitter.fire(Emitter.DRAWING_END, {
+        emitter.fire(Emitter.SHAPE_DRAWING_END, {
           shape: moving > 0 ? drawingShape : null
         });
         drawingShape = null;
@@ -2630,12 +2636,12 @@ function createTextarea(painter, emitter, event, shape) {
     parentElement.removeChild(textarea);
 
     p = textarea = null;
-    emitter.fire(Emitter.DRAWING_END, {
+    emitter.fire(Emitter.SHAPE_DRAWING_END, {
       shape: shape
     });
   });
 
-  emitter.fire(Emitter.DRAWING_START, {
+  emitter.fire(Emitter.SHAPE_DRAWING_START, {
     cursor: 'text'
   });
 
@@ -2844,19 +2850,14 @@ var Canvas = function () {
 
         hoverShape = newHoverShape;
       }
-    }).on(Emitter.HOVER_SHAPE_CHANGE, refresh).on(Emitter.ACTIVE_SHAPE_CHANGE, refresh).on(Emitter.REFRESH, refresh).on(Emitter.ACTIVE_RECT_CHANGE_END, refresh).on(Emitter.ACTIVE_RECT_CHANGE_START, function () {
+    }).on(Emitter.HOVER_SHAPE_CHANGE, refresh).on(Emitter.ACTIVE_SHAPE_CHANGE, refresh).on(Emitter.ACTIVE_RECT_CHANGE_END, refresh).on(Emitter.ACTIVE_RECT_CHANGE_START, function () {
       var state = me.states[INDEX_ACTIVE],
           shapes = state.getShapes();
       if (shapes.length) {
         me.editShapes(shapes, null, true);
       }
     }).on(Emitter.ACTIVE_SHAPE_DELETE, function () {
-      var state = me.states[INDEX_ACTIVE],
-          shapes = state.getShapes();
-      if (shapes.length) {
-        me.removeShapes(shapes, true);
-        state.setShapes(painter, []);
-      }
+      me.removeSelectedShapes();
     }).on(Emitter.SELECTION_RECT_CHANGE, function (event) {
       me.states[INDEX_ACTIVE].setShapes(painter, me.getShapes().filter(function (shape) {
         if (getInterRect(shape.getRect(painter), event.rect)) {
@@ -2868,9 +2869,9 @@ var Canvas = function () {
     }).on(Emitter.SELECTION_END, function () {
       canvas.style.cursor = '';
       me.refresh();
-    }).on(Emitter.DRAWING_START, function (event) {
+    }).on(Emitter.SHAPE_DRAWING_START, function (event) {
       canvas.style.cursor = event.cursor;
-    }).on(Emitter.DRAWING_END, function (event) {
+    }).on(Emitter.SHAPE_DRAWING, refresh).on(Emitter.SHAPE_DRAWING_END, function (event) {
       canvas.style.cursor = '';
       var shape = event.shape;
 
@@ -2949,6 +2950,9 @@ var Canvas = function () {
     if (!silent) {
       me.refresh();
     }
+    me.emitter.fire(Emitter.SHAPE_ADD, {
+      shapes: shapes
+    });
   };
 
   /**
@@ -2980,11 +2984,31 @@ var Canvas = function () {
     if (!silent) {
       me.refresh();
     }
+    me.emitter.fire(Emitter.SHAPE_REMOVE, {
+      shapes: shapes
+    });
+  };
+
+  /**
+   * 删除选中的图形
+   */
+
+
+  Canvas.prototype.removeSelectedShapes = function () {
+    var state = this.states[INDEX_ACTIVE];
+    if (state) {
+      var shapes = state.getShapes();
+      if (shapes.length) {
+        this.removeShapes(shapes, true);
+        state.setShapes(this.painter, []);
+      }
+    }
   };
 
   Canvas.prototype.editShapes = function (shapes, props, silent) {
-    this.save();
-    var allShapes = this.getShapes();
+    var me = this;
+    me.save();
+    var allShapes = me.getShapes();
     array.each(shapes, function (shape, i) {
       var index = allShapes.indexOf(shape);
       if (index >= 0) {
@@ -2996,8 +3020,11 @@ var Canvas = function () {
       }
     });
     if (!silent) {
-      this.refresh();
+      me.refresh();
     }
+    me.emitter.fire(Emitter.SHAPE_UPDATE, {
+      shapes: shapes
+    });
   };
 
   Canvas.prototype.getShapes = function () {

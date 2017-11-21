@@ -106,10 +106,6 @@ export default class Canvas {
       refresh
     )
     .on(
-      Emitter.REFRESH,
-      refresh
-    )
-    .on(
       Emitter.ACTIVE_RECT_CHANGE_END,
       refresh
     )
@@ -157,13 +153,17 @@ export default class Canvas {
       }
     )
     .on(
-      Emitter.DRAWING_START,
+      Emitter.SHAPE_DRAWING_START,
       function (event) {
         canvas.style.cursor = event.cursor
       }
     )
     .on(
-      Emitter.DRAWING_END,
+      Emitter.SHAPE_DRAWING,
+      refresh
+    )
+    .on(
+      Emitter.SHAPE_DRAWING_END,
       function (event) {
         canvas.style.cursor = ''
         const { shape } = event
@@ -245,6 +245,12 @@ export default class Canvas {
     if (!silent) {
       me.refresh()
     }
+    me.emitter.fire(
+      Emitter.SHAPE_ADD,
+      {
+        shapes: shapes
+      }
+    )
   }
 
   /**
@@ -275,6 +281,12 @@ export default class Canvas {
     if (!silent) {
       me.refresh()
     }
+    me.emitter.fire(
+      Emitter.SHAPE_REMOVE,
+      {
+        shapes: shapes
+      }
+    )
   }
 
   /**
@@ -292,8 +304,9 @@ export default class Canvas {
   }
 
   editShapes(shapes, props, silent) {
-    this.save()
-    const allShapes = this.getShapes()
+    let me = this
+    me.save()
+    const allShapes = me.getShapes()
     array.each(
       shapes,
       function (shape, i) {
@@ -308,8 +321,14 @@ export default class Canvas {
       }
     )
     if (!silent) {
-      this.refresh()
+      me.refresh()
     }
+    me.emitter.fire(
+      Emitter.SHAPE_UPDATE,
+      {
+        shapes: shapes
+      }
+    )
   }
 
   getShapes() {

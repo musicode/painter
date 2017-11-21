@@ -212,6 +212,9 @@
                 <button class="btn btn-danger btn-clear">
                     清空
                 </button>
+                <button class="btn btn-danger btn-remove">
+                    删除
+                </button>
                 <button class="btn btn-warning btn-prev">
                     撤销
                 </button>
@@ -332,6 +335,10 @@
 
         $('.btn-clear').on('click', function () {
             instance.clear();
+        });
+
+        $('.btn-remove').on('click', function () {
+            instance.removeSelectedShapes();
         });
 
         $('.btn-prev').on('click', function () {

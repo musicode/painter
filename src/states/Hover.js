@@ -62,8 +62,8 @@ export default class Hover extends State {
     me
     .on(Emitter.SHAPE_ENTER, me.shapeEnterHandler)
     .on(Emitter.SHAPE_LEAVE, me.shapeLeaveHandler)
-    .on(Emitter.DRAWING_START, me.drawingStartHandler)
-    .on(Emitter.DRAWING_END, me.drawingEndHandler)
+    .on(Emitter.SHAPE_DRAWING_START, me.drawingStartHandler)
+    .on(Emitter.SHAPE_DRAWING_END, me.drawingEndHandler)
     .on(Emitter.ACTIVE_SHAPE_CHANGE, me.activeShapeChangeHandler)
     .on(Emitter.RESET, me.resetHandler)
   }
@@ -72,8 +72,8 @@ export default class Hover extends State {
     this
     .off(Emitter.SHAPE_ENTER, this.shapeEnterHandler)
     .off(Emitter.SHAPE_LEAVE, this.shapeLeaveHandler)
-    .off(Emitter.DRAWING_START, this.drawingStartHandler)
-    .off(Emitter.DRAWING_END, this.drawingEndHandler)
+    .off(Emitter.SHAPE_DRAWING_START, this.drawingStartHandler)
+    .off(Emitter.SHAPE_DRAWING_END, this.drawingEndHandler)
     .off(Emitter.ACTIVE_SHAPE_CHANGE, this.activeShapeChangeHandler)
     .off(Emitter.RESET, this.resetHandler)
   }

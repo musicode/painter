@@ -204,8 +204,6 @@ export default class Emitter {
 
 }
 
-Emitter.REFRESH = 'refresh'
-
 Emitter.RESET = 'reset'
 
 Emitter.CLEAR = 'clear'
@@ -240,9 +238,17 @@ Emitter.SELECTION_START = 'selection_start'
 
 Emitter.SELECTION_END = 'selection_end'
 
-Emitter.DRAWING_START = 'drawing_start'
+Emitter.SHAPE_DRAWING_START = 'shape_drawing_start'
 
-Emitter.DRAWING_END = 'drawing_end'
+Emitter.SHAPE_DRAWING = 'shape_drawing'
+
+Emitter.SHAPE_DRAWING_END = 'shape_drawing_end'
+
+Emitter.SHAPE_ADD = 'shape_add'
+
+Emitter.SHAPE_REMOVE = 'shape_remove'
+
+Emitter.SHAPE_UPDATE = 'shape_update'
 
 const SHORTCUT = {
   8: Emitter.ACTIVE_SHAPE_DELETE,

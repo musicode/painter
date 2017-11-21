@@ -26,9 +26,9 @@ export default class Drawing extends State {
       }
     }
 
-    const refresh = function () {
+    const drawing = function () {
       emitter.fire(
-        Emitter.REFRESH
+        Emitter.SHAPE_DRAWING
       )
     }
 
@@ -53,7 +53,7 @@ export default class Drawing extends State {
         }
         else {
           emitter.fire(
-            Emitter.DRAWING_START,
+            Emitter.SHAPE_DRAWING_START,
             {
               cursor: 'crosshair'
             }
@@ -64,7 +64,7 @@ export default class Drawing extends State {
     me.mouseMoveHandler = function (event) {
       if (drawingShape && drawingShape.drawing) {
         moving++
-        drawingShape.drawing(painter, startX, startY, event.x, event.y, restore, refresh)
+        drawingShape.drawing(painter, startX, startY, event.x, event.y, restore, drawing)
       }
     }
     me.mouseUpHandler = function () {
@@ -77,7 +77,7 @@ export default class Drawing extends State {
           return
         }
         emitter.fire(
-          Emitter.DRAWING_END,
+          Emitter.SHAPE_DRAWING_END,
           {
             shape: moving > 0 ? drawingShape : null
           }
