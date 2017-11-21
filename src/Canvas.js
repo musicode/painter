@@ -315,8 +315,9 @@ export default class Canvas {
     if (states[ INDEX_SELECTION ]) {
       states[ INDEX_SELECTION ].destroy()
     }
+    let target
     if (Shape) {
-      states[ INDEX_SELECTION ] = new Drawing(
+      target = new Drawing(
         {
           createShape: function () {
             return new Shape(config)
@@ -326,12 +327,13 @@ export default class Canvas {
         painter
       )
     }
-    else {
-      states[ INDEX_SELECTION ] = new Selection(
+    else if (Shape !== false) {
+      target = new Selection(
         { },
         emitter
       )
     }
+    states[ INDEX_SELECTION ] = target
   }
 
   apply(config) {
@@ -425,16 +427,23 @@ export default class Canvas {
   }
 
   /**
+   * 是否有上一步
+   *
+   * @return {boolean}
+   */
+  hasPrev() {
+    return this.histories[ this.historyIndex - 1 ] ? true : false
+  }
+
+  /**
    * 上一步，用于撤销
    *
    * @return {boolean} 是否撤销成功
    */
   prev() {
-    let { histories, historyIndex, emitter } = this
-    historyIndex--
-    if (histories[ historyIndex ]) {
-      this.historyIndex = historyIndex
-      emitter.fire(
+    if (this.hasPrev()) {
+      this.historyIndex--
+      this.emitter.fire(
         Emitter.RESET
       )
       this.refresh()
@@ -443,16 +452,23 @@ export default class Canvas {
   }
 
   /**
+   * 是否有下一步
+   *
+   * @return {boolean}
+   */
+  hasPrev() {
+    return this.histories[ this.historyIndex + 1 ] ? true : false
+  }
+
+  /**
    * 下一步，用于恢复
    *
    * @return {boolean} 是否恢复成功
    */
   next() {
-    let { histories, historyIndex, emitter } = this
-    historyIndex++
-    if (histories[ historyIndex ]) {
-      this.historyIndex = historyIndex
-      emitter.fire(
+    if (this.hasNext()) {
+      this.historyIndex++
+      this.emitter.fire(
         Emitter.RESET
       )
       this.refresh()

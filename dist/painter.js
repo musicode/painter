@@ -2980,15 +2980,17 @@ var Canvas = function () {
     if (states[INDEX_SELECTION]) {
       states[INDEX_SELECTION].destroy();
     }
+    var target;
     if (Shape) {
-      states[INDEX_SELECTION] = new Drawing({
+      target = new Drawing({
         createShape: function createShape() {
           return new Shape(config);
         }
       }, emitter, painter);
-    } else {
-      states[INDEX_SELECTION] = new Selection({}, emitter);
+    } else if (Shape !== false) {
+      target = new Selection({}, emitter);
     }
+    states[INDEX_SELECTION] = target;
   };
 
   Canvas.prototype.apply = function (config) {
@@ -3077,6 +3079,17 @@ var Canvas = function () {
   };
 
   /**
+   * 是否有上一步
+   *
+   * @return {boolean}
+   */
+
+
+  Canvas.prototype.hasPrev = function () {
+    return this.histories[this.historyIndex - 1] ? true : false;
+  };
+
+  /**
    * 上一步，用于撤销
    *
    * @return {boolean} 是否撤销成功
@@ -3084,17 +3097,23 @@ var Canvas = function () {
 
 
   Canvas.prototype.prev = function () {
-    var histories = this.histories,
-        historyIndex = this.historyIndex,
-        emitter = this.emitter;
-
-    historyIndex--;
-    if (histories[historyIndex]) {
-      this.historyIndex = historyIndex;
-      emitter.fire(Emitter.RESET);
+    if (this.hasPrev()) {
+      this.historyIndex--;
+      this.emitter.fire(Emitter.RESET);
       this.refresh();
       return true;
     }
+  };
+
+  /**
+   * 是否有下一步
+   *
+   * @return {boolean}
+   */
+
+
+  Canvas.prototype.hasPrev = function () {
+    return this.histories[this.historyIndex + 1] ? true : false;
   };
 
   /**
@@ -3105,14 +3124,9 @@ var Canvas = function () {
 
 
   Canvas.prototype.next = function () {
-    var histories = this.histories,
-        historyIndex = this.historyIndex,
-        emitter = this.emitter;
-
-    historyIndex++;
-    if (histories[historyIndex]) {
-      this.historyIndex = historyIndex;
-      emitter.fire(Emitter.RESET);
+    if (this.hasNext()) {
+      this.historyIndex++;
+      this.emitter.fire(Emitter.RESET);
       this.refresh();
       return true;
     }
