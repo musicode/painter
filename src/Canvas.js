@@ -125,11 +125,7 @@ export default class Canvas {
     .on(
       Emitter.ACTIVE_SHAPE_DELETE,
       function () {
-        let state = me.states[ INDEX_ACTIVE ], shapes = state.getShapes()
-        if (shapes.length) {
-          me.removeShapes(shapes, true)
-          state.setShapes(painter, [])
-        }
+        me.removeSelectedShapes()
       }
     )
     .on(
@@ -278,6 +274,20 @@ export default class Canvas {
     )
     if (!silent) {
       me.refresh()
+    }
+  }
+
+  /**
+   * 删除选中的图形
+   */
+  removeSelectedShapes() {
+    let state = this.states[ INDEX_ACTIVE ]
+    if (state) {
+      let shapes = state.getShapes()
+      if (shapes.length) {
+        this.removeShapes(shapes, true)
+        state.setShapes(this.painter, [])
+      }
     }
   }
 
