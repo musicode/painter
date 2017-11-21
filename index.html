@@ -267,6 +267,7 @@
                 tool: tool,
                 count: count,
                 radius: radius,
+                thickness: 10,
                 hasFill: hasFill,
                 hasStroke: hasStroke,
                 hasShadow: hasShadow,
@@ -302,6 +303,7 @@
             if (
               !instance.apply({
                   radius: config.radius,
+                  thickness: config.thickness,
                   count: Math.max(config.count, 3),
                   fillStyle: config.hasFill ? config.fillStyle : null,
                   strokeStyle: config.hasStroke ? config.strokeStyle : null,

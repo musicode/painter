@@ -22,6 +22,7 @@ export default class Arrow extends Polygon {
    * 正在绘制
    *
    * @param {Painter} painter
+   * @param {number} thickness 箭头粗细
    * @param {number} startX 起始点 x 坐标
    * @param {number} startY 起始点 y 坐标
    * @param {number} endX 结束点 x 坐标
@@ -32,10 +33,11 @@ export default class Arrow extends Polygon {
 
     restore()
 
+    let { thickness } = this
     const distance = getDistance(startX, startY, endX, endY)
 
     // 下面这些数字都是不断尝试调出的参数，没有理由，就是试
-    let thickness = 20, threshold = thickness * 10, header
+    let threshold = thickness * 10, header
 
     if (distance < threshold) {
       thickness *= distance / threshold
