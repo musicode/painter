@@ -303,15 +303,11 @@ export default class Canvas {
   }
 
   getShapes() {
-    const { histories, historyIndex } = this
-    return histories[ historyIndex ]
+    return this.histories[ this.historyIndex ]
   }
 
   drawing(Shape) {
     const { states, emitter, painter, config } = this
-    if (states[ INDEX_SELECTION ]) {
-      states[ INDEX_SELECTION ].destroy()
-    }
 
     const destroy = function (name) {
       if (states[ name ]) {
