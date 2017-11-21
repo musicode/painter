@@ -733,14 +733,15 @@ var Active = function (_State) {
   };
 
   Active.prototype.isPointInPath = function (painter, x, y) {
-    var boxes = this.boxes;
+    var boxes = this.boxes,
+        thumbSize = this.thumbSize;
 
     if (boxes) {
       for (var i = 0, len = boxes.length, tx, ty; i < len; i += 2) {
         tx = boxes[i];
         ty = boxes[i + 1];
         // 扩大响应区域
-        if (x >= tx - THUMB_SIZE && x <= tx + 2 * THUMB_SIZE && y >= ty - THUMB_SIZE && y <= ty + 2 * THUMB_SIZE) {
+        if (x >= tx - thumbSize && x <= tx + 2 * thumbSize && y >= ty - thumbSize && y <= ty + 2 * thumbSize) {
           return i / 2;
         }
       }
@@ -771,15 +772,15 @@ var Active = function (_State) {
       });
     }
 
-    var THUMB_SIZE = 6 * getDevicePixelRatio();
+    var thumbSize = this.thumbSize = 6 * getDevicePixelRatio();
 
-    var left = x - THUMB_SIZE / 2;
-    var center = x + (width - THUMB_SIZE) / 2;
-    var right = x + width - THUMB_SIZE / 2;
+    var left = x - thumbSize / 2;
+    var center = x + (width - thumbSize) / 2;
+    var right = x + width - thumbSize / 2;
 
-    var top = y - THUMB_SIZE / 2;
-    var middle = y + (height - THUMB_SIZE) / 2;
-    var bottom = y + height - THUMB_SIZE / 2;
+    var top = y - thumbSize / 2;
+    var middle = y + (height - thumbSize) / 2;
+    var bottom = y + height - thumbSize / 2;
 
     painter.setStrokeStyle('#ccc');
 
@@ -798,12 +799,12 @@ var Active = function (_State) {
     for (var i = 0, len = boxes.length, gradient; i < len; i += 2) {
       x = boxes[i];
       y = boxes[i + 1];
-      gradient = painter.createLinearGradient(x, y + THUMB_SIZE, x, y);
+      gradient = painter.createLinearGradient(x, y + thumbSize, x, y);
       gradient.addColorStop(0, '#d6d6d6');
       gradient.addColorStop(1, '#f9f9f9');
       painter.begin();
       painter.setFillStyle(gradient);
-      painter.drawRect(x, y, THUMB_SIZE, THUMB_SIZE);
+      painter.drawRect(x, y, thumbSize, thumbSize);
       painter.stroke();
       painter.fill();
     }
@@ -2529,8 +2530,6 @@ var Star = function (_Shape) {
  */
 var TRANSPARENT = 'rgba(0,0,0,0)';
 
-var dpr = getDevicePixelRatio();
-
 var textarea;
 var p;
 
@@ -2543,7 +2542,7 @@ function getTextSize(shape, text) {
 
   var parentElement = document.body;
   p = document.createElement('p');
-  p.style.cssText = '\n    position: absolute;\n    visibility: hidden;\n    font: ' + fontSize * dpr + 'px ' + fontFamily + ';\n  ';
+  p.style.cssText = '\n    position: absolute;\n    visibility: hidden;\n    font: ' + fontSize * getDevicePixelRatio() + 'px ' + fontFamily + ';\n  ';
   parentElement.appendChild(p);
 
   var textLines = (text + '').split('\n');
@@ -2604,7 +2603,7 @@ function createTextarea(painter, emitter, event, shape) {
     var length = textarea.value.length;
     var textareaSize = getTextSize(shape, textarea.value);
 
-    textarea.style.width = textareaSize.width / dpr + fontSize + 'px';
+    textarea.style.width = textareaSize.width / getDevicePixelRatio() + fontSize + 'px';
 
     if (!textareaIsInCanvas(painter, textareaSize.width + x, textareaSize.height + y)) {
       textarea.maxLength = length;
@@ -2682,6 +2681,8 @@ var Text = function (_Shape) {
         fontItalic = this.fontItalic,
         fontWeight = this.fontWeight;
 
+    var dpr = getDevicePixelRatio();
+
     painter.setFillStyle(this.fillStyle);
     painter.setFont(fontSize * dpr, fontFamily, fontItalic, fontWeight);
     var height = fontSize * dpr + fontSize * dpr / 6;
@@ -2700,6 +2701,8 @@ var Text = function (_Shape) {
         strokeStyle = this.strokeStyle,
         fontItalic = this.fontItalic,
         fontWeight = this.fontWeight;
+
+    var dpr = getDevicePixelRatio();
 
     painter.setLineWidth(strokeThickness);
     painter.setStrokeStyle(strokeStyle);
@@ -2757,7 +2760,7 @@ var Text = function (_Shape) {
         fontWeight = this.fontWeight;
 
     var row = text.split('\n');
-    painter.setFont(fontSize * dpr, fontFamily, fontItalic, fontWeight);
+    painter.setFont(fontSize * getDevicePixelRatio(), fontFamily, fontItalic, fontWeight);
 
     var width = getTextSize(this, text).width;
     var height = getTextSize(this, text).height;

@@ -234,16 +234,16 @@ export default class Active extends State {
   }
 
   isPointInPath(painter, x, y) {
-    const { boxes } = this
+    const { boxes, thumbSize } = this
     if (boxes) {
       for (let i = 0, len = boxes.length, tx, ty; i < len; i += 2) {
         tx = boxes[ i ]
         ty = boxes[ i + 1 ]
         // 扩大响应区域
-        if (x >= tx - THUMB_SIZE
-          && x <= tx + 2 * THUMB_SIZE
-          && y >= ty - THUMB_SIZE
-          && y <= ty + 2 * THUMB_SIZE
+        if (x >= tx - thumbSize
+          && x <= tx + 2 * thumbSize
+          && y >= ty - thumbSize
+          && y <= ty + 2 * thumbSize
         ) {
           return i / 2
         }
@@ -274,15 +274,15 @@ export default class Active extends State {
       )
     }
 
-    const THUMB_SIZE = 6 * getDevicePixelRatio()
+    const thumbSize = this.thumbSize = 6 * getDevicePixelRatio()
 
-    const left = x - THUMB_SIZE / 2
-    const center = x + (width - THUMB_SIZE) / 2
-    const right = x + width - THUMB_SIZE / 2
+    const left = x - thumbSize / 2
+    const center = x + (width - thumbSize) / 2
+    const right = x + width - thumbSize / 2
 
-    const top = y - THUMB_SIZE / 2
-    const middle = y + (height - THUMB_SIZE) / 2
-    const bottom = y + height - THUMB_SIZE / 2
+    const top = y - thumbSize / 2
+    const middle = y + (height - thumbSize) / 2
+    const bottom = y + height - thumbSize / 2
 
 
     painter.setStrokeStyle('#ccc')
@@ -311,12 +311,12 @@ export default class Active extends State {
     for (let i = 0, len = boxes.length, gradient; i < len; i += 2) {
       x = boxes[ i ]
       y = boxes[ i + 1 ]
-      gradient = painter.createLinearGradient(x, y + THUMB_SIZE, x, y)
+      gradient = painter.createLinearGradient(x, y + thumbSize, x, y)
       gradient.addColorStop(0, '#d6d6d6')
       gradient.addColorStop(1, '#f9f9f9')
       painter.begin()
       painter.setFillStyle(gradient)
-      painter.drawRect(x, y, THUMB_SIZE, THUMB_SIZE)
+      painter.drawRect(x, y, thumbSize, thumbSize)
       painter.stroke()
       painter.fill()
     }
