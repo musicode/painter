@@ -8,9 +8,8 @@ import Emitter from '../Emitter'
 
 import updateRect from '../function/updateRect'
 import getUnionRect from '../function/getUnionRect'
+import getDevicePixelRatio from '../function/getDevicePixelRatio'
 import array from '../util/array'
-
-const THUMB_SIZE = 12
 
 const LEFT_TOP = 0
 const CENTER_TOP = 1
@@ -274,6 +273,8 @@ export default class Active extends State {
         }
       )
     }
+
+    const THUMB_SIZE = 6 * getDevicePixelRatio()
 
     const left = x - THUMB_SIZE / 2
     const center = x + (width - THUMB_SIZE) / 2

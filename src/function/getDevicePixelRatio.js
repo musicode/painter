@@ -7,5 +7,5 @@ export default function () {
   if (devicePixelRatio > 2) {
     devicePixelRatio = 2
   }
-  return devicePixelRatio
+  return devicePixelRatio || 1
 }

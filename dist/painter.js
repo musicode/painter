@@ -108,7 +108,7 @@ var getDevicePixelRatio = function () {
   if (devicePixelRatio > 2) {
     devicePixelRatio = 2;
   }
-  return devicePixelRatio;
+  return devicePixelRatio || 1;
 };
 
 /**
@@ -536,8 +536,6 @@ var getUnionRect = function (rects) {
  * @author musicode
  */
 
-var THUMB_SIZE = 12;
-
 var LEFT_TOP = 0;
 var CENTER_TOP = 1;
 var RIGHT_TOP = 2;
@@ -772,6 +770,8 @@ var Active = function (_State) {
         painter.strokeRect(rect.x + 0.5, rect.y + 0.5, rect.width, rect.height);
       });
     }
+
+    var THUMB_SIZE = 6 * getDevicePixelRatio();
 
     var left = x - THUMB_SIZE / 2;
     var center = x + (width - THUMB_SIZE) / 2;
