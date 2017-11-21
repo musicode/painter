@@ -185,8 +185,16 @@ export default class Painter {
     }
   }
 
-  setFont(fontSize, fontFamily) {
-    this.context.font = fontSize + 'px ' + fontFamily
+  setFont(fontSize, fontFamily, fontItalic, fontWeight) {
+    let styles = [ ]
+    if (fontItalic) {
+      styles.push('italic')
+    }
+    if (fontWeight) {
+      styles.push('bold')
+    }
+    styles.push(`${fontSize}px`, fontFamily)
+    this.context.font = styles.join(' ')
   }
 }
 

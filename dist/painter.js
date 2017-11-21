@@ -1245,8 +1245,16 @@ var Painter = function () {
     }
   };
 
-  Painter.prototype.setFont = function (fontSize, fontFamily) {
-    this.context.font = fontSize + 'px ' + fontFamily;
+  Painter.prototype.setFont = function (fontSize, fontFamily, fontItalic, fontWeight) {
+    var styles = [];
+    if (fontItalic) {
+      styles.push('italic');
+    }
+    if (fontWeight) {
+      styles.push('bold');
+    }
+    styles.push(fontSize + 'px', fontFamily);
+    this.context.font = styles.join(' ');
   };
 
   return Painter;
@@ -2518,7 +2526,6 @@ var Star = function (_Shape) {
  * @author wangtianhua
  */
 var TRANSPARENT = 'rgba(0,0,0,0)';
-var CURSOR_COLOR = 'rgba(0,0,0,1)';
 
 var dpr = getDevicePixelRatio();
 
@@ -2559,12 +2566,21 @@ function createTextarea(painter, emitter, event, shape) {
       fontFamily = shape.fontFamily,
       lineHeight = shape.lineHeight,
       x = shape.x,
-      y = shape.y;
+      y = shape.y,
+      fontItalic = shape.fontItalic,
+      fontWeight = shape.fontWeight;
 
   var parentElement = document.body;
 
   textarea = document.createElement('textarea');
-  textarea.style.cssText = '\n    position: absolute;\n    left: ' + event.pageX + 'px;\n    top: ' + event.pageY + 'px;\n    color: ' + TRANSPARENT + ';\n    caret-color: ' + CURSOR_COLOR + ';\n    background-color: ' + TRANSPARENT + ';\n    font: ' + fontSize + 'px ' + fontFamily + ';\n    line-height: ' + lineHeight + 'px;\n    border: none;\n    outline: none;\n    resize: none;\n    padding: 0;\n    overflow: hidden;\n    width: ' + fontSize + 'px;\n    wrap: physical;\n  ';
+  var style = '\n    position: absolute;\n    left: ' + event.pageX + 'px;\n    top: ' + event.pageY + 'px;\n    color: ' + TRANSPARENT + ';\n    caret-color: ' + shape.caretColor + ';\n    background-color: ' + TRANSPARENT + ';\n    font: ' + fontSize + 'px ' + fontFamily + ';\n    line-height: ' + lineHeight + 'px;\n    border: none;\n    outline: none;\n    resize: none;\n    padding: 0;\n    overflow: hidden;\n    width: ' + fontSize + 'px;\n    wrap: physical;\n  ';
+  if (fontItalic) {
+    style += 'font-style: italic;';
+  }
+  if (fontWeight) {
+    style += 'font-weight: bold;';
+  }
+  textarea.style.cssText = style;
   parentElement.appendChild(textarea);
 
   setTimeout(function () {
@@ -2660,10 +2676,12 @@ var Text = function (_Shape) {
         y = this.y,
         fontSize = this.fontSize,
         fontFamily = this.fontFamily,
-        text = this.text;
+        text = this.text,
+        fontItalic = this.fontItalic,
+        fontWeight = this.fontWeight;
 
     painter.setFillStyle(this.fillStyle);
-    painter.setFont(fontSize * dpr, fontFamily);
+    painter.setFont(fontSize * dpr, fontFamily, fontItalic, fontWeight);
     var height = fontSize * dpr + fontSize * dpr / 6;
     array.each(text.split('\n'), function (value, index) {
       painter.fillText(x, y + fontSize * dpr + height * index, value);
@@ -2677,11 +2695,13 @@ var Text = function (_Shape) {
         fontFamily = this.fontFamily,
         text = this.text,
         strokeThickness = this.strokeThickness,
-        strokeStyle = this.strokeStyle;
+        strokeStyle = this.strokeStyle,
+        fontItalic = this.fontItalic,
+        fontWeight = this.fontWeight;
 
     painter.setLineWidth(strokeThickness);
     painter.setStrokeStyle(strokeStyle);
-    painter.setFont(fontSize * dpr, fontFamily);
+    painter.setFont(fontSize * dpr, fontFamily, fontItalic, fontWeight);
     var height = fontSize * dpr + fontSize * dpr / 6;
 
     array.each(text.split('\n'), function (value, index) {
@@ -2730,10 +2750,12 @@ var Text = function (_Shape) {
         y = this.y,
         text = this.text,
         fontSize = this.fontSize,
-        fontFamily = this.fontFamily;
+        fontFamily = this.fontFamily,
+        fontItalic = this.fontItalic,
+        fontWeight = this.fontWeight;
 
     var row = text.split('\n');
-    painter.setFont(fontSize * dpr, fontFamily);
+    painter.setFont(fontSize * dpr, fontFamily, fontItalic, fontWeight);
 
     var width = getTextSize(this, text).width;
     var height = getTextSize(this, text).height;
@@ -2897,7 +2919,7 @@ var Canvas = function () {
    * 添加图形
    *
    * @param {Shape} shape
-   * @param {bolean} silent
+   * @param {boolean} silent
    */
 
 
@@ -2909,7 +2931,7 @@ var Canvas = function () {
    * 批量添加图形
    *
    * @param {Array.<Shape>} shapes
-   * @param {bolean} silent
+   * @param {boolean} silent
    */
 
 
@@ -2928,7 +2950,7 @@ var Canvas = function () {
    * 删除图形
    *
    * @param {Shape} shape
-   * @param {bolean} silent
+   * @param {boolean} silent
    */
 
 
@@ -2940,7 +2962,7 @@ var Canvas = function () {
    * 批量删除图形
    *
    * @param {Array.<Shape>} shapes
-   * @param {bolean} silent
+   * @param {boolean} silent
    */
 
 
@@ -2974,10 +2996,7 @@ var Canvas = function () {
   };
 
   Canvas.prototype.getShapes = function () {
-    var histories = this.histories,
-        historyIndex = this.historyIndex;
-
-    return histories[historyIndex];
+    return this.histories[this.historyIndex];
   };
 
   Canvas.prototype.drawing = function (Shape) {
@@ -2986,9 +3005,6 @@ var Canvas = function () {
         painter = this.painter,
         config = this.config;
 
-    if (states[INDEX_SELECTION]) {
-      states[INDEX_SELECTION].destroy();
-    }
 
     var destroy = function (name) {
       if (states[name]) {

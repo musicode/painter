@@ -262,6 +262,7 @@
                 shadowBlur: shadowBlur,
                 shadowColor: shadowColor,
                 fontSize: fontSize,
+                caretColor: 'rgba(0,0,0,1)',
 
                 tool: tool,
                 count: count,
@@ -311,7 +312,8 @@
                   shadowBlur: config.shadowBlur,
                   shadowColor: config.hasShadow ? config.shadowColor : null,
                   fontSize: config.fontSize,
-                  fontFamily: 'sans-serif'
+                  fontFamily: 'sans-serif',
+                  caretColor: config.caretColor
               })
             ) {
                 instance.refresh();

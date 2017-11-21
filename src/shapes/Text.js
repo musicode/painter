@@ -9,7 +9,6 @@ import Emitter from '../Emitter'
 import getDevicePixelRatio from '../function/getDevicePixelRatio'
 
 const TRANSPARENT = 'rgba(0,0,0,0)'
-const CURSOR_COLOR = 'rgba(0,0,0,1)'
 
 const dpr = getDevicePixelRatio()
 
@@ -47,16 +46,16 @@ function getTextSize (shape, text) {
 
 function createTextarea(painter, emitter, event, shape) {
 
-  const { fontSize, fontFamily, lineHeight, x, y } = shape
+  const { fontSize, fontFamily, lineHeight, x, y, fontItalic, fontWeight } = shape
   const parentElement = document.body
 
   textarea = document.createElement('textarea')
-  textarea.style.cssText = `
+  let style = `
     position: absolute;
     left: ${event.pageX}px;
     top: ${event.pageY}px;
     color: ${TRANSPARENT};
-    caret-color: ${CURSOR_COLOR};
+    caret-color: ${shape.caretColor};
     background-color: ${TRANSPARENT};
     font: ${fontSize}px ${fontFamily};
     line-height: ${lineHeight}px;
@@ -68,6 +67,13 @@ function createTextarea(painter, emitter, event, shape) {
     width: ${fontSize}px;
     wrap: physical;
   `
+  if (fontItalic) {
+    style += 'font-style: italic;';
+  }
+  if (fontWeight) {
+    style += 'font-weight: bold;';
+  }
+  textarea.style.cssText = style
   parentElement.appendChild(textarea)
 
   setTimeout(
@@ -162,11 +168,13 @@ export default class Text extends Shape {
   }
 
   fill(painter) {
-    const { x, y, fontSize, fontFamily, text} = this
+    const { x, y, fontSize, fontFamily, text, fontItalic, fontWeight } = this
     painter.setFillStyle(this.fillStyle)
     painter.setFont(
       fontSize * dpr,
-      fontFamily
+      fontFamily,
+      fontItalic,
+      fontWeight
     )
     const height = fontSize * dpr + fontSize * dpr / 6
     array.each(
@@ -178,12 +186,14 @@ export default class Text extends Shape {
   }
 
   stroke(painter) {
-    const { x, y, fontSize, fontFamily, text, strokeThickness, strokeStyle } = this
+    const { x, y, fontSize, fontFamily, text, strokeThickness, strokeStyle, fontItalic, fontWeight } = this
     painter.setLineWidth(strokeThickness)
     painter.setStrokeStyle(strokeStyle)
     painter.setFont(
       fontSize * dpr,
-      fontFamily
+      fontFamily,
+      fontItalic,
+      fontWeight
     )
     const height = fontSize * dpr + fontSize * dpr / 6
 
@@ -233,11 +243,13 @@ export default class Text extends Shape {
 
   getRect(painter) {
 
-    const { x, y, text, fontSize, fontFamily } = this
+    const { x, y, text, fontSize, fontFamily, fontItalic, fontWeight } = this
     let row = text.split('\n')
     painter.setFont(
       fontSize * dpr,
-      fontFamily
+      fontFamily,
+      fontItalic,
+      fontWeight
     )
 
     let width = getTextSize(this, text).width
