@@ -183,9 +183,14 @@ export default class Emitter {
     }
   }
 
-  on(type, listener) {
+  on(type, listener, preferred) {
     let list = this.listeners[ type ] || (this.listeners[ type ] = [ ])
-    list.push(listener)
+    if (preferred) {
+      list.unshift(listener)
+    }
+    else {
+      list.push(listener)
+    }
     return this
   }
 

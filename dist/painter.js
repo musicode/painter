@@ -72,12 +72,23 @@ var possibleConstructorReturn = function (self, call) {
  */
 
 var State = function () {
-  function State(props) {
+  function State(props, emitter) {
     classCallCheck(this, State);
 
     Object.assign(this, props);
+    this.emitter = emitter;
     this.state = true;
   }
+
+  State.prototype.on = function (type, handler) {
+    this.emitter.on(type, handler, true);
+    return this;
+  };
+
+  State.prototype.off = function (type, handler) {
+    this.emitter.off(type, handler);
+    return this;
+  };
 
   State.prototype.destroy = function () {};
 
@@ -301,9 +312,13 @@ var Emitter = function () {
     }
   };
 
-  Emitter.prototype.on = function (type, listener) {
+  Emitter.prototype.on = function (type, listener, preferred) {
     var list = this.listeners[type] || (this.listeners[type] = []);
-    list.push(listener);
+    if (preferred) {
+      list.unshift(listener);
+    } else {
+      list.push(listener);
+    }
     return this;
   };
 
@@ -397,12 +412,10 @@ var Selection = function (_State) {
   function Selection(props, emitter) {
     classCallCheck(this, Selection);
 
-    var _this = possibleConstructorReturn(this, _State.call(this, props));
+    var _this = possibleConstructorReturn(this, _State.call(this, props, emitter));
 
     var me = _this,
         hoverShape;
-
-    me.emitter = emitter;
 
     me.mouseDownHandler = function (event) {
       if (!hoverShape && event.inCanvas) {
@@ -439,13 +452,13 @@ var Selection = function (_State) {
       }
     };
 
-    emitter.on(Emitter.MOUSE_DOWN, me.mouseDownHandler).on(Emitter.SHAPE_ENTER, me.shapeEnterHandler).on(Emitter.SHAPE_LEAVE, me.shapeLeaveHandler);
+    me.on(Emitter.MOUSE_DOWN, me.mouseDownHandler).on(Emitter.SHAPE_ENTER, me.shapeEnterHandler).on(Emitter.SHAPE_LEAVE, me.shapeLeaveHandler);
 
     return _this;
   }
 
   Selection.prototype.destroy = function () {
-    this.emitter.off(Emitter.MOUSE_DOWN, this.mouseDownHandler).off(Emitter.SHAPE_ENTER, this.shapeEnterHandler).off(Emitter.SHAPE_LEAVE, this.shapeLeaveHandler);
+    this.off(Emitter.MOUSE_DOWN, this.mouseDownHandler).off(Emitter.SHAPE_ENTER, this.shapeEnterHandler).off(Emitter.SHAPE_LEAVE, this.shapeLeaveHandler);
   };
 
   Selection.prototype.isPointInPath = function (painter, x, y) {
@@ -540,7 +553,7 @@ var Active = function (_State) {
   function Active(props, emitter, painter) {
     classCallCheck(this, Active);
 
-    var _this = possibleConstructorReturn(this, _State.call(this, props));
+    var _this = possibleConstructorReturn(this, _State.call(this, props, emitter));
 
     var me = _this,
         currentBox,
@@ -551,7 +564,6 @@ var Active = function (_State) {
         savedShapes;
 
     me.shapes = [];
-    me.emitter = emitter;
 
     var saveShapes = function () {
       savedShapes = me.shapes.map(function (shape) {
@@ -692,13 +704,13 @@ var Active = function (_State) {
       me.setShapes(painter, []);
     };
 
-    emitter.on(Emitter.CLEAR, me.clearHandler).on(Emitter.SHAPE_ENTER, me.shapeEnterHandler).on(Emitter.SHAPE_LEAVE, me.shapeLeaveHandler).on(Emitter.MOUSE_DOWN, me.mouseDownHandler).on(Emitter.MOUSE_MOVE, me.mouseMoveHandler).on(Emitter.MOUSE_UP, me.mouseUpHandler).on(Emitter.RESET, me.resetUpHandler);
+    me.on(Emitter.CLEAR, me.clearHandler).on(Emitter.SHAPE_ENTER, me.shapeEnterHandler).on(Emitter.SHAPE_LEAVE, me.shapeLeaveHandler).on(Emitter.MOUSE_DOWN, me.mouseDownHandler).on(Emitter.MOUSE_MOVE, me.mouseMoveHandler).on(Emitter.MOUSE_UP, me.mouseUpHandler).on(Emitter.RESET, me.resetUpHandler);
 
     return _this;
   }
 
   Active.prototype.destroy = function () {
-    this.emitter.off(Emitter.CLEAR, this.clearHandler).off(Emitter.SHAPE_ENTER, this.shapeEnterHandler).off(Emitter.SHAPE_LEAVE, this.shapeLeaveHandler).off(Emitter.MOUSE_DOWN, this.mouseDownHandler).off(Emitter.MOUSE_MOVE, this.mouseMoveHandler).off(Emitter.MOUSE_UP, this.mouseUpHandler).off(Emitter.RESET, this.resetUpHandler);
+    this.off(Emitter.CLEAR, this.clearHandler).off(Emitter.SHAPE_ENTER, this.shapeEnterHandler).off(Emitter.SHAPE_LEAVE, this.shapeLeaveHandler).off(Emitter.MOUSE_DOWN, this.mouseDownHandler).off(Emitter.MOUSE_MOVE, this.mouseMoveHandler).off(Emitter.MOUSE_UP, this.mouseUpHandler).off(Emitter.RESET, this.resetUpHandler);
   };
 
   Active.prototype.getShapes = function () {
@@ -814,13 +826,11 @@ var Hover = function (_State) {
   function Hover(props, emitter) {
     classCallCheck(this, Hover);
 
-    var _this = possibleConstructorReturn(this, _State.call(this, props));
+    var _this = possibleConstructorReturn(this, _State.call(this, props, emitter));
 
     var me = _this,
         activeShapes,
         drawing;
-
-    me.emitter = emitter;
 
     me.shapeEnterHandler = function (event) {
       var shape = event.shape;
@@ -861,12 +871,12 @@ var Hover = function (_State) {
       me.shape = null;
     };
 
-    emitter.on(Emitter.SHAPE_ENTER, me.shapeEnterHandler).on(Emitter.SHAPE_LEAVE, me.shapeLeaveHandler).on(Emitter.DRAWING_START, me.drawingStartHandler).on(Emitter.DRAWING_END, me.drawingEndHandler).on(Emitter.ACTIVE_SHAPE_CHANGE, me.activeShapeChangeHandler).on(Emitter.RESET, me.resetHandler);
+    me.on(Emitter.SHAPE_ENTER, me.shapeEnterHandler).on(Emitter.SHAPE_LEAVE, me.shapeLeaveHandler).on(Emitter.DRAWING_START, me.drawingStartHandler).on(Emitter.DRAWING_END, me.drawingEndHandler).on(Emitter.ACTIVE_SHAPE_CHANGE, me.activeShapeChangeHandler).on(Emitter.RESET, me.resetHandler);
     return _this;
   }
 
   Hover.prototype.destroy = function () {
-    this.emitter.off(Emitter.SHAPE_ENTER, this.shapeEnterHandler).off(Emitter.SHAPE_LEAVE, this.shapeLeaveHandler).off(Emitter.DRAWING_START, this.drawingStartHandler).off(Emitter.DRAWING_END, this.drawingEndHandler).off(Emitter.ACTIVE_SHAPE_CHANGE, this.activeShapeChangeHandler).off(Emitter.RESET, this.resetHandler);
+    this.off(Emitter.SHAPE_ENTER, this.shapeEnterHandler).off(Emitter.SHAPE_LEAVE, this.shapeLeaveHandler).off(Emitter.DRAWING_START, this.drawingStartHandler).off(Emitter.DRAWING_END, this.drawingEndHandler).off(Emitter.ACTIVE_SHAPE_CHANGE, this.activeShapeChangeHandler).off(Emitter.RESET, this.resetHandler);
   };
 
   Hover.prototype.isPointInPath = function (painter, x, y) {
@@ -904,7 +914,7 @@ var Drawing = function (_State) {
   function Drawing(props, emitter, painter) {
     classCallCheck(this, Drawing);
 
-    var _this = possibleConstructorReturn(this, _State.call(this, props));
+    var _this = possibleConstructorReturn(this, _State.call(this, props, emitter));
 
     var me = _this,
         hoverShape,
@@ -913,8 +923,6 @@ var Drawing = function (_State) {
         saved,
         startX,
         startY;
-
-    me.emitter = emitter;
 
     // 提供两种清空画布的方式
     // 1. 还原鼠标按下时保存的画布
@@ -976,13 +984,13 @@ var Drawing = function (_State) {
       }
     };
 
-    emitter.on(Emitter.SHAPE_ENTER, me.shapeEnterHandler).on(Emitter.SHAPE_LEAVE, me.shapeLeaveHandler).on(Emitter.MOUSE_DOWN, me.mouseDownHandler).on(Emitter.MOUSE_MOVE, me.mouseMoveHandler).on(Emitter.MOUSE_UP, me.mouseUpHandler).on(Emitter.RESET, me.mouseUpHandler);
+    me.on(Emitter.SHAPE_ENTER, me.shapeEnterHandler).on(Emitter.SHAPE_LEAVE, me.shapeLeaveHandler).on(Emitter.MOUSE_DOWN, me.mouseDownHandler).on(Emitter.MOUSE_MOVE, me.mouseMoveHandler).on(Emitter.MOUSE_UP, me.mouseUpHandler).on(Emitter.RESET, me.mouseUpHandler);
 
     return _this;
   }
 
   Drawing.prototype.destroy = function () {
-    this.emitter.off(Emitter.SHAPE_ENTER, this.shapeEnterHandler).off(Emitter.SHAPE_LEAVE, this.shapeLeaveHandler).off(Emitter.MOUSE_DOWN, this.mouseDownHandler).off(Emitter.MOUSE_MOVE, this.mouseMoveHandler).off(Emitter.MOUSE_UP, this.mouseUpHandler).off(Emitter.RESET, this.mouseUpHandler);
+    this.off(Emitter.SHAPE_ENTER, this.shapeEnterHandler).off(Emitter.SHAPE_LEAVE, this.shapeLeaveHandler).off(Emitter.MOUSE_DOWN, this.mouseDownHandler).off(Emitter.MOUSE_MOVE, this.mouseMoveHandler).off(Emitter.MOUSE_UP, this.mouseUpHandler).off(Emitter.RESET, this.mouseUpHandler);
   };
 
   Drawing.prototype.isPointInPath = function (painter, x, y) {
@@ -2747,6 +2755,7 @@ var Text = function (_Shape) {
  */
 
 var INDEX_ACTIVE = 0;
+var INDEX_HOVER = 1;
 var INDEX_SELECTION = 2;
 
 var Canvas = function () {
@@ -2764,7 +2773,7 @@ var Canvas = function () {
 
     var emitter = me.emitter = new Emitter(canvas);
 
-    me.states = [new Active({}, emitter, painter), new Hover({}, emitter)];
+    me.states = [];
 
     me.histories = [[]];
     me.historyIndex = 0;
@@ -2980,17 +2989,50 @@ var Canvas = function () {
     if (states[INDEX_SELECTION]) {
       states[INDEX_SELECTION].destroy();
     }
-    var target;
+
+    var destroy = function (name) {
+      if (states[name]) {
+        states[name].destroy();
+        states[name] = null;
+      }
+    };
+
+    var createActiveIfNeeded = function () {
+      if (!states[INDEX_ACTIVE]) {
+        states[INDEX_ACTIVE] = new Active({}, emitter, painter);
+      }
+    };
+
+    var createHoverIfNeeded = function () {
+      if (!states[INDEX_HOVER]) {
+        states[INDEX_HOVER] = new Hover({}, emitter);
+      }
+    };
+
+    var createSelection = function (selection) {
+      destroy(INDEX_SELECTION);
+      states[INDEX_SELECTION] = selection;
+    };
+
     if (Shape) {
-      target = new Drawing({
+      createActiveIfNeeded();
+      createHoverIfNeeded();
+      createSelection(new Drawing({
         createShape: function createShape() {
           return new Shape(config);
         }
-      }, emitter, painter);
+      }, emitter, painter));
     } else if (Shape !== false) {
-      target = new Selection({}, emitter);
+      createActiveIfNeeded();
+      createHoverIfNeeded();
+      createSelection(new Selection({}, emitter));
+    } else {
+      destroy(INDEX_ACTIVE);
+      destroy(INDEX_HOVER);
+      createSelection();
     }
-    states[INDEX_SELECTION] = target;
+
+    this.refresh();
   };
 
   Canvas.prototype.apply = function (config) {
@@ -3006,9 +3048,12 @@ var Canvas = function () {
     });
 
     if (isChange) {
-      var shapes = this.states[INDEX_ACTIVE].getShapes();
-      if (shapes.length) {
-        this.editShapes(shapes, config);
+      var active = this.states[INDEX_ACTIVE];
+      if (active) {
+        var shapes = active.getShapes();
+        if (shapes.length) {
+          this.editShapes(shapes, config);
+        }
       }
       this.config = config;
       return true;
@@ -3112,7 +3157,7 @@ var Canvas = function () {
    */
 
 
-  Canvas.prototype.hasPrev = function () {
+  Canvas.prototype.hasNext = function () {
     return this.histories[this.historyIndex + 1] ? true : false;
   };
 

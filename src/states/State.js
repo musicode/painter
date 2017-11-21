@@ -5,9 +5,20 @@
 
 export default class State {
 
-  constructor(props) {
+  constructor(props, emitter) {
     Object.assign(this, props)
+    this.emitter = emitter
     this.state = true
+  }
+
+  on(type, handler) {
+    this.emitter.on(type, handler, true)
+    return this
+  }
+
+  off(type, handler) {
+    this.emitter.off(type, handler)
+    return this
   }
 
   destroy() {

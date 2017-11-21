@@ -11,11 +11,9 @@ export default class Hover extends State {
 
   constructor(props, emitter) {
 
-    super(props)
+    super(props, emitter)
 
     let me = this, activeShapes, drawing
-
-    me.emitter = emitter
 
     me.shapeEnterHandler = function (event) {
       let { shape } = event
@@ -61,7 +59,7 @@ export default class Hover extends State {
       me.shape = null
     }
 
-    emitter
+    me
     .on(Emitter.SHAPE_ENTER, me.shapeEnterHandler)
     .on(Emitter.SHAPE_LEAVE, me.shapeLeaveHandler)
     .on(Emitter.DRAWING_START, me.drawingStartHandler)
@@ -71,7 +69,7 @@ export default class Hover extends State {
   }
 
   destroy() {
-    this.emitter
+    this
     .off(Emitter.SHAPE_ENTER, this.shapeEnterHandler)
     .off(Emitter.SHAPE_LEAVE, this.shapeLeaveHandler)
     .off(Emitter.DRAWING_START, this.drawingStartHandler)

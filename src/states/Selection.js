@@ -10,11 +10,9 @@ export default class Selection extends State {
 
   constructor(props, emitter) {
 
-    super(props)
+    super(props, emitter)
 
     let me = this, hoverShape
-
-    me.emitter = emitter
 
     me.mouseDownHandler = function (event) {
       if (!hoverShape && event.inCanvas) {
@@ -61,7 +59,7 @@ export default class Selection extends State {
       }
     }
 
-    emitter
+    me
     .on(Emitter.MOUSE_DOWN, me.mouseDownHandler)
     .on(Emitter.SHAPE_ENTER, me.shapeEnterHandler)
     .on(Emitter.SHAPE_LEAVE, me.shapeLeaveHandler)
@@ -69,7 +67,7 @@ export default class Selection extends State {
   }
 
   destroy() {
-    this.emitter
+    this
     .off(Emitter.MOUSE_DOWN, this.mouseDownHandler)
     .off(Emitter.SHAPE_ENTER, this.shapeEnterHandler)
     .off(Emitter.SHAPE_LEAVE, this.shapeLeaveHandler)

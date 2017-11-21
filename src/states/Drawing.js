@@ -10,11 +10,9 @@ export default class Drawing extends State {
 
   constructor(props, emitter, painter) {
 
-    super(props)
+    super(props, emitter)
 
     let me = this, hoverShape, drawingShape, moving, saved, startX, startY
-
-    me.emitter = emitter
 
     // 提供两种清空画布的方式
     // 1. 还原鼠标按下时保存的画布
@@ -88,7 +86,7 @@ export default class Drawing extends State {
       }
     }
 
-    emitter
+    me
     .on(Emitter.SHAPE_ENTER, me.shapeEnterHandler)
     .on(Emitter.SHAPE_LEAVE, me.shapeLeaveHandler)
     .on(Emitter.MOUSE_DOWN, me.mouseDownHandler)
@@ -99,7 +97,7 @@ export default class Drawing extends State {
   }
 
   destroy() {
-    this.emitter
+    this
     .off(Emitter.SHAPE_ENTER, this.shapeEnterHandler)
     .off(Emitter.SHAPE_LEAVE, this.shapeLeaveHandler)
     .off(Emitter.MOUSE_DOWN, this.mouseDownHandler)

@@ -17,6 +17,7 @@ import Emitter from './Emitter'
 import Painter from './Painter'
 
 const INDEX_ACTIVE = 0
+const INDEX_HOVER = 1
 const INDEX_SELECTION = 2
 
 export default class Canvas {
@@ -32,11 +33,7 @@ export default class Canvas {
 
     const emitter = me.emitter = new Emitter(canvas)
 
-    me.states = [
-      new Active({ }, emitter, painter),
-
-      new Hover({ }, emitter)
-    ]
+    me.states = [ ]
 
     me.histories = [ [ ] ]
     me.historyIndex = 0
@@ -315,25 +312,67 @@ export default class Canvas {
     if (states[ INDEX_SELECTION ]) {
       states[ INDEX_SELECTION ].destroy()
     }
-    let target
+
+    const destroy = function (name) {
+      if (states[ name ]) {
+        states[ name ].destroy()
+        states[ name ] = null
+      }
+    }
+
+    const createActiveIfNeeded = function () {
+      if (!states[ INDEX_ACTIVE ]) {
+        states[ INDEX_ACTIVE ] = new Active({ }, emitter, painter)
+      }
+    }
+
+    const createHoverIfNeeded = function () {
+      if (!states[ INDEX_HOVER ]) {
+        states[ INDEX_HOVER ] = new Hover(
+          { },
+          emitter
+        )
+      }
+    }
+
+    const createSelection = function (selection) {
+      destroy(INDEX_SELECTION)
+      states[ INDEX_SELECTION ] = selection
+    }
+
     if (Shape) {
-      target = new Drawing(
-        {
-          createShape: function () {
-            return new Shape(config)
-          }
-        },
-        emitter,
-        painter
+      createActiveIfNeeded()
+      createHoverIfNeeded()
+      createSelection(
+        new Drawing(
+          {
+            createShape: function () {
+              return new Shape(config)
+            }
+          },
+          emitter,
+          painter
+        )
       )
     }
     else if (Shape !== false) {
-      target = new Selection(
-        { },
-        emitter
+      createActiveIfNeeded()
+      createHoverIfNeeded()
+      createSelection(
+        new Selection(
+          { },
+          emitter
+        )
       )
     }
-    states[ INDEX_SELECTION ] = target
+    else {
+      destroy(INDEX_ACTIVE)
+      destroy(INDEX_HOVER)
+      createSelection()
+    }
+
+    this.refresh()
+
   }
 
   apply(config) {
@@ -352,9 +391,12 @@ export default class Canvas {
     )
 
     if (isChange) {
-      const shapes = this.states[ INDEX_ACTIVE ].getShapes()
-      if (shapes.length) {
-        this.editShapes(shapes, config)
+      const active = this.states[ INDEX_ACTIVE ]
+      if (active) {
+        const shapes = active.getShapes()
+        if (shapes.length) {
+          this.editShapes(shapes, config)
+        }
       }
       this.config = config
       return true
@@ -456,7 +498,7 @@ export default class Canvas {
    *
    * @return {boolean}
    */
-  hasPrev() {
+  hasNext() {
     return this.histories[ this.historyIndex + 1 ] ? true : false
   }
 

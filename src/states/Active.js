@@ -25,12 +25,11 @@ export default class Active extends State {
 
   constructor(props, emitter, painter) {
 
-    super(props)
+    super(props, emitter)
 
     let me = this, currentBox, targetX, targetY, update, hoverShape, savedShapes
 
     me.shapes = [ ]
-    me.emitter = emitter
 
     const saveShapes = function () {
       savedShapes = me.shapes.map(
@@ -183,7 +182,7 @@ export default class Active extends State {
       me.setShapes(painter, [ ])
     }
 
-    emitter
+    me
     .on(Emitter.CLEAR, me.clearHandler)
     .on(Emitter.SHAPE_ENTER, me.shapeEnterHandler)
     .on(Emitter.SHAPE_LEAVE, me.shapeLeaveHandler)
@@ -195,7 +194,7 @@ export default class Active extends State {
   }
 
   destroy() {
-    this.emitter
+    this
     .off(Emitter.CLEAR, this.clearHandler)
     .off(Emitter.SHAPE_ENTER, this.shapeEnterHandler)
     .off(Emitter.SHAPE_LEAVE, this.shapeLeaveHandler)
