@@ -5,8 +5,8 @@
 import Shape from './Shape'
 import containRect from '../contain/rect'
 import array from '../util/array'
+import constant from '../constant'
 import Emitter from '../Emitter'
-import getDevicePixelRatio from '../function/getDevicePixelRatio'
 
 const TRANSPARENT = 'rgba(0,0,0,0)'
 
@@ -21,7 +21,7 @@ function getTextSize (shape, text) {
   p.style.cssText = `
     position: absolute;
     visibility: hidden;
-    font: ${fontSize * getDevicePixelRatio()}px ${fontFamily};
+    font: ${fontSize * constant.DEVICE_PIXEL_RATIO}px ${fontFamily};
   `
   parentElement.appendChild(p)
 
@@ -95,7 +95,7 @@ function createTextarea(painter, emitter, event, shape) {
     let length = textarea.value.length
     let textareaSize = getTextSize(shape, textarea.value)
 
-    textarea.style.width = (textareaSize.width / getDevicePixelRatio() + fontSize) + 'px'
+    textarea.style.width = (textareaSize.width / constant.DEVICE_PIXEL_RATIO + fontSize) + 'px'
 
     if (!textareaIsInCanvas(painter, textareaSize.width + x, textareaSize.height + y)) {
       textarea.maxLength = length
@@ -167,7 +167,7 @@ export default class Text extends Shape {
 
   fill(painter) {
     const { x, y, fontSize, fontFamily, text, fontItalic, fontWeight } = this
-    const dpr = getDevicePixelRatio()
+    const dpr = constant.DEVICE_PIXEL_RATIO
 
     painter.setFillStyle(this.fillStyle)
     painter.setFont(
@@ -187,7 +187,7 @@ export default class Text extends Shape {
 
   stroke(painter) {
     const { x, y, fontSize, fontFamily, text, strokeThickness, strokeStyle, fontItalic, fontWeight } = this
-    const dpr = getDevicePixelRatio()
+    const dpr = constant.DEVICE_PIXEL_RATIO
 
     painter.setLineWidth(strokeThickness)
     painter.setStrokeStyle(strokeStyle)
@@ -248,7 +248,7 @@ export default class Text extends Shape {
     const { x, y, text, fontSize, fontFamily, fontItalic, fontWeight } = this
     let row = text.split('\n')
     painter.setFont(
-      fontSize * getDevicePixelRatio(),
+      fontSize * constant.DEVICE_PIXEL_RATIO,
       fontFamily,
       fontItalic,
       fontWeight

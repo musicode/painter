@@ -2,8 +2,8 @@
  * @file 事件处理
  * @author musicode
  */
-import getDevicePixelRatio from './function/getDevicePixelRatio'
 import array from './util/array'
+import constant from './constant'
 
 export default class Emitter {
 
@@ -14,17 +14,11 @@ export default class Emitter {
     let me = this, realX, realY, cursorX, cursorY, pageX, pageY, inCanvas
 
     let updatePosition = function () {
-      cursorX = pageX - canvas.offsetLeft
-      cursorY = pageY - canvas.offsetTop
+      realX = pageX - canvas.offsetLeft
+      realY = pageY - canvas.offsetTop
 
-      realX = cursorX
-      realY = cursorY
-
-      const devicePixelRatio = getDevicePixelRatio()
-      if (devicePixelRatio > 1) {
-        cursorX *= devicePixelRatio
-        cursorY *= devicePixelRatio
-      }
+      cursorX = realX * constant.DEVICE_PIXEL_RATIO
+      cursorY = realY * constant.DEVICE_PIXEL_RATIO
 
       inCanvas = cursorX >= 0
           && cursorX <= canvas.width

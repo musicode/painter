@@ -5,10 +5,10 @@
 
 import State from './State'
 import Emitter from '../Emitter'
+import constant from '../constant'
 
 import updateRect from '../function/updateRect'
 import getUnionRect from '../function/getUnionRect'
-import getDevicePixelRatio from '../function/getDevicePixelRatio'
 import array from '../util/array'
 
 const LEFT_TOP = 0
@@ -274,7 +274,7 @@ export default class Active extends State {
       )
     }
 
-    const thumbSize = this.thumbSize = 6 * getDevicePixelRatio()
+    const thumbSize = this.thumbSize = 6 * constant.DEVICE_PIXEL_RATIO
 
     const left = x - thumbSize / 2
     const center = x + (width - thumbSize) / 2

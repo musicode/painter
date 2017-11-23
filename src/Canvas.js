@@ -9,12 +9,12 @@ import Hover from './states/Hover'
 import Drawing from './states/Drawing'
 
 import getInterRect from './function/getInterRect'
-import getDevicePixelRatio from './function/getDevicePixelRatio'
 import array from './util/array'
 import object from './util/object'
 
 import Emitter from './Emitter'
 import Painter from './Painter'
+import constant from './constant'
 
 const INDEX_ACTIVE = 0
 const INDEX_HOVER = 1
@@ -202,14 +202,8 @@ export default class Canvas {
     element.style.width = width + 'px'
     element.style.height = height + 'px'
 
-    const devicePixelRatio = getDevicePixelRatio()
-    if (devicePixelRatio > 1) {
-      width *= devicePixelRatio
-      height *= devicePixelRatio
-    }
-
-    this.element.width = width
-    this.element.height = height
+    this.element.width = width * constant.DEVICE_PIXEL_RATIO
+    this.element.height = height * constant.DEVICE_PIXEL_RATIO
 
     if (!silent) {
       this.refresh()
