@@ -11,11 +11,14 @@ export default class Emitter {
 
     this.listeners = { }
 
-    let me = this, cursorX, cursorY, pageX, pageY, inCanvas
+    let me = this, realX, realY, cursorX, cursorY, pageX, pageY, inCanvas
 
     let updatePosition = function () {
       cursorX = pageX - canvas.offsetLeft
       cursorY = pageY - canvas.offsetTop
+
+      realX = cursorX
+      realY = cursorY
 
       const devicePixelRatio = getDevicePixelRatio()
       if (devicePixelRatio > 1) {
@@ -63,6 +66,8 @@ export default class Emitter {
           {
             x: cursorX,
             y: cursorY,
+            realX: realX,
+            realY: realY,
             pageX: pageX,
             pageY: pageY,
             inCanvas
@@ -89,6 +94,8 @@ export default class Emitter {
             {
               x: cursorX,
               y: cursorY,
+              realX: realX,
+              realY: realY,
               pageX: pageX,
               pageY: pageY,
               inCanvas,
@@ -118,6 +125,8 @@ export default class Emitter {
               {
                 x: cursorX,
                 y: cursorY,
+                realX: realX,
+                realY: realY,
                 pageX: pageX,
                 pageY: pageY,
                 inCanvas,
