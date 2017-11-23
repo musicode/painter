@@ -98,20 +98,6 @@ var State = function () {
 }();
 
 /**
- * @file 获取 dpr
- * @author musicode
- */
-var getDevicePixelRatio = function () {
-  var _window = window,
-      devicePixelRatio = _window.devicePixelRatio;
-
-  if (devicePixelRatio > 2) {
-    devicePixelRatio = 2;
-  }
-  return devicePixelRatio || 1;
-};
-
-/**
  * @file 数组操作
  * @author musicode
  */
@@ -170,6 +156,17 @@ var array = {
 };
 
 /**
+ * @file 常量
+ * @author musicode
+ */
+var constant = {
+  DEVICE_PIXEL_RATIO: window.devicePixelRatio > 1 ? window.devicePixelRatio : 1,
+  STROKE_POSITION_INSIDE: 1,
+  STROKE_POSITION_CENTER: 2,
+  STROKE_POSITION_OUTSIDE: 3
+};
+
+/**
  * @file 事件处理
  * @author musicode
  */
@@ -181,6 +178,8 @@ var Emitter = function () {
     this.listeners = {};
 
     var me = this,
+        realX,
+        realY,
         cursorX,
         cursorY,
         pageX,
@@ -188,14 +187,11 @@ var Emitter = function () {
         inCanvas;
 
     var updatePosition = function () {
-      cursorX = pageX - canvas.offsetLeft;
-      cursorY = pageY - canvas.offsetTop;
+      realX = pageX - canvas.offsetLeft;
+      realY = pageY - canvas.offsetTop;
 
-      var devicePixelRatio = getDevicePixelRatio();
-      if (devicePixelRatio > 1) {
-        cursorX *= devicePixelRatio;
-        cursorY *= devicePixelRatio;
-      }
+      cursorX = realX * constant.DEVICE_PIXEL_RATIO;
+      cursorY = realY * constant.DEVICE_PIXEL_RATIO;
 
       inCanvas = cursorX >= 0 && cursorX <= canvas.width && cursorY >= 0 && cursorY <= canvas.height;
     };
@@ -230,6 +226,8 @@ var Emitter = function () {
         me.fire(Emitter.MOUSE_UP, {
           x: cursorX,
           y: cursorY,
+          realX: realX,
+          realY: realY,
           pageX: pageX,
           pageY: pageY,
           inCanvas: inCanvas
@@ -248,6 +246,8 @@ var Emitter = function () {
         me.fire(Emitter.MOUSE_MOVE, {
           x: cursorX,
           y: cursorY,
+          realX: realX,
+          realY: realY,
           pageX: pageX,
           pageY: pageY,
           inCanvas: inCanvas
@@ -265,6 +265,8 @@ var Emitter = function () {
           me.fire(Emitter.MOUSE_MOVE, {
             x: cursorX,
             y: cursorY,
+            realX: realX,
+            realY: realY,
             pageX: pageX,
             pageY: pageY,
             inCanvas: inCanvas
@@ -778,7 +780,7 @@ var Active = function (_State) {
       });
     }
 
-    var thumbSize = this.thumbSize = 6 * getDevicePixelRatio();
+    var thumbSize = this.thumbSize = 6 * constant.DEVICE_PIXEL_RATIO;
 
     var left = x - thumbSize / 2;
     var center = x + (width - thumbSize) / 2;
@@ -1537,16 +1539,6 @@ var Shape = function () {
 
   return Shape;
 }();
-
-/**
- * @file 常量
- * @author musicode
- */
-var constant = {
-  STROKE_POSITION_INSIDE: 1,
-  STROKE_POSITION_CENTER: 2,
-  STROKE_POSITION_OUTSIDE: 3
-};
 
 /**
  * @file 抄来的...
@@ -2548,7 +2540,7 @@ function getTextSize(shape, text) {
 
   var parentElement = document.body;
   p = document.createElement('p');
-  p.style.cssText = '\n    position: absolute;\n    visibility: hidden;\n    font: ' + fontSize * getDevicePixelRatio() + 'px ' + fontFamily + ';\n  ';
+  p.style.cssText = '\n    position: absolute;\n    visibility: hidden;\n    font: ' + fontSize * constant.DEVICE_PIXEL_RATIO + 'px ' + fontFamily + ';\n  ';
   parentElement.appendChild(p);
 
   var textLines = (text + '').split('\n');
@@ -2609,7 +2601,7 @@ function createTextarea(painter, emitter, event, shape) {
     var length = textarea.value.length;
     var textareaSize = getTextSize(shape, textarea.value);
 
-    textarea.style.width = textareaSize.width / getDevicePixelRatio() + fontSize + 'px';
+    textarea.style.width = textareaSize.width / constant.DEVICE_PIXEL_RATIO + fontSize + 'px';
 
     if (!textareaIsInCanvas(painter, textareaSize.width + x, textareaSize.height + y)) {
       textarea.maxLength = length;
@@ -2687,7 +2679,7 @@ var Text = function (_Shape) {
         fontItalic = this.fontItalic,
         fontWeight = this.fontWeight;
 
-    var dpr = getDevicePixelRatio();
+    var dpr = constant.DEVICE_PIXEL_RATIO;
 
     painter.setFillStyle(this.fillStyle);
     painter.setFont(fontSize * dpr, fontFamily, fontItalic, fontWeight);
@@ -2708,7 +2700,7 @@ var Text = function (_Shape) {
         fontItalic = this.fontItalic,
         fontWeight = this.fontWeight;
 
-    var dpr = getDevicePixelRatio();
+    var dpr = constant.DEVICE_PIXEL_RATIO;
 
     painter.setLineWidth(strokeThickness);
     painter.setStrokeStyle(strokeStyle);
@@ -2766,7 +2758,7 @@ var Text = function (_Shape) {
         fontWeight = this.fontWeight;
 
     var row = text.split('\n');
-    painter.setFont(fontSize * getDevicePixelRatio(), fontFamily, fontItalic, fontWeight);
+    painter.setFont(fontSize * constant.DEVICE_PIXEL_RATIO, fontFamily, fontItalic, fontWeight);
 
     var width = getTextSize(this, text).width;
     var height = getTextSize(this, text).height;
@@ -2907,14 +2899,8 @@ var Canvas = function () {
     element.style.width = width + 'px';
     element.style.height = height + 'px';
 
-    var devicePixelRatio = getDevicePixelRatio();
-    if (devicePixelRatio > 1) {
-      width *= devicePixelRatio;
-      height *= devicePixelRatio;
-    }
-
-    this.element.width = width;
-    this.element.height = height;
+    this.element.width = width * constant.DEVICE_PIXEL_RATIO;
+    this.element.height = height * constant.DEVICE_PIXEL_RATIO;
 
     if (!silent) {
       this.refresh();
