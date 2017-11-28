@@ -5,6 +5,7 @@
 import array from '../util/array'
 import object from '../util/object'
 
+import constant from '../constant'
 import containLine from '../contain/line'
 import containRect from '../contain/rect'
 import getRectByPoints from '../function/getRectByPoints'
@@ -44,9 +45,10 @@ export default class Shape {
 
   isPointInStroke(painter, x, y) {
     let { strokeThickness, points } = this
-    if (strokeThickness < 8) {
-      strokeThickness = 8
+    if (strokeThickness < 5) {
+      strokeThickness = 5
     }
+
     for (let i = 0, len = points.length; i < len; i++) {
       if (points[ i + 1 ]
         && containLine(
@@ -54,7 +56,7 @@ export default class Shape {
             points[ i ].y,
             points[ i + 1 ].x,
             points[ i + 1 ].y,
-            strokeThickness, x, y
+            strokeThickness * constant.DEVICE_PIXEL_RATIO, x, y
           )
       ) {
         return true
@@ -110,7 +112,7 @@ export default class Shape {
    * @param {Painter} painter
    */
   stroke(painter) {
-    painter.setLineWidth(this.strokeThickness)
+    painter.setLineWidth(this.strokeThickness * constant.DEVICE_PIXEL_RATIO)
     painter.setStrokeStyle(this.strokeStyle)
     painter.begin()
     this.drawPath(painter)

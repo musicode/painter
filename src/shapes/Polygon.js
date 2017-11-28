@@ -44,6 +44,8 @@ export default class Polygon extends Shape {
 
     let { points, strokePosition, strokeThickness, strokeStyle } = this
 
+    strokeThickness *= constant.DEVICE_PIXEL_RATIO
+
     painter.setLineWidth(strokeThickness)
     painter.setStrokeStyle(strokeStyle)
     painter.begin()

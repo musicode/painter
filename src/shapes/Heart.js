@@ -3,16 +3,16 @@
  * @author wangtianhua
  */
 
-import Shape from './Shape'
-import constant from '../constant'
+import Polygon from './Polygon'
 
 import heart from '../contain/heart'
-import containPolygon from '../contain/polygon'
-import containRect from '../contain/rect'
 import getDistance from '../function/getDistance'
 import array from '../util/array'
 
-export default class Heart extends Shape {
+const PI = Math.PI
+const PI2 = PI * 2
+
+export default class Heart extends Polygon {
 
   drawing(painter, startX, startY, endX, endY, restore) {
 
@@ -25,7 +25,7 @@ export default class Heart extends Shape {
     let width = getDistance(startX, 0, endX, 0)
     let height = getDistance(0, startY, 0, endY)
 
-    const points = [ ], radius = width / 32, PI = Math.PI, PI2 = Math.PI * 2
+    const points = [ ], radius = width / 32
 
     let radian = PI, stepRadian = PI2 / Math.max(radius * 16, 30), endRadian = -PI
 
@@ -50,43 +50,6 @@ export default class Heart extends Shape {
     this.points = points
     this.draw(painter)
 
-  }
-
-  fill(painter) {
-    painter.setFillStyle(this.fillStyle)
-    painter.begin()
-    this.drawPath(painter)
-    painter.fill()
-  }
-
-  isPointInFill(painter, x, y) {
-    return containPolygon(this.points, x, y)
-  }
-
-  drawPath(painter) {
-    painter.drawPoints(this.points)
-    painter.close()
-  }
-
-  stroke(painter) {
-
-    let { points, strokePosition, strokeThickness, strokeStyle } = this
-
-    painter.setLineWidth(strokeThickness)
-    painter.setStrokeStyle(strokeStyle)
-    painter.begin()
-
-    if (strokePosition === constant.STROKE_POSITION_INSIDE) {
-      points = getOffsetPoints(points, strokeThickness / -2)
-    }
-    else if (strokePosition === constant.STROKE_POSITION_OUTSIDE) {
-      points = getOffsetPoints(points, strokeThickness / 2)
-    }
-
-    painter.drawPoints(points)
-    painter.close()
-
-    painter.stroke()
   }
 
   validate() {

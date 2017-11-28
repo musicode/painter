@@ -4,6 +4,7 @@
  */
 import State from './State'
 import Emitter from '../Emitter'
+import constant from '../constant'
 
 import array from '../util/array'
 
@@ -84,15 +85,15 @@ export default class Hover extends State {
 
   draw(painter) {
 
-    let { shape } = this
+    let { shape, hoverThickness, hoverColor } = this
     if (!shape) {
       return
     }
 
     painter.disableShadow()
 
-    painter.setLineWidth(4)
-    painter.setStrokeStyle('#45C0FF')
+    painter.setLineWidth(hoverThickness * constant.DEVICE_PIXEL_RATIO)
+    painter.setStrokeStyle(hoverColor)
 
     painter.begin()
     shape.drawPath(painter)

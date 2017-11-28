@@ -4,6 +4,7 @@
  */
 
 import Shape from './Shape'
+import constant from '../constant'
 import array from '../util/array'
 
 /**
@@ -34,7 +35,7 @@ export default class Doodle extends Shape {
 
     if (points.length === 1) {
       this.setLineStyle(painter)
-      painter.setLineWidth(this.strokeThickness)
+      painter.setLineWidth(this.strokeThickness * constant.DEVICE_PIXEL_RATIO)
       painter.setStrokeStyle(this.strokeStyle)
     }
 

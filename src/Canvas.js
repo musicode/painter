@@ -348,7 +348,7 @@ export default class Canvas {
     const createHoverIfNeeded = function () {
       if (!states[ INDEX_HOVER ]) {
         states[ INDEX_HOVER ] = new Hover(
-          { },
+          config,
           emitter
         )
       }
@@ -396,30 +396,14 @@ export default class Canvas {
 
   apply(config) {
 
-    let isChange
-
-    const oldConfig = this.config || { }
-    object.each(
-      config,
-      function (value, key) {
-        if (value !== oldConfig[ key ]) {
-          isChange = true
-          return false
-        }
+    const active = this.states[ INDEX_ACTIVE ]
+    if (active) {
+      const shapes = active.getShapes()
+      if (shapes.length) {
+        this.editShapes(shapes, config)
       }
-    )
-
-    if (isChange) {
-      const active = this.states[ INDEX_ACTIVE ]
-      if (active) {
-        const shapes = active.getShapes()
-        if (shapes.length) {
-          this.editShapes(shapes, config)
-        }
-      }
-      this.config = config
-      return true
     }
+    this.config = config
 
   }
 
