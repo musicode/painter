@@ -42,11 +42,26 @@ export default class Emitter {
       }
     }
 
+    let fireEvent = function (type, data) {
+      if (data.inCanvas) {
+        me.fire(type, data)
+      }
+      else {
+        // 给外部按钮一些优先执行的机会
+        setTimeout(
+          function () {
+            me.fire(type, data)
+          },
+          50
+        )
+      }
+    }
+
     let onMouseDown = function (event) {
       if (!me.disabled) {
         updatePositionByTouchEvent(event)
 
-        me.fire(
+        fireEvent(
           Emitter.MOUSE_DOWN,
           {
             x: cursorX,
@@ -62,7 +77,7 @@ export default class Emitter {
 
     let onMouseUp = function (event) {
       if (!me.disabled) {
-        me.fire(
+        fireEvent(
           Emitter.MOUSE_UP,
           {
             x: cursorX,
@@ -90,7 +105,7 @@ export default class Emitter {
           pageY = event.pageY
           updatePosition()
 
-          me.fire(
+          fireEvent(
             Emitter.MOUSE_MOVE,
             {
               x: cursorX,
@@ -121,7 +136,7 @@ export default class Emitter {
         function (event) {
           if (!me.disabled) {
             updatePositionByTouchEvent(event)
-            me.fire(
+            fireEvent(
               Emitter.MOUSE_MOVE,
               {
                 x: cursorX,
@@ -141,7 +156,7 @@ export default class Emitter {
         function (event) {
           if (!me.disabled) {
             updatePositionByTouchEvent(event)
-            me.fire(
+            fireEvent(
               Emitter.MOUSE_MOVE,
               {
                 x: cursorX,

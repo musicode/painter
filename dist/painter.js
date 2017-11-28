@@ -212,11 +212,22 @@ var Emitter = function () {
       }
     };
 
+    var fireEvent = function (type, data) {
+      if (data.inCanvas) {
+        me.fire(type, data);
+      } else {
+        // 给外部按钮一些优先执行的机会
+        setTimeout(function () {
+          me.fire(type, data);
+        }, 50);
+      }
+    };
+
     var onMouseDown = function (event) {
       if (!me.disabled) {
         updatePositionByTouchEvent(event);
 
-        me.fire(Emitter.MOUSE_DOWN, {
+        fireEvent(Emitter.MOUSE_DOWN, {
           x: cursorX,
           y: cursorY,
           pageX: pageX,
@@ -229,7 +240,7 @@ var Emitter = function () {
 
     var onMouseUp = function (event) {
       if (!me.disabled) {
-        me.fire(Emitter.MOUSE_UP, {
+        fireEvent(Emitter.MOUSE_UP, {
           x: cursorX,
           y: cursorY,
           realX: realX,
@@ -249,7 +260,7 @@ var Emitter = function () {
         pageY = event.pageY;
         updatePosition();
 
-        me.fire(Emitter.MOUSE_MOVE, {
+        fireEvent(Emitter.MOUSE_MOVE, {
           x: cursorX,
           y: cursorY,
           realX: realX,
@@ -268,7 +279,7 @@ var Emitter = function () {
       document.addEventListener('touchmove', function (event) {
         if (!me.disabled) {
           updatePositionByTouchEvent(event);
-          me.fire(Emitter.MOUSE_MOVE, {
+          fireEvent(Emitter.MOUSE_MOVE, {
             x: cursorX,
             y: cursorY,
             realX: realX,
@@ -282,7 +293,7 @@ var Emitter = function () {
       canvas.addEventListener('touchmove', function (event) {
         if (!me.disabled) {
           updatePositionByTouchEvent(event);
-          me.fire(Emitter.MOUSE_MOVE, {
+          fireEvent(Emitter.MOUSE_MOVE, {
             x: cursorX,
             y: cursorY,
             pageX: pageX,
