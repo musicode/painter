@@ -7,18 +7,22 @@ import constant from './constant'
 
 export default class Emitter {
 
-  constructor(canvas) {
+  constructor(canvas, container) {
 
     this.listeners = { }
 
     let me = this, realX, realY, cursorX, cursorY, pageX, pageY, inCanvas
 
-    let { parentNode } = canvas
-
     let updatePosition = function () {
 
-      realX = pageX - canvas.offsetLeft + parentNode.scrollLeft
-      realY = pageY - canvas.offsetTop + parentNode.scrollTop
+      if (container) {
+        realX = pageX - container.offsetLeft + container.scrollLeft
+        realY = pageY - container.offsetTop + container.scrollTop
+      }
+      else {
+        realX = pageX - canvas.offsetLeft
+        realY = pageY - canvas.offsetTop
+      }
 
       cursorX = realX * constant.DEVICE_PIXEL_RATIO
       cursorY = realY * constant.DEVICE_PIXEL_RATIO

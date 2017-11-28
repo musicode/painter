@@ -14,10 +14,14 @@
             background-color: #EEE;
             user-select: none;
         }
+        #canvas {
+            height: 500px;
+            overflow-y: auto;
+            margin: 20px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.2);
+        }
         canvas {
             background-color: #FFF;
-            box-shadow: 0 0 8px rgba(0,0,0,0.2);
-            margin: 20px;
         }
         .form-horizontal {
             margin: 20px;
@@ -131,7 +135,7 @@
                     <input type="checkbox" name="hasStroke" checked> 有描边
                 </label>
                 <label class="checkbox-inline">
-                    <input type="checkbox" name="hasShadow" checked> 有阴影
+                    <input type="checkbox" name="hasShadow"> 有阴影
                 </label>
             </div>
         </div>
@@ -224,14 +228,15 @@
             </div>
         </div>
     </div>
-    <canvas></canvas>
+    <div id="canvas">
+        <canvas></canvas>
+    </div>
+
     <script src="./demo/jquery.js"></script>
     <script src="./dist/painter.js"></script>
     <script>
 
         var canvas = $('canvas')[0];
-        var context = canvas.getContext('2d');
-
 
         function getConfig() {
             var canvasWidth = + $('input[name="canvasWidth"]').val().trim();
@@ -266,6 +271,8 @@
                 shadowColor: shadowColor,
                 fontSize: fontSize,
                 caretColor: 'rgba(0,0,0,1)',
+                hoverColor: '#45C0FF',
+                hoverThickness: 1,
 
                 tool: tool,
                 count: count,
@@ -278,7 +285,7 @@
         }
 
 
-        window.instance = new Painter(canvas);
+        window.instance = new Painter(canvas, 10, $('#canvas')[0]);
 
         var config = getConfig();
 
@@ -318,7 +325,9 @@
                   shadowColor: config.hasShadow ? config.shadowColor : null,
                   fontSize: config.fontSize,
                   fontFamily: 'sans-serif',
-                  caretColor: config.caretColor
+                  caretColor: config.caretColor,
+                  hoverColor: config.hoverColor,
+                  hoverThickness: config.hoverThickness,
               })
             ) {
                 instance.refresh();

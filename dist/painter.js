@@ -171,7 +171,7 @@ var constant = {
  * @author musicode
  */
 var Emitter = function () {
-  function Emitter(canvas) {
+  function Emitter(canvas, container) {
     classCallCheck(this, Emitter);
 
 
@@ -186,13 +186,15 @@ var Emitter = function () {
         pageY,
         inCanvas;
 
-    var parentNode = canvas.parentNode;
-
-
     var updatePosition = function () {
 
-      realX = pageX - canvas.offsetLeft + parentNode.scrollLeft;
-      realY = pageY - canvas.offsetTop + parentNode.scrollTop;
+      if (container) {
+        realX = pageX - container.offsetLeft + container.scrollLeft;
+        realY = pageY - container.offsetTop + container.scrollTop;
+      } else {
+        realX = pageX - canvas.offsetLeft;
+        realY = pageY - canvas.offsetTop;
+      }
 
       cursorX = realX * constant.DEVICE_PIXEL_RATIO;
       cursorY = realY * constant.DEVICE_PIXEL_RATIO;
@@ -897,7 +899,9 @@ var Hover = function (_State) {
   };
 
   Hover.prototype.draw = function (painter) {
-    var shape = this.shape;
+    var shape = this.shape,
+        hoverThickness = this.hoverThickness,
+        hoverColor = this.hoverColor;
 
     if (!shape) {
       return;
@@ -905,8 +909,8 @@ var Hover = function (_State) {
 
     painter.disableShadow();
 
-    painter.setLineWidth(4);
-    painter.setStrokeStyle('#45C0FF');
+    painter.setLineWidth(hoverThickness * constant.DEVICE_PIXEL_RATIO);
+    painter.setStrokeStyle(hoverColor);
 
     painter.begin();
     shape.drawPath(painter);
@@ -1433,11 +1437,12 @@ var Shape = function () {
     var strokeThickness = this.strokeThickness,
         points = this.points;
 
-    if (strokeThickness < 8) {
-      strokeThickness = 8;
+    if (strokeThickness < 5) {
+      strokeThickness = 5;
     }
+
     for (var i = 0, len = points.length; i < len; i++) {
-      if (points[i + 1] && containLine(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y, strokeThickness, x, y)) {
+      if (points[i + 1] && containLine(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y, strokeThickness * constant.DEVICE_PIXEL_RATIO, x, y)) {
         return true;
       }
     }
@@ -1494,7 +1499,7 @@ var Shape = function () {
 
 
   Shape.prototype.stroke = function (painter) {
-    painter.setLineWidth(this.strokeThickness);
+    painter.setLineWidth(this.strokeThickness * constant.DEVICE_PIXEL_RATIO);
     painter.setStrokeStyle(this.strokeStyle);
     painter.begin();
     this.drawPath(painter);
@@ -1603,7 +1608,7 @@ var containPolygon = function (points, x, y) {
  * @file 偏移点坐标，用于实现内外描边
  * @author musicode
  */
-var getOffsetPoints$1 = function (points, offset) {
+var getOffsetPoints = function (points, offset) {
   var result = [],
       length = points.length;
 
@@ -1737,14 +1742,16 @@ var Polygon = function (_Shape) {
         strokeStyle = this.strokeStyle;
 
 
+    strokeThickness *= constant.DEVICE_PIXEL_RATIO;
+
     painter.setLineWidth(strokeThickness);
     painter.setStrokeStyle(strokeStyle);
     painter.begin();
 
     if (strokePosition === constant.STROKE_POSITION_INSIDE) {
-      points = getOffsetPoints$1(points, strokeThickness / -2);
+      points = getOffsetPoints(points, strokeThickness / -2);
     } else if (strokePosition === constant.STROKE_POSITION_OUTSIDE) {
-      points = getOffsetPoints$1(points, strokeThickness / 2);
+      points = getOffsetPoints(points, strokeThickness / 2);
     }
 
     painter.drawPoints(points);
@@ -1982,7 +1989,7 @@ var Doodle = function (_Shape) {
 
     if (points.length === 1) {
       this.setLineStyle(painter);
-      painter.setLineWidth(this.strokeThickness);
+      painter.setLineWidth(this.strokeThickness * constant.DEVICE_PIXEL_RATIO);
       painter.setStrokeStyle(this.strokeStyle);
     }
 
@@ -2018,12 +2025,15 @@ var heart = {
  * @author wangtianhua
  */
 
-var Heart = function (_Shape) {
-  inherits(Heart, _Shape);
+var PI = Math.PI;
+var PI2$1 = PI * 2;
+
+var Heart = function (_Polygon) {
+  inherits(Heart, _Polygon);
 
   function Heart() {
     classCallCheck(this, Heart);
-    return possibleConstructorReturn(this, _Shape.apply(this, arguments));
+    return possibleConstructorReturn(this, _Polygon.apply(this, arguments));
   }
 
   Heart.prototype.drawing = function (painter, startX, startY, endX, endY, restore) {
@@ -2038,12 +2048,10 @@ var Heart = function (_Shape) {
     var height = getDistance(0, startY, 0, endY);
 
     var points = [],
-        radius = width / 32,
-        PI = Math.PI,
-        PI2 = Math.PI * 2;
+        radius = width / 32;
 
     var radian = PI,
-        stepRadian = PI2 / Math.max(radius * 16, 30),
+        stepRadian = PI2$1 / Math.max(radius * 16, 30),
         endRadian = -PI;
 
     array.push(points, {
@@ -2061,51 +2069,12 @@ var Heart = function (_Shape) {
     this.draw(painter);
   };
 
-  Heart.prototype.fill = function (painter) {
-    painter.setFillStyle(this.fillStyle);
-    painter.begin();
-    this.drawPath(painter);
-    painter.fill();
-  };
-
-  Heart.prototype.isPointInFill = function (painter, x, y) {
-    return containPolygon(this.points, x, y);
-  };
-
-  Heart.prototype.drawPath = function (painter) {
-    painter.drawPoints(this.points);
-    painter.close();
-  };
-
-  Heart.prototype.stroke = function (painter) {
-    var points = this.points,
-        strokePosition = this.strokePosition,
-        strokeThickness = this.strokeThickness,
-        strokeStyle = this.strokeStyle;
-
-
-    painter.setLineWidth(strokeThickness);
-    painter.setStrokeStyle(strokeStyle);
-    painter.begin();
-
-    if (strokePosition === constant.STROKE_POSITION_INSIDE) {
-      points = getOffsetPoints(points, strokeThickness / -2);
-    } else if (strokePosition === constant.STROKE_POSITION_OUTSIDE) {
-      points = getOffsetPoints(points, strokeThickness / 2);
-    }
-
-    painter.drawPoints(points);
-    painter.close();
-
-    painter.stroke();
-  };
-
   Heart.prototype.validate = function () {
     return this.width > 5 && this.height > 5;
   };
 
   return Heart;
-}(Shape);
+}(Polygon);
 
 /**
  * @file 椭圆
@@ -2435,54 +2404,15 @@ var Rect = function (_Polygon) {
  * @file 内多边形
  * @author wangtianhua
  */
-var PI2$1 = 2 * Math.PI;
+var PI2$2 = 2 * Math.PI;
 
-var Star = function (_Shape) {
-  inherits(Star, _Shape);
+var Star = function (_Polygon) {
+  inherits(Star, _Polygon);
 
   function Star() {
     classCallCheck(this, Star);
-    return possibleConstructorReturn(this, _Shape.apply(this, arguments));
+    return possibleConstructorReturn(this, _Polygon.apply(this, arguments));
   }
-
-  Star.prototype.isPointInFill = function (painter, x, y) {
-    return containPolygon(this.points, x, y);
-  };
-
-  Star.prototype.drawPath = function (painter) {
-    painter.drawPoints(this.points);
-    painter.close();
-  };
-
-  Star.prototype.stroke = function (painter) {
-    var points = this.points,
-        strokePosition = this.strokePosition,
-        strokeThickness = this.strokeThickness,
-        strokeStyle = this.strokeStyle;
-
-
-    painter.setLineWidth(strokeThickness);
-    painter.setStrokeStyle(strokeStyle);
-    painter.begin();
-
-    if (strokePosition === constant.STROKE_POSITION_INSIDE) {
-      points = getOffsetPoints$1(points, strokeThickness / -2);
-    } else if (strokePosition === constant.STROKE_POSITION_OUTSIDE) {
-      points = getOffsetPoints$1(points, strokeThickness / 2);
-    }
-
-    painter.drawPoints(points);
-    painter.close();
-
-    painter.stroke();
-  };
-
-  Star.prototype.fill = function (painter) {
-    painter.setFillStyle(this.fillStyle);
-    painter.begin();
-    this.drawPath(painter);
-    painter.fill();
-  };
 
   Star.prototype.drawing = function (painter, startX, startY, endX, endY, restore) {
 
@@ -2493,7 +2423,7 @@ var Star = function (_Shape) {
 
 
     var outerRadius = getDistance(startX, startY, endX, endY);
-    var stepRadian = PI2$1 / count;
+    var stepRadian = PI2$2 / count;
     var innerRadius = radius;
 
     if (!innerRadius) {
@@ -2503,7 +2433,7 @@ var Star = function (_Shape) {
     var points = [];
 
     var radian = Math.atan2(endY - startY, endX - startX),
-        endRadian = radian + PI2$1;
+        endRadian = radian + PI2$2;
     do {
       array.push(points, getPointOfCircle(startX, startY, outerRadius, radian));
       array.push(points, getPointOfCircle(startX, startY, innerRadius, radian + stepRadian / 2));
@@ -2524,7 +2454,7 @@ var Star = function (_Shape) {
   };
 
   return Star;
-}(Shape);
+}(Polygon);
 
 /**
  * @file 文字
@@ -2790,6 +2720,7 @@ var INDEX_SELECTION = 2;
 var Canvas = function () {
   function Canvas(canvas) {
     var maxHistorySize = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 10;
+    var container = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
     classCallCheck(this, Canvas);
 
 
@@ -2800,7 +2731,7 @@ var Canvas = function () {
 
     var painter = me.painter = new Painter(canvas.getContext('2d'));
 
-    var emitter = me.emitter = new Emitter(canvas);
+    var emitter = me.emitter = new Emitter(canvas, container);
 
     me.states = [];
 
@@ -3043,7 +2974,7 @@ var Canvas = function () {
 
     var createHoverIfNeeded = function () {
       if (!states[INDEX_HOVER]) {
-        states[INDEX_HOVER] = new Hover({}, emitter);
+        states[INDEX_HOVER] = new Hover(config, emitter);
       }
     };
 
@@ -3075,27 +3006,14 @@ var Canvas = function () {
 
   Canvas.prototype.apply = function (config) {
 
-    var isChange;
-
-    var oldConfig = this.config || {};
-    object.each(config, function (value, key) {
-      if (value !== oldConfig[key]) {
-        isChange = true;
-        return false;
+    var active = this.states[INDEX_ACTIVE];
+    if (active) {
+      var shapes = active.getShapes();
+      if (shapes.length) {
+        this.editShapes(shapes, config);
       }
-    });
-
-    if (isChange) {
-      var active = this.states[INDEX_ACTIVE];
-      if (active) {
-        var shapes = active.getShapes();
-        if (shapes.length) {
-          this.editShapes(shapes, config);
-        }
-      }
-      this.config = config;
-      return true;
     }
+    this.config = config;
   };
 
   /**

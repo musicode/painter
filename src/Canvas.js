@@ -22,7 +22,7 @@ const INDEX_SELECTION = 2
 
 export default class Canvas {
 
-  constructor(canvas, maxHistorySize = 10) {
+  constructor(canvas, maxHistorySize = 10, container = null) {
 
     const me = this
 
@@ -31,7 +31,7 @@ export default class Canvas {
 
     const painter = me.painter = new Painter(canvas.getContext('2d'))
 
-    const emitter = me.emitter = new Emitter(canvas)
+    const emitter = me.emitter = new Emitter(canvas, container)
 
     me.states = [ ]
 
