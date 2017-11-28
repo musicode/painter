@@ -13,9 +13,12 @@ export default class Emitter {
 
     let me = this, realX, realY, cursorX, cursorY, pageX, pageY, inCanvas
 
+    let { parentNode } = canvas
+
     let updatePosition = function () {
-      realX = pageX - canvas.offsetLeft
-      realY = pageY - canvas.offsetTop
+
+      realX = pageX - canvas.offsetLeft + parentNode.scrollLeft
+      realY = pageY - canvas.offsetTop + parentNode.scrollTop
 
       cursorX = realX * constant.DEVICE_PIXEL_RATIO
       cursorY = realY * constant.DEVICE_PIXEL_RATIO

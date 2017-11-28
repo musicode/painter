@@ -186,9 +186,13 @@ var Emitter = function () {
         pageY,
         inCanvas;
 
+    var parentNode = canvas.parentNode;
+
+
     var updatePosition = function () {
-      realX = pageX - canvas.offsetLeft;
-      realY = pageY - canvas.offsetTop;
+
+      realX = pageX - canvas.offsetLeft + parentNode.scrollLeft;
+      realY = pageY - canvas.offsetTop + parentNode.scrollTop;
 
       cursorX = realX * constant.DEVICE_PIXEL_RATIO;
       cursorY = realY * constant.DEVICE_PIXEL_RATIO;
