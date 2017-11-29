@@ -178,6 +178,8 @@ var Emitter = function () {
     this.listeners = {};
 
     var me = this,
+        offsetX = 0,
+        offsetY = 0,
         realX,
         realY,
         cursorX,
@@ -186,14 +188,28 @@ var Emitter = function () {
         pageY,
         inCanvas;
 
+    var getOffset = function (element) {
+      if (element && element.tagName) {
+        offsetX += element.offsetLeft;
+        offsetY += element.offsetTop;
+        getOffset(element.parentNode);
+      }
+    };
+
+    if (container) {
+      getOffset(container);
+    } else {
+      getOffset(canvas);
+    }
+
     var updatePosition = function () {
 
+      realX = pageX - offsetX;
+      realY = pageY - offsetY;
+
       if (container) {
-        realX = pageX - container.offsetLeft + container.scrollLeft;
-        realY = pageY - container.offsetTop + container.scrollTop;
-      } else {
-        realX = pageX - canvas.offsetLeft;
-        realY = pageY - canvas.offsetTop;
+        realX += container.scrollLeft;
+        realY += container.scrollTop;
       }
 
       cursorX = realX * constant.DEVICE_PIXEL_RATIO;
