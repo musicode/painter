@@ -229,7 +229,9 @@ var Emitter = function () {
     };
 
     var fireEvent = function (type, data) {
-      if (data.inCanvas) {
+      var target = data.target;
+
+      if (target && target.tagName === 'CANVAS') {
         me.fire(type, data);
       } else {
         // 给外部按钮一些优先执行的机会
@@ -246,6 +248,8 @@ var Emitter = function () {
         fireEvent(Emitter.MOUSE_DOWN, {
           x: cursorX,
           y: cursorY,
+          realX: realX,
+          realY: realY,
           pageX: pageX,
           pageY: pageY,
           target: event.target,
@@ -254,7 +258,7 @@ var Emitter = function () {
       }
     };
 
-    var onMouseUp = function (event) {
+    var onMouseUp = function () {
       if (!me.disabled) {
         fireEvent(Emitter.MOUSE_UP, {
           x: cursorX,

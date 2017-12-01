@@ -292,7 +292,7 @@ export default class Canvas {
       let shapes = state.getShapes()
       if (shapes.length) {
         this.removeShapes(shapes, true)
-        state.setShapes(this.painter, [])
+        state.setShapes(this.painter, [ ])
       }
     }
   }

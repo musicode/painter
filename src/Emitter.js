@@ -57,7 +57,8 @@ export default class Emitter {
     }
 
     let fireEvent = function (type, data) {
-      if (data.inCanvas) {
+      const { target } = data
+      if (target && target.tagName === 'CANVAS') {
         me.fire(type, data)
       }
       else {
@@ -80,6 +81,8 @@ export default class Emitter {
           {
             x: cursorX,
             y: cursorY,
+            realX: realX,
+            realY: realY,
             pageX: pageX,
             pageY: pageY,
             target: event.target,
@@ -89,7 +92,7 @@ export default class Emitter {
       }
     }
 
-    let onMouseUp = function (event) {
+    let onMouseUp = function () {
       if (!me.disabled) {
         fireEvent(
           Emitter.MOUSE_UP,
