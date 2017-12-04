@@ -91,9 +91,6 @@ export default class Shape {
       }
 
     }
-    else {
-      this.draw(painter)
-    }
 
   }
 

@@ -202,7 +202,7 @@ var Emitter = function () {
       getOffset(canvas);
     }
 
-    var updatePosition = function () {
+    var updatePosition = function (event) {
 
       realX = pageX - offsetX;
       realY = pageY - offsetY;
@@ -215,6 +215,15 @@ var Emitter = function () {
       cursorX = realX * constant.DEVICE_PIXEL_RATIO;
       cursorY = realY * constant.DEVICE_PIXEL_RATIO;
 
+      var target = event.target;
+
+      if (target.tagName === 'CANVAS') {
+        if (target !== canvas) {
+          inCanvas = false;
+          return;
+        }
+      }
+
       inCanvas = cursorX >= 0 && cursorX <= canvas.width && cursorY >= 0 && cursorY <= canvas.height;
     };
 
@@ -224,7 +233,7 @@ var Emitter = function () {
       if (touches) {
         pageX = touches[0].pageX;
         pageY = touches[0].pageY;
-        updatePosition();
+        updatePosition(event);
       }
     };
 
@@ -278,7 +287,7 @@ var Emitter = function () {
       if (!me.disabled) {
         pageX = event.pageX;
         pageY = event.pageY;
-        updatePosition();
+        updatePosition(event);
 
         fireEvent(Emitter.MOUSE_MOVE, {
           x: cursorX,
@@ -1506,8 +1515,6 @@ var Shape = function () {
         this.setLineStyle(painter);
         this.stroke(painter);
       }
-    } else {
-      this.draw(painter);
     }
   };
 

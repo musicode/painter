@@ -28,7 +28,7 @@ export default class Emitter {
       getOffset(canvas)
     }
 
-    let updatePosition = function () {
+    let updatePosition = function (event) {
 
       realX = pageX - offsetX
       realY = pageY - offsetY
@@ -41,10 +41,19 @@ export default class Emitter {
       cursorX = realX * constant.DEVICE_PIXEL_RATIO
       cursorY = realY * constant.DEVICE_PIXEL_RATIO
 
+      let { target } = event
+      if (target.tagName === 'CANVAS') {
+        if (target !== canvas) {
+          inCanvas = false
+          return
+        }
+      }
+
       inCanvas = cursorX >= 0
           && cursorX <= canvas.width
           && cursorY >= 0
           && cursorY <= canvas.height
+
     }
 
     let updatePositionByTouchEvent = function (event) {
@@ -52,7 +61,7 @@ export default class Emitter {
       if (touches) {
         pageX = touches[ 0 ].pageX
         pageY = touches[ 0 ].pageY
-        updatePosition()
+        updatePosition(event)
       }
     }
 
@@ -120,7 +129,7 @@ export default class Emitter {
         if (!me.disabled) {
           pageX = event.pageX
           pageY = event.pageY
-          updatePosition()
+          updatePosition(event)
 
           fireEvent(
             Emitter.MOUSE_MOVE,
