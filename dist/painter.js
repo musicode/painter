@@ -222,9 +222,12 @@ var Emitter = function () {
           inCanvas = false;
           return;
         }
+      } else {
+        inCanvas == false;
+        return;
       }
 
-      inCanvas = cursorX >= 0 && cursorX <= canvas.width && cursorY >= 0 && cursorY <= canvas.height;
+      inCanvas = true;
     };
 
     var updatePositionByTouchEvent = function (event) {
@@ -238,9 +241,7 @@ var Emitter = function () {
     };
 
     var fireEvent = function (type, data) {
-      var target = data.target;
-
-      if (target && target.tagName === 'CANVAS') {
+      if (inCanvas) {
         me.fire(type, data);
       } else {
         // 给外部按钮一些优先执行的机会
@@ -3022,8 +3023,6 @@ var Canvas = function () {
     };
 
     if (Shape) {
-      createActiveIfNeeded();
-      createHoverIfNeeded();
       createSelection(new Drawing({
         createShape: function createShape() {
           return new Shape(config);

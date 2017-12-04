@@ -360,8 +360,6 @@ export default class Canvas {
     }
 
     if (Shape) {
-      createActiveIfNeeded()
-      createHoverIfNeeded()
       createSelection(
         new Drawing(
           {

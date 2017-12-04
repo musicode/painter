@@ -48,11 +48,12 @@ export default class Emitter {
           return
         }
       }
+      else {
+        inCanvas == false
+        return
+      }
 
-      inCanvas = cursorX >= 0
-          && cursorX <= canvas.width
-          && cursorY >= 0
-          && cursorY <= canvas.height
+      inCanvas = true
 
     }
 
@@ -66,8 +67,7 @@ export default class Emitter {
     }
 
     let fireEvent = function (type, data) {
-      const { target } = data
-      if (target && target.tagName === 'CANVAS') {
+      if (inCanvas) {
         me.fire(type, data)
       }
       else {
