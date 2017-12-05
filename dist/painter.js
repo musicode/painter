@@ -1528,6 +1528,9 @@ var Shape = function () {
 
   Shape.prototype.drawPath = function (painter) {
     painter.drawPoints(this.points);
+    if (this.autoClose) {
+      painter.close();
+    }
   };
 
   /**
