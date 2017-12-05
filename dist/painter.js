@@ -2640,7 +2640,7 @@ function getTextSize(shape, text) {
 
   var parentElement = document.body;
   p = document.createElement('p');
-  p.style.cssText = '\n    position: absolute;\n    visibility: hidden;\n    font: ' + fontSize * constant.DEVICE_PIXEL_RATIO + 'px ' + fontFamily + ';\n  ';
+  p.style.cssText = '\n    position: absolute;\n    visibility: hidden;\n    font: ' + fontSize * constant.DEVICE_PIXEL_RATIO + 'px ' + fontFamily + ';\n    line-height: ' + lineHeight + 'px;\n  ';
   parentElement.appendChild(p);
 
   var textLines = (text + '').split('\n');
@@ -2667,12 +2667,14 @@ function createTextarea(painter, emitter, event, shape) {
       x = shape.x,
       y = shape.y,
       fontItalic = shape.fontItalic,
-      fontWeight = shape.fontWeight;
+      fontWeight = shape.fontWeight,
+      caretColor = shape.caretColor,
+      borderColor = shape.borderColor;
 
   var parentElement = document.body;
 
   textarea = document.createElement('textarea');
-  var style = '\n    position: absolute;\n    left: ' + event.pageX + 'px;\n    top: ' + event.pageY + 'px;\n    color: ' + TRANSPARENT + ';\n    caret-color: ' + shape.caretColor + ';\n    background-color: ' + TRANSPARENT + ';\n    font: ' + fontSize + 'px ' + fontFamily + ';\n    line-height: ' + lineHeight + 'px;\n    border: none;\n    outline: none;\n    resize: none;\n    padding: 0;\n    overflow: hidden;\n    width: ' + fontSize + 'px;\n    wrap: physical;\n  ';
+  var style = '\n    position: absolute;\n    left: ' + event.pageX + 'px;\n    top: ' + event.pageY + 'px;\n    color: ' + TRANSPARENT + ';\n    caret-color: ' + caretColor + ';\n    background-color: ' + TRANSPARENT + ';\n    font: ' + fontSize + 'px ' + fontFamily + ';\n    line-height: ' + lineHeight + 'px;\n    border: 1px dashed ' + borderColor + ';\n    outline: none;\n    resize: none;\n    padding: 0;\n    overflow: hidden;\n    width: ' + fontSize + 'px;\n    wrap: physical;\n  ';
   if (fontItalic) {
     style += 'font-style: italic;';
   }

@@ -22,6 +22,7 @@ function getTextSize (shape, text) {
     position: absolute;
     visibility: hidden;
     font: ${fontSize * constant.DEVICE_PIXEL_RATIO}px ${fontFamily};
+    line-height: ${lineHeight}px;
   `
   parentElement.appendChild(p)
 
@@ -44,7 +45,7 @@ function getTextSize (shape, text) {
 
 function createTextarea(painter, emitter, event, shape) {
 
-  const { fontSize, fontFamily, lineHeight, x, y, fontItalic, fontWeight } = shape
+  const { fontSize, fontFamily, lineHeight, x, y, fontItalic, fontWeight, caretColor, borderColor } = shape
   const parentElement = document.body
 
   textarea = document.createElement('textarea')
@@ -53,11 +54,11 @@ function createTextarea(painter, emitter, event, shape) {
     left: ${event.pageX}px;
     top: ${event.pageY}px;
     color: ${TRANSPARENT};
-    caret-color: ${shape.caretColor};
+    caret-color: ${caretColor};
     background-color: ${TRANSPARENT};
     font: ${fontSize}px ${fontFamily};
     line-height: ${lineHeight}px;
-    border: none;
+    border: 1px dashed ${borderColor};
     outline: none;
     resize: none;
     padding: 0;
