@@ -54,12 +54,14 @@ function copy(object, deep) {
  * @return {Object}
  */
 function extend(source, target) {
-  each(
-    target,
-    function (value, key) {
-      source[ key ] = value
-    }
-  )
+  if (target) {
+    each(
+      target,
+      function (value, key) {
+        source[ key ] = value
+      }
+    )
+  }
   return source
 }
 
