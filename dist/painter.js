@@ -186,7 +186,9 @@ var Emitter = function () {
         cursorY,
         pageX,
         pageY,
-        inCanvas;
+        inCanvas,
+        width,
+        height;
 
     var getOffset = function (element) {
       if (element && element.tagName) {
@@ -262,8 +264,10 @@ var Emitter = function () {
           realY: realY,
           pageX: pageX,
           pageY: pageY,
+          inCanvas: inCanvas,
           target: event.target,
-          inCanvas: inCanvas
+          width: canvas.width,
+          height: canvas.height
         });
       }
     };
@@ -980,7 +984,9 @@ var Drawing = function (_State) {
         moving,
         saved,
         startX,
-        startY;
+        startY,
+        canvasWidth,
+        canvasHeight;
 
     // 提供两种清空画布的方式
     // 1. 还原鼠标按下时保存的画布
@@ -1010,6 +1016,8 @@ var Drawing = function (_State) {
         moving = 0;
         startX = event.x;
         startY = event.y;
+        canvasWidth = event.width;
+        canvasHeight = event.height;
         drawingShape = new me.createShape();
         if (drawingShape.startDrawing && drawingShape.startDrawing(painter, emitter, event) === false) {
           drawingShape = null;
@@ -1023,7 +1031,7 @@ var Drawing = function (_State) {
     me.mouseMoveHandler = function (event) {
       if (drawingShape && drawingShape.drawing) {
         moving++;
-        drawingShape.drawing(painter, startX, startY, event.x, event.y, restore, drawing);
+        drawingShape.drawing(painter, startX, startY, event.x, event.y, restore);
       }
     };
     me.mouseUpHandler = function () {
@@ -1528,9 +1536,6 @@ var Shape = function () {
 
   Shape.prototype.drawPath = function (painter) {
     painter.drawPoints(this.points);
-    if (this.autoClose) {
-      painter.close();
-    }
   };
 
   /**
@@ -2044,6 +2049,36 @@ var Doodle = function (_Shape) {
       x: endX,
       y: endY
     });
+  };
+
+  /**
+   * 绘制路径
+   *
+   * @param {Painter} painter
+   */
+
+
+  Doodle.prototype.drawPath = function (painter) {
+    painter.drawPoints(this.points);
+    if (this.autoClose) {
+      painter.close();
+    }
+  };
+
+  /**
+   * 填充
+   *
+   * @param {Painter} painter
+   */
+
+
+  Doodle.prototype.fill = function (painter) {
+    if (this.autoClose) {
+      painter.setFillStyle(this.fillStyle);
+      painter.begin();
+      this.drawPath(painter);
+      painter.fill();
+    }
   };
 
   return Doodle;

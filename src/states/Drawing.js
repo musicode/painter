@@ -12,7 +12,7 @@ export default class Drawing extends State {
 
     super(props, emitter)
 
-    let me = this, hoverShape, drawingShape, moving, saved, startX, startY
+    let me = this, hoverShape, drawingShape, moving, saved, startX, startY, canvasWidth, canvasHeight
 
     // 提供两种清空画布的方式
     // 1. 还原鼠标按下时保存的画布
@@ -45,6 +45,8 @@ export default class Drawing extends State {
         moving = 0
         startX = event.x
         startY = event.y
+        canvasWidth = event.width
+        canvasHeight = event.height
         drawingShape = new me.createShape()
         if (drawingShape.startDrawing
           && drawingShape.startDrawing(painter, emitter, event) === false
@@ -64,7 +66,7 @@ export default class Drawing extends State {
     me.mouseMoveHandler = function (event) {
       if (drawingShape && drawingShape.drawing) {
         moving++
-        drawingShape.drawing(painter, startX, startY, event.x, event.y, restore, drawing)
+        drawingShape.drawing(painter, startX, startY, event.x, event.y, restore)
       }
     }
     me.mouseUpHandler = function () {

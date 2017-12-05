@@ -101,9 +101,6 @@ export default class Shape {
    */
   drawPath(painter) {
     painter.drawPoints(this.points)
-    if (this.autoClose) {
-      painter.close()
-    }
   }
 
   /**

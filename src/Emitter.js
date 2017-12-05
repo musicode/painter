@@ -11,7 +11,7 @@ export default class Emitter {
 
     this.listeners = { }
 
-    let me = this, offsetX = 0, offsetY = 0, realX, realY, cursorX, cursorY, pageX, pageY, inCanvas
+    let me = this, offsetX = 0, offsetY = 0, realX, realY, cursorX, cursorY, pageX, pageY, inCanvas, width, height
 
     let getOffset = function (element) {
       if (element && element.tagName) {
@@ -94,8 +94,10 @@ export default class Emitter {
             realY: realY,
             pageX: pageX,
             pageY: pageY,
-            target: event.target,
             inCanvas,
+            target: event.target,
+            width: canvas.width,
+            height: canvas.height,
           }
         )
       }
