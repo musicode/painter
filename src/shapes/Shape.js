@@ -164,8 +164,7 @@ export default class Shape {
   }
 
   clone() {
-    return object.extend(
-      new this.constructor(),
+    return new this.constructor(
       object.copy(this, true)
     )
   }

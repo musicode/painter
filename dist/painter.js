@@ -1595,7 +1595,7 @@ var Shape = function () {
   };
 
   Shape.prototype.clone = function () {
-    return object.extend(new this.constructor(), object.copy(this, true));
+    return new this.constructor(object.copy(this, true));
   };
 
   Shape.prototype.toJSON = function (extra) {
