@@ -19,7 +19,7 @@ import getRectByPoints from '../function/getRectByPoints'
 export default class Shape {
 
   constructor(props) {
-    Object.assign(this, props)
+    object.extend(this, props)
   }
 
   /**
@@ -155,9 +155,8 @@ export default class Shape {
     )
   }
 
-  validate() {
-    const { points } = this
-    return points && points.length > 1
+  validate(painter, rect) {
+    return true
   }
 
   getRect() {
@@ -165,10 +164,25 @@ export default class Shape {
   }
 
   clone() {
-    return Object.assign(
+    return object.extend(
       new this.constructor(),
       object.copy(this, true)
     )
+  }
+
+  toJSON(extra) {
+    let json = {
+      strokeThickness: this.strokeThickness,
+      strokeStyle: this.strokeStyle,
+      fillStyle: this.fillStyle,
+    }
+    if (this.points) {
+      json.points = this.points
+    }
+    if (extra) {
+      object.extend(json, extra)
+    }
+    return json
   }
 
 }

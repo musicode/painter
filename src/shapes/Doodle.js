@@ -82,4 +82,10 @@ export default class Doodle extends Shape {
     }
   }
 
+  toJSON() {
+    return super.toJSON({
+      name: 'Doodle',
+    })
+  }
+
 }

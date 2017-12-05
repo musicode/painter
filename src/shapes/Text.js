@@ -166,7 +166,7 @@ export default class Text extends Shape {
   }
 
   fill(painter) {
-    const { x, y, fontSize, fontFamily, text, fontItalic, fontWeight } = this
+    const { x, y, text, fontSize, fontFamily, fontItalic, fontWeight } = this
     const dpr = constant.DEVICE_PIXEL_RATIO
 
     painter.setFillStyle(this.fillStyle)
@@ -186,7 +186,9 @@ export default class Text extends Shape {
   }
 
   stroke(painter) {
-    const { x, y, fontSize, fontFamily, text, strokeThickness, strokeStyle, fontItalic, fontWeight } = this
+
+    const { x, y, text, fontSize, fontFamily, fontItalic, fontWeight, strokeThickness, strokeStyle } = this
+
     const dpr = constant.DEVICE_PIXEL_RATIO
 
     painter.setLineWidth(strokeThickness)
@@ -263,6 +265,20 @@ export default class Text extends Shape {
       width: width,
       height: height,
     }
+  }
+
+  toJSON() {
+    return super.toJSON({
+      name: 'Text',
+      x: this.x,
+      y: this.y,
+      text: this.text,
+      fontSize: this.fontSize,
+      fontFamily: this.fontFamily,
+      fontItalic: this.fontItalic,
+      fontWeight: this.fontWeight,
+      lineHeight: this.lineHeight,
+    })
   }
 
 }

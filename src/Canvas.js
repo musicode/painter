@@ -168,7 +168,13 @@ export default class Canvas {
         canvas.style.cursor = ''
         const { shape } = event
         if (shape) {
-          if (shape.validate(painter)) {
+          const rect = {
+            x: 0,
+            y: 0,
+            width: canvas.width,
+            height: canvas.height,
+          }
+          if (shape.validate(painter, rect)) {
             me.addShape(shape, true)
           }
           me.refresh()
@@ -308,7 +314,7 @@ export default class Canvas {
         if (index >= 0) {
           let newShape = shape.clone()
           if (props) {
-            Object.assign(newShape, props)
+            object.extend(newShape, props)
           }
           allShapes[ index ] = shapes[ i ] = newShape
         }

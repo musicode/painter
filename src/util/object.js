@@ -46,9 +46,27 @@ function copy(object, deep) {
   return result
 }
 
+/**
+ * 扩展对象
+ *
+ * @param {Object} source
+ * @param {Object} target
+ * @return {Object}
+ */
+function extend(source, target) {
+  each(
+    target,
+    function (value, key) {
+      source[ key ] = value
+    }
+  )
+  return source
+}
+
 export default {
   each,
   copy,
+  extend,
 }
 
 

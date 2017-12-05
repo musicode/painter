@@ -10,6 +10,7 @@ import constant from '../constant'
 import updateRect from '../function/updateRect'
 import getUnionRect from '../function/getUnionRect'
 import array from '../util/array'
+import object from '../util/object'
 
 const LEFT_TOP = 0
 const CENTER_TOP = 1
@@ -216,7 +217,7 @@ export default class Active extends State {
           }
         )
       )
-      Object.assign(this, rect)
+      object.extend(this, rect)
     }
     else {
       this.width = this.height = 0

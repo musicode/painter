@@ -4,6 +4,64 @@
 	(global.Painter = factory());
 }(this, (function () { 'use strict';
 
+/**
+ * @file 数组操作
+ * @author musicode
+ */
+
+function each$1(array, callback, reversed) {
+  var length = array.length;
+
+  if (length) {
+    if (reversed) {
+      for (var i = length - 1; i >= 0; i--) {
+        if (callback(array[i], i) === false) {
+          break;
+        }
+      }
+    } else {
+      for (var _i = 0; _i < length; _i++) {
+        if (callback(array[_i], _i) === false) {
+          break;
+        }
+      }
+    }
+  }
+}
+
+function push(array, item) {
+  array.push(item);
+}
+
+function pop(array) {
+  array.pop();
+}
+
+function remove(array, item) {
+  var index = array.indexOf(item);
+  if (index >= 0) {
+    array.splice(index, 1);
+    return true;
+  }
+}
+
+function last(array) {
+  return array[array.length - 1];
+}
+
+function has(array, item) {
+  return array.indexOf(item) >= 0;
+}
+
+var array = {
+  each: each$1,
+  push: push,
+  pop: pop,
+  remove: remove,
+  last: last,
+  has: has
+};
+
 
 
 
@@ -67,6 +125,61 @@ var possibleConstructorReturn = function (self, call) {
 };
 
 /**
+ * 遍历对象
+ *
+ * @param {Object} object
+ * @param {Function} callback 返回 false 可停止遍历
+ */
+function each(object, callback) {
+  array.each(Object.keys(object), function (key) {
+    return callback(object[key], key);
+  });
+}
+
+/**
+ * 拷贝对象
+ *
+ * @param {*} object
+ * @param {?boolean} deep 是否需要深拷贝
+ * @return {*}
+ */
+function copy(object, deep) {
+  var result = object;
+  if (Array.isArray(object)) {
+    result = [];
+    array.each(object, function (item, index) {
+      result[index] = deep ? copy(item, deep) : item;
+    });
+  } else if (object && typeof object === 'object') {
+    result = {};
+    each(object, function (value, key) {
+      result[key] = deep ? copy(value, deep) : value;
+    });
+  }
+  return result;
+}
+
+/**
+ * 扩展对象
+ *
+ * @param {Object} source
+ * @param {Object} target
+ * @return {Object}
+ */
+function extend(source, target) {
+  each(target, function (value, key) {
+    source[key] = value;
+  });
+  return source;
+}
+
+var object = {
+  each: each,
+  copy: copy,
+  extend: extend
+};
+
+/**
  * @file 状态基类
  * @author musicode
  */
@@ -75,7 +188,7 @@ var State = function () {
   function State(props, emitter) {
     classCallCheck(this, State);
 
-    Object.assign(this, props);
+    object.extend(this, props);
     this.emitter = emitter;
     this.state = true;
   }
@@ -96,64 +209,6 @@ var State = function () {
 
   return State;
 }();
-
-/**
- * @file 数组操作
- * @author musicode
- */
-
-function each(array, callback, reversed) {
-  var length = array.length;
-
-  if (length) {
-    if (reversed) {
-      for (var i = length - 1; i >= 0; i--) {
-        if (callback(array[i], i) === false) {
-          break;
-        }
-      }
-    } else {
-      for (var _i = 0; _i < length; _i++) {
-        if (callback(array[_i], _i) === false) {
-          break;
-        }
-      }
-    }
-  }
-}
-
-function push(array, item) {
-  array.push(item);
-}
-
-function pop(array) {
-  array.pop();
-}
-
-function remove(array, item) {
-  var index = array.indexOf(item);
-  if (index >= 0) {
-    array.splice(index, 1);
-    return true;
-  }
-}
-
-function last(array) {
-  return array[array.length - 1];
-}
-
-function has(array, item) {
-  return array.indexOf(item) >= 0;
-}
-
-var array = {
-  each: each,
-  push: push,
-  pop: pop,
-  remove: remove,
-  last: last,
-  has: has
-};
 
 /**
  * @file 常量
@@ -186,9 +241,7 @@ var Emitter = function () {
         cursorY,
         pageX,
         pageY,
-        inCanvas,
-        width,
-        height;
+        inCanvas;
 
     var getOffset = function (element) {
       if (element && element.tagName) {
@@ -249,7 +302,7 @@ var Emitter = function () {
         // 给外部按钮一些优先执行的机会
         setTimeout(function () {
           me.fire(type, data);
-        }, 50);
+        }, 200);
       }
     };
 
@@ -264,10 +317,8 @@ var Emitter = function () {
           realY: realY,
           pageX: pageX,
           pageY: pageY,
-          inCanvas: inCanvas,
           target: event.target,
-          width: canvas.width,
-          height: canvas.height
+          inCanvas: inCanvas
         });
       }
     };
@@ -779,7 +830,7 @@ var Active = function (_State) {
       var rect = getUnionRect(shapes.map(function (shape) {
         return shape.getRect(painter);
       }));
-      Object.assign(this, rect);
+      object.extend(this, rect);
     } else {
       this.width = this.height = 0;
     }
@@ -984,9 +1035,7 @@ var Drawing = function (_State) {
         moving,
         saved,
         startX,
-        startY,
-        canvasWidth,
-        canvasHeight;
+        startY;
 
     // 提供两种清空画布的方式
     // 1. 还原鼠标按下时保存的画布
@@ -1016,8 +1065,6 @@ var Drawing = function (_State) {
         moving = 0;
         startX = event.x;
         startY = event.y;
-        canvasWidth = event.width;
-        canvasHeight = event.height;
         drawingShape = new me.createShape();
         if (drawingShape.startDrawing && drawingShape.startDrawing(painter, emitter, event) === false) {
           drawingShape = null;
@@ -1083,46 +1130,6 @@ var getInterRect = function (rect1, rect2) {
       height: bottom - top
     };
   }
-};
-
-/**
- * 遍历对象
- *
- * @param {Object} object
- * @param {Function} callback 返回 false 可停止遍历
- */
-function each$1(object, callback) {
-  array.each(Object.keys(object), function (key) {
-    return callback(object[key], key);
-  });
-}
-
-/**
- * 拷贝对象
- *
- * @param {*} object
- * @param {?boolean} deep 是否需要深拷贝
- * @return {*}
- */
-function copy(object, deep) {
-  var result = object;
-  if (Array.isArray(object)) {
-    result = [];
-    array.each(object, function (item, index) {
-      result[index] = deep ? copy(item, deep) : item;
-    });
-  } else if (object && typeof object === 'object') {
-    result = {};
-    each$1(object, function (value, key) {
-      result[key] = deep ? copy(value, deep) : value;
-    });
-  }
-  return result;
-}
-
-var object = {
-  each: each$1,
-  copy: copy
 };
 
 /**
@@ -1457,7 +1464,7 @@ var Shape = function () {
   function Shape(props) {
     classCallCheck(this, Shape);
 
-    Object.assign(this, props);
+    object.extend(this, props);
   }
 
   /**
@@ -1579,10 +1586,8 @@ var Shape = function () {
     });
   };
 
-  Shape.prototype.validate = function () {
-    var points = this.points;
-
-    return points && points.length > 1;
+  Shape.prototype.validate = function (painter, rect) {
+    return true;
   };
 
   Shape.prototype.getRect = function () {
@@ -1590,7 +1595,22 @@ var Shape = function () {
   };
 
   Shape.prototype.clone = function () {
-    return Object.assign(new this.constructor(), object.copy(this, true));
+    return object.extend(new this.constructor(), object.copy(this, true));
+  };
+
+  Shape.prototype.toJSON = function (extra) {
+    var json = {
+      strokeThickness: this.strokeThickness,
+      strokeStyle: this.strokeStyle,
+      fillStyle: this.fillStyle
+    };
+    if (this.points) {
+      json.points = this.points;
+    }
+    if (extra) {
+      object.extend(json, extra);
+    }
+    return json;
   };
 
   return Shape;
@@ -1864,9 +1884,18 @@ var Polygon = function (_Shape) {
     this.draw(painter);
   };
 
-  Polygon.prototype.validate = function () {
-    var rect = this.getRect();
-    return rect.width > 5 && rect.height > 5;
+  Polygon.prototype.validate = function (painter, rect) {
+    if (_Shape.prototype.validate.call(this, painter, rect)) {
+      rect = this.getRect();
+      return rect.width > 5 && rect.height > 5;
+    }
+  };
+
+  Polygon.prototype.toJSON = function () {
+    return _Shape.prototype.toJSON.call(this, {
+      name: 'Doodle',
+      autoClose: true
+    });
   };
 
   return Polygon;
@@ -1991,6 +2020,13 @@ var Arrow = function (_Polygon) {
     this.draw(painter);
   };
 
+  Arrow.prototype.toJSON = function () {
+    return _Polygon.prototype.toJSON.call(this, {
+      name: 'Doodle',
+      autoClose: true
+    });
+  };
+
   return Arrow;
 }(Polygon);
 
@@ -2081,6 +2117,12 @@ var Doodle = function (_Shape) {
     }
   };
 
+  Doodle.prototype.toJSON = function () {
+    return _Shape.prototype.toJSON.call(this, {
+      name: 'Doodle'
+    });
+  };
+
   return Doodle;
 }(Shape);
 
@@ -2146,8 +2188,17 @@ var Heart = function (_Polygon) {
     this.draw(painter);
   };
 
-  Heart.prototype.validate = function () {
-    return this.width > 5 && this.height > 5;
+  Heart.prototype.validate = function (painter, rect) {
+    if (_Polygon.prototype.validate.call(this, painter, rect)) {
+      return this.width > 5 && this.height > 5;
+    }
+  };
+
+  Heart.prototype.toJSON = function () {
+    return _Polygon.prototype.toJSON.call(this, {
+      name: 'Doodle',
+      autoClose: true
+    });
   };
 
   return Heart;
@@ -2195,10 +2246,18 @@ var Line = function (_Shape) {
     this.draw(painter);
   };
 
-  Line.prototype.validate = function () {
-    var points = this.points;
+  Line.prototype.validate = function (painter, rect) {
+    if (_Shape.prototype.validate.call(this, painter, rect)) {
+      var points = this.points;
 
-    return points && points.length === 2;
+      return points && points.length === 2;
+    }
+  };
+
+  Line.prototype.toJSON = function () {
+    return _Shape.prototype.toJSON.call(this, {
+      name: 'Doodle'
+    });
   };
 
   return Line;
@@ -2381,8 +2440,10 @@ var Oval = function (_Shape) {
     this.height = rect.height * data.height;
   };
 
-  Oval.prototype.validate = function () {
-    return this.width > 5 && this.height > 5;
+  Oval.prototype.validate = function (painter, rect) {
+    if (_Shape.prototype.validate.call(this, painter, rect)) {
+      return this.width > 5 && this.height > 5;
+    }
   };
 
   Oval.prototype.getRect = function () {
@@ -2397,6 +2458,16 @@ var Oval = function (_Shape) {
       width: width,
       height: height
     };
+  };
+
+  Oval.prototype.toJSON = function () {
+    return _Shape.prototype.toJSON.call(this, {
+      name: 'Oval',
+      x: this.x,
+      y: this.y,
+      width: this.width,
+      height: this.height
+    });
   };
 
   return Oval;
@@ -2474,6 +2545,13 @@ var Rect = function (_Polygon) {
     this.draw(painter);
   };
 
+  Rect.prototype.toJSON = function () {
+    return _Polygon.prototype.toJSON.call(this, {
+      name: 'Doodle',
+      autoClose: true
+    });
+  };
+
   return Rect;
 }(Polygon);
 
@@ -2525,9 +2603,18 @@ var Star = function (_Polygon) {
     this.draw(painter);
   };
 
-  Star.prototype.validate = function () {
-    var rect = this.getRect();
-    return rect.width > 5 && rect.height > 5;
+  Star.prototype.validate = function (painter, rect) {
+    if (_Polygon.prototype.validate.call(this, painter, rect)) {
+      rect = this.getRect();
+      return rect.width > 5 && rect.height > 5;
+    }
+  };
+
+  Star.prototype.toJSON = function () {
+    return _Polygon.prototype.toJSON.call(this, {
+      name: 'Doodle',
+      autoClose: true
+    });
   };
 
   return Star;
@@ -2684,9 +2771,9 @@ var Text = function (_Shape) {
   Text.prototype.fill = function (painter) {
     var x = this.x,
         y = this.y,
+        text = this.text,
         fontSize = this.fontSize,
         fontFamily = this.fontFamily,
-        text = this.text,
         fontItalic = this.fontItalic,
         fontWeight = this.fontWeight;
 
@@ -2703,13 +2790,14 @@ var Text = function (_Shape) {
   Text.prototype.stroke = function (painter) {
     var x = this.x,
         y = this.y,
+        text = this.text,
         fontSize = this.fontSize,
         fontFamily = this.fontFamily,
-        text = this.text,
-        strokeThickness = this.strokeThickness,
-        strokeStyle = this.strokeStyle,
         fontItalic = this.fontItalic,
-        fontWeight = this.fontWeight;
+        fontWeight = this.fontWeight,
+        strokeThickness = this.strokeThickness,
+        strokeStyle = this.strokeStyle;
+
 
     var dpr = constant.DEVICE_PIXEL_RATIO;
 
@@ -2780,6 +2868,20 @@ var Text = function (_Shape) {
       width: width,
       height: height
     };
+  };
+
+  Text.prototype.toJSON = function () {
+    return _Shape.prototype.toJSON.call(this, {
+      name: 'Text',
+      x: this.x,
+      y: this.y,
+      text: this.text,
+      fontSize: this.fontSize,
+      fontFamily: this.fontFamily,
+      fontItalic: this.fontItalic,
+      fontWeight: this.fontWeight,
+      lineHeight: this.lineHeight
+    });
   };
 
   return Text;
@@ -2880,7 +2982,13 @@ var Canvas = function () {
       var shape = event.shape;
 
       if (shape) {
-        if (shape.validate(painter)) {
+        var rect = {
+          x: 0,
+          y: 0,
+          width: canvas.width,
+          height: canvas.height
+        };
+        if (shape.validate(painter, rect)) {
           me.addShape(shape, true);
         }
         me.refresh();
@@ -3012,7 +3120,7 @@ var Canvas = function () {
       if (index >= 0) {
         var newShape = shape.clone();
         if (props) {
-          Object.assign(newShape, props);
+          object.extend(newShape, props);
         }
         allShapes[index] = shapes[i] = newShape;
       }

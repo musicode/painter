@@ -3,10 +3,12 @@
  * @author musicode
  */
 
+import object from '../util/object'
+
 export default class State {
 
   constructor(props, emitter) {
-    Object.assign(this, props)
+    object.extend(this, props)
     this.emitter = emitter
     this.state = true
   }
