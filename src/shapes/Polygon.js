@@ -42,19 +42,19 @@ export default class Polygon extends Shape {
    */
   stroke(painter) {
 
-    let { points, strokePosition, strokeThickness, strokeStyle } = this
+    let { points, strokePosition, lineWidth, strokeStyle } = this
 
-    strokeThickness *= constant.DEVICE_PIXEL_RATIO
+    lineWidth *= constant.DEVICE_PIXEL_RATIO
 
-    painter.setLineWidth(strokeThickness)
+    painter.setLineWidth(lineWidth)
     painter.setStrokeStyle(strokeStyle)
     painter.begin()
 
     if (strokePosition === constant.STROKE_POSITION_INSIDE) {
-      points = getOffsetPoints(points, strokeThickness / -2)
+      points = getOffsetPoints(points, lineWidth / -2)
     }
     else if (strokePosition === constant.STROKE_POSITION_OUTSIDE) {
-      points = getOffsetPoints(points, strokeThickness / 2)
+      points = getOffsetPoints(points, lineWidth / 2)
     }
 
     painter.drawPoints(points)

@@ -188,11 +188,11 @@ export default class Text extends Shape {
 
   stroke(painter) {
 
-    const { x, y, text, fontSize, fontFamily, fontItalic, fontWeight, strokeThickness, strokeStyle } = this
+    const { x, y, text, fontSize, fontFamily, fontItalic, fontWeight, lineWidth, strokeStyle } = this
 
     const dpr = constant.DEVICE_PIXEL_RATIO
 
-    painter.setLineWidth(strokeThickness)
+    painter.setLineWidth(lineWidth)
     painter.setStrokeStyle(strokeStyle)
     painter.setFont(
       fontSize * dpr,

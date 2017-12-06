@@ -37,7 +37,7 @@ export default class Oval extends Shape {
       height,
       strokeStyle,
       strokePosition,
-      strokeThickness,
+      lineWidth,
     } = this
 
     switch (strokePosition) {
@@ -49,8 +49,8 @@ export default class Oval extends Shape {
         painter.begin()
         painter.drawOval(x, y, width, height)
         if (painter.isPointInPath(x1, y1)) {
-          width -= strokeThickness
-          height -= strokeThickness
+          width -= lineWidth
+          height -= lineWidth
           painter.begin()
           painter.drawOval(x, y, width, height)
           return !painter.isPointInPath(x1, y1)
@@ -60,8 +60,8 @@ export default class Oval extends Shape {
         painter.begin()
         painter.drawOval(x, y, width, height)
         if (painter.isPointInPath(x1, y1)) {
-          width -= 2 * strokeThickness
-          height -= 2 * strokeThickness
+          width -= 2 * lineWidth
+          height -= 2 * lineWidth
           painter.begin()
           painter.drawOval(x, y, width, height)
           return !painter.isPointInPath(x1, y1)
@@ -95,26 +95,26 @@ export default class Oval extends Shape {
       height,
       strokeStyle,
       strokePosition,
-      strokeThickness,
+      lineWidth,
     } = this
 
     // Canvas 的描边机制是 center
 
     // inside
     if (strokePosition === constant.STROKE_POSITION_INSIDE) {
-      width -= strokeThickness
-      height -= strokeThickness
+      width -= lineWidth
+      height -= lineWidth
       if (width < 0 || height < 0) {
         return
       }
     }
     // outside
     else if (strokePosition === constant.STROKE_POSITION_OUTSIDE) {
-      width += strokeThickness
-      height += strokeThickness
+      width += lineWidth
+      height += lineWidth
     }
 
-    painter.setLineWidth(strokeThickness)
+    painter.setLineWidth(lineWidth)
     painter.setStrokeStyle(strokeStyle)
     painter.begin()
     painter.drawOval(x, y, width, height)

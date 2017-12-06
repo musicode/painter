@@ -62,7 +62,7 @@
                 描边粗细
             </label>
             <div class="col-sm-7">
-                <input name="strokeThickness" type="range" value="2" min="1" class="form-control">
+                <input name="lineWidth" type="range" value="2" min="1" class="form-control">
             </div>
         </div>
         <div class="form-group">
@@ -242,7 +242,7 @@
             var fillStyle = $('input[name="fillStyle"]').val();
             var strokeStyle = $('input[name="strokeStyle"]').val();
             var strokePosition = + $('input[name="strokePosition"]:checked').val();
-            var strokeThickness = + $('input[name="strokeThickness"]').val();
+            var lineWidth = + $('input[name="lineWidth"]').val();
             var shadowOffsetX = + $('input[name="shadowOffsetX"]').val().trim();
             var shadowOffsetY = + $('input[name="shadowOffsetY"]').val().trim();
             var shadowBlur = + $('input[name="shadowBlur"]').val().trim();
@@ -262,7 +262,7 @@
                 fillStyle: fillStyle,
                 strokeStyle: strokeStyle,
                 strokePosition: strokePosition,
-                strokeThickness: strokeThickness,
+                lineWidth: lineWidth,
                 shadowOffsetX: shadowOffsetX,
                 shadowOffsetY: shadowOffsetY,
                 shadowBlur: shadowBlur,
@@ -316,7 +316,7 @@
                   fillStyle: config.hasFill ? config.fillStyle : null,
                   strokeStyle: config.hasStroke ? config.strokeStyle : null,
                   strokePosition: config.strokePosition,
-                  strokeThickness: config.strokeThickness,
+                  lineWidth: config.lineWidth,
                   shadowOffsetX: config.shadowOffsetX,
                   shadowOffsetY: config.shadowOffsetY,
                   shadowBlur: config.shadowBlur,

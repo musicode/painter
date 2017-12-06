@@ -44,9 +44,9 @@ export default class Shape {
   }
 
   isPointInStroke(painter, x, y) {
-    let { strokeThickness, points } = this
-    if (strokeThickness < 5) {
-      strokeThickness = 5
+    let { lineWidth, points } = this
+    if (lineWidth < 5) {
+      lineWidth = 5
     }
 
     for (let i = 0, len = points.length; i < len; i++) {
@@ -56,7 +56,7 @@ export default class Shape {
             points[ i ].y,
             points[ i + 1 ].x,
             points[ i + 1 ].y,
-            strokeThickness * constant.DEVICE_PIXEL_RATIO, x, y
+            lineWidth * constant.DEVICE_PIXEL_RATIO, x, y
           )
       ) {
         return true
@@ -73,7 +73,7 @@ export default class Shape {
   draw(painter) {
 
     const needFill = this.fillStyle && this.fill
-    const needStroke = this.strokeThickness && this.strokeStyle
+    const needStroke = this.lineWidth && this.strokeStyle
 
     if (needFill || needStroke) {
 
@@ -109,7 +109,7 @@ export default class Shape {
    * @param {Painter} painter
    */
   stroke(painter) {
-    painter.setLineWidth(this.strokeThickness * constant.DEVICE_PIXEL_RATIO)
+    painter.setLineWidth(this.lineWidth * constant.DEVICE_PIXEL_RATIO)
     painter.setStrokeStyle(this.strokeStyle)
     painter.begin()
     this.drawPath(painter)
@@ -167,7 +167,7 @@ export default class Shape {
 
   toJSON(extra) {
     let json = {
-      strokeThickness: this.strokeThickness,
+      lineWidth: this.lineWidth,
       strokeStyle: this.strokeStyle,
       fillStyle: this.fillStyle,
     }

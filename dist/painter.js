@@ -1495,15 +1495,15 @@ var Shape = function () {
   };
 
   Shape.prototype.isPointInStroke = function (painter, x, y) {
-    var strokeThickness = this.strokeThickness,
+    var lineWidth = this.lineWidth,
         points = this.points;
 
-    if (strokeThickness < 5) {
-      strokeThickness = 5;
+    if (lineWidth < 5) {
+      lineWidth = 5;
     }
 
     for (var i = 0, len = points.length; i < len; i++) {
-      if (points[i + 1] && containLine(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y, strokeThickness * constant.DEVICE_PIXEL_RATIO, x, y)) {
+      if (points[i + 1] && containLine(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y, lineWidth * constant.DEVICE_PIXEL_RATIO, x, y)) {
         return true;
       }
     }
@@ -1520,7 +1520,7 @@ var Shape = function () {
   Shape.prototype.draw = function (painter) {
 
     var needFill = this.fillStyle && this.fill;
-    var needStroke = this.strokeThickness && this.strokeStyle;
+    var needStroke = this.lineWidth && this.strokeStyle;
 
     if (needFill || needStroke) {
 
@@ -1558,7 +1558,7 @@ var Shape = function () {
 
 
   Shape.prototype.stroke = function (painter) {
-    painter.setLineWidth(this.strokeThickness * constant.DEVICE_PIXEL_RATIO);
+    painter.setLineWidth(this.lineWidth * constant.DEVICE_PIXEL_RATIO);
     painter.setStrokeStyle(this.strokeStyle);
     painter.begin();
     this.drawPath(painter);
@@ -1601,7 +1601,7 @@ var Shape = function () {
 
   Shape.prototype.toJSON = function (extra) {
     var json = {
-      strokeThickness: this.strokeThickness,
+      lineWidth: this.lineWidth,
       strokeStyle: this.strokeStyle,
       fillStyle: this.fillStyle
     };
@@ -1806,20 +1806,20 @@ var Polygon = function (_Shape) {
   Polygon.prototype.stroke = function (painter) {
     var points = this.points,
         strokePosition = this.strokePosition,
-        strokeThickness = this.strokeThickness,
+        lineWidth = this.lineWidth,
         strokeStyle = this.strokeStyle;
 
 
-    strokeThickness *= constant.DEVICE_PIXEL_RATIO;
+    lineWidth *= constant.DEVICE_PIXEL_RATIO;
 
-    painter.setLineWidth(strokeThickness);
+    painter.setLineWidth(lineWidth);
     painter.setStrokeStyle(strokeStyle);
     painter.begin();
 
     if (strokePosition === constant.STROKE_POSITION_INSIDE) {
-      points = getOffsetPoints(points, strokeThickness / -2);
+      points = getOffsetPoints(points, lineWidth / -2);
     } else if (strokePosition === constant.STROKE_POSITION_OUTSIDE) {
-      points = getOffsetPoints(points, strokeThickness / 2);
+      points = getOffsetPoints(points, lineWidth / 2);
     }
 
     painter.drawPoints(points);
@@ -2069,7 +2069,7 @@ var Doodle = function (_Shape) {
 
     if (points.length === 1) {
       this.setLineStyle(painter);
-      painter.setLineWidth(this.strokeThickness * constant.DEVICE_PIXEL_RATIO);
+      painter.setLineWidth(this.lineWidth * constant.DEVICE_PIXEL_RATIO);
       painter.setStrokeStyle(this.strokeStyle);
     }
 
@@ -2294,7 +2294,7 @@ var Oval = function (_Shape) {
         height = this.height,
         strokeStyle = this.strokeStyle,
         strokePosition = this.strokePosition,
-        strokeThickness = this.strokeThickness;
+        lineWidth = this.lineWidth;
 
 
     switch (strokePosition) {
@@ -2306,8 +2306,8 @@ var Oval = function (_Shape) {
         painter.begin();
         painter.drawOval(x, y, width, height);
         if (painter.isPointInPath(x1, y1)) {
-          width -= strokeThickness;
-          height -= strokeThickness;
+          width -= lineWidth;
+          height -= lineWidth;
           painter.begin();
           painter.drawOval(x, y, width, height);
           return !painter.isPointInPath(x1, y1);
@@ -2317,8 +2317,8 @@ var Oval = function (_Shape) {
         painter.begin();
         painter.drawOval(x, y, width, height);
         if (painter.isPointInPath(x1, y1)) {
-          width -= 2 * strokeThickness;
-          height -= 2 * strokeThickness;
+          width -= 2 * lineWidth;
+          height -= 2 * lineWidth;
           painter.begin();
           painter.drawOval(x, y, width, height);
           return !painter.isPointInPath(x1, y1);
@@ -2354,26 +2354,26 @@ var Oval = function (_Shape) {
         height = this.height,
         strokeStyle = this.strokeStyle,
         strokePosition = this.strokePosition,
-        strokeThickness = this.strokeThickness;
+        lineWidth = this.lineWidth;
 
     // Canvas 的描边机制是 center
 
     // inside
 
     if (strokePosition === constant.STROKE_POSITION_INSIDE) {
-      width -= strokeThickness;
-      height -= strokeThickness;
+      width -= lineWidth;
+      height -= lineWidth;
       if (width < 0 || height < 0) {
         return;
       }
     }
     // outside
     else if (strokePosition === constant.STROKE_POSITION_OUTSIDE) {
-        width += strokeThickness;
-        height += strokeThickness;
+        width += lineWidth;
+        height += lineWidth;
       }
 
-    painter.setLineWidth(strokeThickness);
+    painter.setLineWidth(lineWidth);
     painter.setStrokeStyle(strokeStyle);
     painter.begin();
     painter.drawOval(x, y, width, height);
@@ -2783,13 +2783,13 @@ var Text = function (_Shape) {
         fontFamily = this.fontFamily,
         fontItalic = this.fontItalic,
         fontWeight = this.fontWeight,
-        strokeThickness = this.strokeThickness,
+        lineWidth = this.lineWidth,
         strokeStyle = this.strokeStyle;
 
 
     var dpr = constant.DEVICE_PIXEL_RATIO;
 
-    painter.setLineWidth(strokeThickness);
+    painter.setLineWidth(lineWidth);
     painter.setStrokeStyle(strokeStyle);
     painter.setFont(fontSize * dpr, fontFamily, fontItalic, fontWeight);
     var height = fontSize * dpr + fontSize * dpr / 6;
