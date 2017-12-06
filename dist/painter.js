@@ -294,6 +294,7 @@ var Emitter = function () {
         pageX = touches[0].pageX;
         pageY = touches[0].pageY;
         updatePosition(event);
+        return true;
       }
     };
 
@@ -310,7 +311,9 @@ var Emitter = function () {
 
     var onMouseDown = function (event) {
       if (!me.disabled) {
-        updatePositionByTouchEvent(event);
+        if (!updatePositionByTouchEvent(event)) {
+          updatePosition(event);
+        }
 
         fireEvent(Emitter.MOUSE_DOWN, {
           x: cursorX,
