@@ -3157,6 +3157,8 @@ var Canvas = function () {
     };
 
     if (Shape) {
+      destroy(INDEX_ACTIVE);
+      destroy(INDEX_HOVER);
       createSelection(new Drawing({
         createShape: function createShape() {
           return new Shape(config);

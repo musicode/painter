@@ -366,6 +366,8 @@ export default class Canvas {
     }
 
     if (Shape) {
+      destroy(INDEX_ACTIVE)
+      destroy(INDEX_HOVER)
       createSelection(
         new Drawing(
           {
