@@ -40,8 +40,7 @@ export default class Rect extends Polygon {
 
   toJSON() {
     return super.toJSON({
-      name: 'Doodle',
-      autoClose: true,
+      name: 'Polygon',
     })
   }
 

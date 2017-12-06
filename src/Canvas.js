@@ -525,6 +525,14 @@ export default class Canvas {
     }
   }
 
+  /**
+   * 销毁
+   */
+  dispose() {
+    this.painter =
+    this.emitter = null
+  }
+
 }
 
 import Arrow from './shapes/Arrow'

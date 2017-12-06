@@ -124,8 +124,7 @@ export default class Arrow extends Polygon {
 
   toJSON() {
     return super.toJSON({
-      name: 'Doodle',
-      autoClose: true,
+      name: 'Polygon',
     })
   }
 

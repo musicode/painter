@@ -119,17 +119,14 @@ export default class Polygon extends Shape {
 
   }
 
-  validate(painter, rect) {
-    if (super.validate(painter, rect)) {
-      rect = this.getRect()
-      return rect.width > 5 && rect.height > 5
-    }
+  validate() {
+    const rect = this.getRect()
+    return rect.width > 5 && rect.height > 5
   }
 
   toJSON() {
     return super.toJSON({
-      name: 'Doodle',
-      autoClose: true,
+      name: 'Polygon',
     })
   }
 

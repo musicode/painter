@@ -36,11 +36,9 @@ export default class Line extends Shape {
 
   }
 
-  validate(painter, rect) {
-    if (super.validate(painter, rect)) {
-      const { points } = this
-      return points && points.length === 2
-    }
+  validate() {
+    const { points } = this
+    return points && points.length === 2
   }
 
   toJSON() {

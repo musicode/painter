@@ -52,16 +52,13 @@ export default class Heart extends Polygon {
 
   }
 
-  validate(painter, rect) {
-    if (super.validate(painter, rect)) {
-      return this.width > 5 && this.height > 5
-    }
+  validate() {
+    return this.width > 5 && this.height > 5
   }
 
   toJSON() {
     return super.toJSON({
-      name: 'Doodle',
-      autoClose: true,
+      name: 'Polygon',
     })
   }
 

@@ -1588,10 +1588,6 @@ var Shape = function () {
     });
   };
 
-  Shape.prototype.validate = function (painter, rect) {
-    return true;
-  };
-
   Shape.prototype.getRect = function () {
     return getRectByPoints(this.points);
   };
@@ -1886,17 +1882,14 @@ var Polygon = function (_Shape) {
     this.draw(painter);
   };
 
-  Polygon.prototype.validate = function (painter, rect) {
-    if (_Shape.prototype.validate.call(this, painter, rect)) {
-      rect = this.getRect();
-      return rect.width > 5 && rect.height > 5;
-    }
+  Polygon.prototype.validate = function () {
+    var rect = this.getRect();
+    return rect.width > 5 && rect.height > 5;
   };
 
   Polygon.prototype.toJSON = function () {
     return _Shape.prototype.toJSON.call(this, {
-      name: 'Doodle',
-      autoClose: true
+      name: 'Polygon'
     });
   };
 
@@ -2024,8 +2017,7 @@ var Arrow = function (_Polygon) {
 
   Arrow.prototype.toJSON = function () {
     return _Polygon.prototype.toJSON.call(this, {
-      name: 'Doodle',
-      autoClose: true
+      name: 'Polygon'
     });
   };
 
@@ -2190,16 +2182,13 @@ var Heart = function (_Polygon) {
     this.draw(painter);
   };
 
-  Heart.prototype.validate = function (painter, rect) {
-    if (_Polygon.prototype.validate.call(this, painter, rect)) {
-      return this.width > 5 && this.height > 5;
-    }
+  Heart.prototype.validate = function () {
+    return this.width > 5 && this.height > 5;
   };
 
   Heart.prototype.toJSON = function () {
     return _Polygon.prototype.toJSON.call(this, {
-      name: 'Doodle',
-      autoClose: true
+      name: 'Polygon'
     });
   };
 
@@ -2248,12 +2237,10 @@ var Line = function (_Shape) {
     this.draw(painter);
   };
 
-  Line.prototype.validate = function (painter, rect) {
-    if (_Shape.prototype.validate.call(this, painter, rect)) {
-      var points = this.points;
+  Line.prototype.validate = function () {
+    var points = this.points;
 
-      return points && points.length === 2;
-    }
+    return points && points.length === 2;
   };
 
   Line.prototype.toJSON = function () {
@@ -2442,10 +2429,8 @@ var Oval = function (_Shape) {
     this.height = rect.height * data.height;
   };
 
-  Oval.prototype.validate = function (painter, rect) {
-    if (_Shape.prototype.validate.call(this, painter, rect)) {
-      return this.width > 5 && this.height > 5;
-    }
+  Oval.prototype.validate = function () {
+    return this.width > 5 && this.height > 5;
   };
 
   Oval.prototype.getRect = function () {
@@ -2549,8 +2534,7 @@ var Rect = function (_Polygon) {
 
   Rect.prototype.toJSON = function () {
     return _Polygon.prototype.toJSON.call(this, {
-      name: 'Doodle',
-      autoClose: true
+      name: 'Polygon'
     });
   };
 
@@ -2605,17 +2589,14 @@ var Star = function (_Polygon) {
     this.draw(painter);
   };
 
-  Star.prototype.validate = function (painter, rect) {
-    if (_Polygon.prototype.validate.call(this, painter, rect)) {
-      rect = this.getRect();
-      return rect.width > 5 && rect.height > 5;
-    }
+  Star.prototype.validate = function () {
+    var rect = this.getRect();
+    return rect.width > 5 && rect.height > 5;
   };
 
   Star.prototype.toJSON = function () {
     return _Polygon.prototype.toJSON.call(this, {
-      name: 'Doodle',
-      autoClose: true
+      name: 'Polygon'
     });
   };
 
@@ -3318,6 +3299,15 @@ var Canvas = function () {
       this.refresh();
       return true;
     }
+  };
+
+  /**
+   * 销毁
+   */
+
+
+  Canvas.prototype.dispose = function () {
+    this.painter = this.emitter = null;
   };
 
   return Canvas;

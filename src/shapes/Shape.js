@@ -155,10 +155,6 @@ export default class Shape {
     )
   }
 
-  validate(painter, rect) {
-    return true
-  }
-
   getRect() {
     return getRectByPoints(this.points)
   }

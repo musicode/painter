@@ -171,10 +171,8 @@ export default class Oval extends Shape {
     this.height = rect.height * data.height
   }
 
-  validate(painter, rect) {
-    if (super.validate(painter, rect)) {
-      return this.width > 5 && this.height > 5
-    }
+  validate() {
+    return this.width > 5 && this.height > 5
   }
 
   getRect() {
