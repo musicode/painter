@@ -243,7 +243,8 @@ var Emitter = function () {
         cursorY,
         pageX,
         pageY,
-        inCanvas;
+        inCanvas,
+        drawing;
 
     var getOffset = function (element) {
       if (element && element.tagName) {
@@ -274,17 +275,7 @@ var Emitter = function () {
 
       var target = event.target;
 
-      if (target.tagName === 'CANVAS') {
-        if (target !== canvas) {
-          inCanvas = false;
-          return;
-        }
-      } else {
-        inCanvas == false;
-        return;
-      }
-
-      inCanvas = true;
+      inCanvas = target.tagName === 'CANVAS' && target === canvas;
     };
 
     var updatePositionByTouchEvent = function (event) {
@@ -311,10 +302,10 @@ var Emitter = function () {
 
     var onMouseDown = function (event) {
       if (!me.disabled) {
-        if (!updatePositionByTouchEvent(event)) {
-          updatePosition(event);
+        updatePositionByTouchEvent(event);
+        if (inCanvas) {
+          drawing = true;
         }
-
         fireEvent(Emitter.MOUSE_DOWN, {
           x: cursorX,
           y: cursorY,
@@ -330,6 +321,9 @@ var Emitter = function () {
 
     var onMouseUp = function () {
       if (!me.disabled) {
+        if (drawing) {
+          drawing = false;
+        }
         fireEvent(Emitter.MOUSE_UP, {
           x: cursorX,
           y: cursorY,
@@ -357,7 +351,7 @@ var Emitter = function () {
           realY: realY,
           pageX: pageX,
           pageY: pageY,
-          inCanvas: inCanvas
+          inCanvas: drawing ? true : inCanvas
         });
       }
     });
@@ -376,7 +370,7 @@ var Emitter = function () {
             realY: realY,
             pageX: pageX,
             pageY: pageY,
-            inCanvas: inCanvas
+            inCanvas: drawing ? true : inCanvas
           });
         }
       });
@@ -386,9 +380,11 @@ var Emitter = function () {
           fireEvent(Emitter.MOUSE_MOVE, {
             x: cursorX,
             y: cursorY,
+            realX: realX,
+            realY: realY,
             pageX: pageX,
             pageY: pageY,
-            inCanvas: inCanvas
+            inCanvas: drawing ? true : inCanvas
           });
           // 在 canvas 画画时禁止页面滚动
           event.preventDefault();
@@ -491,6 +487,7 @@ Emitter.SHAPE_UPDATE = 'shape_update';
 var SHORTCUT = {
   8: Emitter.ACTIVE_SHAPE_DELETE,
   13: Emitter.ACTIVE_SHAPE_ENTER,
+  36: Emitter.CLEAR,
   46: Emitter.ACTIVE_SHAPE_DELETE
 };
 
@@ -1119,6 +1116,16 @@ var Drawing = function (_State) {
 }(State);
 
 /**
+ * @file 创建随机数
+ * @author musicode
+ */
+var randomInt = function (length) {
+  var min = Math.pow(10, length - 1);
+  var max = Math.pow(10, length) - 1;
+  return min + Math.floor(Math.random() * (max - min));
+};
+
+/**
  * @file 两个矩形的交集
  * @author musicode
  */
@@ -1465,6 +1472,10 @@ var getRectByPoints = function (points) {
  * 对于特殊图形，可通过子类改写某些方法实现
  */
 
+function isValidStyle(style) {
+  return style && style !== 'transparent';
+}
+
 var Shape = function () {
   function Shape(props) {
     classCallCheck(this, Shape);
@@ -1485,7 +1496,7 @@ var Shape = function () {
   Shape.prototype.isPointInPath = function (painter, x, y) {
 
     if (containRect(this.getRect(painter), x, y)) {
-      if (this.fillStyle && this.isPointInFill) {
+      if (isValidStyle(this.fillStyle) && this.isPointInFill) {
         return this.isPointInFill(painter, x, y);
       }
       return this.isPointInStroke(painter, x, y);
@@ -1519,8 +1530,8 @@ var Shape = function () {
 
   Shape.prototype.draw = function (painter) {
 
-    var needFill = this.fillStyle && this.fill;
-    var needStroke = this.lineWidth && this.strokeStyle;
+    var needFill = this.fill && isValidStyle(this.fillStyle);
+    var needStroke = this.lineWidth && isValidStyle(this.strokeStyle);
 
     if (needFill || needStroke) {
 
@@ -1601,6 +1612,7 @@ var Shape = function () {
 
   Shape.prototype.toJSON = function (extra) {
     var json = {
+      number: this.number,
       lineWidth: this.lineWidth,
       strokeStyle: this.strokeStyle,
       fillStyle: this.fillStyle
@@ -2944,7 +2956,9 @@ var Canvas = function () {
 
         hoverShape = newHoverShape;
       }
-    }).on(Emitter.HOVER_SHAPE_CHANGE, refresh).on(Emitter.ACTIVE_SHAPE_CHANGE, refresh).on(Emitter.ACTIVE_RECT_CHANGE_END, refresh).on(Emitter.ACTIVE_RECT_CHANGE_START, function () {
+    }).on(Emitter.HOVER_SHAPE_CHANGE, refresh).on(Emitter.ACTIVE_SHAPE_CHANGE, refresh).on(Emitter.ACTIVE_RECT_CHANGE_END, refresh).on(Emitter.CLEAR, function () {
+      me.clear();
+    }).on(Emitter.ACTIVE_RECT_CHANGE_START, function () {
       var state = me.states[INDEX_ACTIVE],
           shapes = state.getShapes();
       if (shapes.length) {
@@ -2976,7 +2990,7 @@ var Canvas = function () {
           width: canvas.width,
           height: canvas.height
         };
-        if (shape.validate(painter, rect)) {
+        if (!shape.validate || shape.validate(painter, rect)) {
           me.addShape(shape, true);
         }
         me.refresh();
@@ -3070,16 +3084,32 @@ var Canvas = function () {
 
 
   Canvas.prototype.removeShapes = function (shapes, silent) {
+
     var me = this;
+
     me.save();
+
+    var numbers = {};
     array.each(shapes, function (shape) {
-      array.remove(me.getShapes(), shape);
+      numbers[shape.number] = 1;
     });
+
+    var removedShapes = [];
+
+    var allShapes = me.getShapes();
+    array.each(allShapes, function (shape, index) {
+      if (numbers[shape.number]) {
+        allShapes.splice(index, 1);
+        removedShapes.push(shape);
+      }
+    }, true);
+
     if (!silent) {
       me.refresh();
     }
+
     me.emitter.fire(Emitter.SHAPE_REMOVE, {
-      shapes: shapes
+      shapes: removedShapes
     });
   };
 
@@ -3161,7 +3191,9 @@ var Canvas = function () {
       destroy(INDEX_HOVER);
       createSelection(new Drawing({
         createShape: function createShape() {
-          return new Shape(config);
+          var shape = new Shape(config);
+          shape.number = '' + randomInt(10);
+          return shape;
         }
       }, emitter, painter));
     } else if (Shape !== false) {
@@ -3216,9 +3248,7 @@ var Canvas = function () {
 
 
   Canvas.prototype.clear = function () {
-    this.getShapes().length = 0;
-    this.painter.clear();
-    this.emitter.fire(Emitter.CLEAR);
+    this.removeShapes(this.getShapes());
   };
 
   /**

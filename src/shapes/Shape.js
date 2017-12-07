@@ -16,6 +16,10 @@ import getRectByPoints from '../function/getRectByPoints'
  * 对于特殊图形，可通过子类改写某些方法实现
  */
 
+function isValidStyle(style) {
+  return style && style !== 'transparent'
+}
+
 export default class Shape {
 
   constructor(props) {
@@ -33,7 +37,7 @@ export default class Shape {
   isPointInPath(painter, x, y) {
 
     if (containRect(this.getRect(painter), x, y)) {
-      if (this.fillStyle && this.isPointInFill) {
+      if (isValidStyle(this.fillStyle) && this.isPointInFill) {
         return this.isPointInFill(painter, x, y)
       }
       return this.isPointInStroke(painter, x, y)
@@ -72,8 +76,8 @@ export default class Shape {
    */
   draw(painter) {
 
-    const needFill = this.fillStyle && this.fill
-    const needStroke = this.lineWidth && this.strokeStyle
+    const needFill = this.fill && isValidStyle(this.fillStyle)
+    const needStroke = this.lineWidth && isValidStyle(this.strokeStyle)
 
     if (needFill || needStroke) {
 
@@ -167,6 +171,7 @@ export default class Shape {
 
   toJSON(extra) {
     let json = {
+      number: this.number,
       lineWidth: this.lineWidth,
       strokeStyle: this.strokeStyle,
       fillStyle: this.fillStyle,

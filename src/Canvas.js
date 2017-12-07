@@ -8,6 +8,7 @@ import Active from './states/Active'
 import Hover from './states/Hover'
 import Drawing from './states/Drawing'
 
+import randomInt from './function/randomInt'
 import getInterRect from './function/getInterRect'
 import array from './util/array'
 import object from './util/object'
@@ -110,6 +111,12 @@ export default class Canvas {
       refresh
     )
     .on(
+      Emitter.CLEAR,
+      function () {
+        me.clear()
+      }
+    )
+    .on(
       Emitter.ACTIVE_RECT_CHANGE_START,
       function () {
         let state = me.states[ INDEX_ACTIVE ], shapes = state.getShapes()
@@ -174,7 +181,7 @@ export default class Canvas {
             width: canvas.width,
             height: canvas.height,
           }
-          if (shape.validate(painter, rect)) {
+          if (!shape.validate || shape.validate(painter, rect)) {
             me.addShape(shape, true)
           }
           me.refresh()
@@ -270,21 +277,42 @@ export default class Canvas {
    * @param {boolean} silent
    */
   removeShapes(shapes, silent) {
+
     let me = this
+
     me.save()
+
+    let numbers = { }
     array.each(
       shapes,
       function (shape) {
-        array.remove(me.getShapes(), shape)
+        numbers[ shape.number ] = 1
       }
     )
+
+
+    let removedShapes = [ ]
+
+    let allShapes = me.getShapes()
+    array.each(
+      allShapes,
+      function (shape, index) {
+        if (numbers[ shape.number ]) {
+          allShapes.splice(index, 1)
+          removedShapes.push(shape)
+        }
+      },
+      true
+    )
+
     if (!silent) {
       me.refresh()
     }
+
     me.emitter.fire(
       Emitter.SHAPE_REMOVE,
       {
-        shapes: shapes
+        shapes: removedShapes
       }
     )
   }
@@ -306,7 +334,7 @@ export default class Canvas {
   editShapes(shapes, props, silent) {
     let me = this
     me.save()
-    const allShapes = me.getShapes()
+    let allShapes = me.getShapes()
     array.each(
       shapes,
       function (shape, i) {
@@ -372,7 +400,9 @@ export default class Canvas {
         new Drawing(
           {
             createShape: function () {
-              return new Shape(config)
+              const shape = new Shape(config)
+              shape.number = '' + randomInt(10)
+              return shape
             }
           },
           emitter,
@@ -437,10 +467,8 @@ export default class Canvas {
    * 清空画布
    */
   clear() {
-    this.getShapes().length = 0
-    this.painter.clear()
-    this.emitter.fire(
-      Emitter.CLEAR
+    this.removeShapes(
+      this.getShapes()
     )
   }
 

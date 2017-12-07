@@ -11,7 +11,7 @@ export default class Emitter {
 
     this.listeners = { }
 
-    let me = this, offsetX = 0, offsetY = 0, realX, realY, cursorX, cursorY, pageX, pageY, inCanvas
+    let me = this, offsetX = 0, offsetY = 0, realX, realY, cursorX, cursorY, pageX, pageY, inCanvas, drawing
 
     let getOffset = function (element) {
       if (element && element.tagName) {
@@ -42,18 +42,7 @@ export default class Emitter {
       cursorY = realY * constant.DEVICE_PIXEL_RATIO
 
       let { target } = event
-      if (target.tagName === 'CANVAS') {
-        if (target !== canvas) {
-          inCanvas = false
-          return
-        }
-      }
-      else {
-        inCanvas == false
-        return
-      }
-
-      inCanvas = true
+      inCanvas = target.tagName === 'CANVAS' && target === canvas
 
     }
 
@@ -84,10 +73,10 @@ export default class Emitter {
 
     let onMouseDown = function (event) {
       if (!me.disabled) {
-        if (!updatePositionByTouchEvent(event)) {
-          updatePosition(event)
+        updatePositionByTouchEvent(event)
+        if (inCanvas) {
+          drawing = true
         }
-
         fireEvent(
           Emitter.MOUSE_DOWN,
           {
@@ -106,6 +95,9 @@ export default class Emitter {
 
     let onMouseUp = function () {
       if (!me.disabled) {
+        if (drawing) {
+          drawing = false
+        }
         fireEvent(
           Emitter.MOUSE_UP,
           {
@@ -143,7 +135,7 @@ export default class Emitter {
               realY: realY,
               pageX: pageX,
               pageY: pageY,
-              inCanvas,
+              inCanvas: drawing ? true : inCanvas,
             }
           )
         }
@@ -174,7 +166,7 @@ export default class Emitter {
                 realY: realY,
                 pageX: pageX,
                 pageY: pageY,
-                inCanvas,
+                inCanvas: drawing ? true : inCanvas,
               }
             )
           }
@@ -190,9 +182,11 @@ export default class Emitter {
               {
                 x: cursorX,
                 y: cursorY,
+                realX: realX,
+                realY: realY,
                 pageX: pageX,
                 pageY: pageY,
-                inCanvas,
+                inCanvas: drawing ? true : inCanvas,
               }
             )
             // 在 canvas 画画时禁止页面滚动
@@ -307,6 +301,7 @@ Emitter.SHAPE_UPDATE = 'shape_update'
 const SHORTCUT = {
   8: Emitter.ACTIVE_SHAPE_DELETE,
   13: Emitter.ACTIVE_SHAPE_ENTER,
+  36: Emitter.CLEAR,
   46: Emitter.ACTIVE_SHAPE_DELETE
 }
 
