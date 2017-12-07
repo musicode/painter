@@ -57,17 +57,8 @@ export default class Emitter {
     }
 
     let fireEvent = function (type, data) {
-      if (inCanvas) {
+      if (drawing || inCanvas) {
         me.fire(type, data)
-      }
-      else {
-        // 给外部按钮一些优先执行的机会
-        setTimeout(
-          function () {
-            me.fire(type, data)
-          },
-          200
-        )
       }
     }
 
@@ -95,9 +86,6 @@ export default class Emitter {
 
     let onMouseUp = function () {
       if (!me.disabled) {
-        if (drawing) {
-          drawing = false
-        }
         fireEvent(
           Emitter.MOUSE_UP,
           {
@@ -110,6 +98,9 @@ export default class Emitter {
             inCanvas
           }
         )
+        if (drawing) {
+          drawing = false
+        }
       }
     }
 

@@ -290,13 +290,8 @@ var Emitter = function () {
     };
 
     var fireEvent = function (type, data) {
-      if (inCanvas) {
+      if (drawing || inCanvas) {
         me.fire(type, data);
-      } else {
-        // 给外部按钮一些优先执行的机会
-        setTimeout(function () {
-          me.fire(type, data);
-        }, 200);
       }
     };
 
@@ -321,9 +316,6 @@ var Emitter = function () {
 
     var onMouseUp = function () {
       if (!me.disabled) {
-        if (drawing) {
-          drawing = false;
-        }
         fireEvent(Emitter.MOUSE_UP, {
           x: cursorX,
           y: cursorY,
@@ -333,6 +325,9 @@ var Emitter = function () {
           pageY: pageY,
           inCanvas: inCanvas
         });
+        if (drawing) {
+          drawing = false;
+        }
       }
     };
 
