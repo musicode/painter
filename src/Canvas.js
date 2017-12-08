@@ -10,6 +10,7 @@ import Drawing from './states/Drawing'
 
 import randomInt from './function/randomInt'
 import getInterRect from './function/getInterRect'
+import convertDimension from './function/convertDimension'
 import array from './util/array'
 import object from './util/object'
 
@@ -36,7 +37,7 @@ export default class Canvas {
 
     me.states = [ ]
 
-    me.histories = [ [ ] ]
+    me.histories = [ { } ]
     me.historyIndex = 0
     me.maxHistorySize = maxHistorySize
 
@@ -204,19 +205,40 @@ export default class Canvas {
   /**
    * 调整画布大小
    *
-   * @param {number} width
-   * @param {number} height
+   * @param {number} newWidth
+   * @param {number} newHeight
    * @param {boolean} silent
    */
-  resize(width, height, silent) {
+  resize(newWidth, newHeight, silent) {
 
-    const { element } = this
+    const { element, histories, historyIndex } = this
 
-    element.style.width = width + 'px'
-    element.style.height = height + 'px'
+    element.style.width = newWidth + 'px'
+    element.style.height = newHeight + 'px'
 
-    this.element.width = width * constant.DEVICE_PIXEL_RATIO
-    this.element.height = height * constant.DEVICE_PIXEL_RATIO
+    newWidth *= constant.DEVICE_PIXEL_RATIO
+    newHeight *= constant.DEVICE_PIXEL_RATIO
+
+    element.width = newWidth
+    element.height = newHeight
+
+    if (histories) {
+      const history = histories[ historyIndex ]
+
+      if (history.shapes && history.width && history.height) {
+        convertDimension(
+          history.shapes,
+          history.width,
+          history.height,
+          newWidth,
+          newHeight
+        )
+      }
+
+      history.width = newWidth
+      history.height = newHeight
+
+    }
 
     if (!silent) {
       this.refresh()
@@ -242,11 +264,14 @@ export default class Canvas {
    */
   addShapes(shapes, silent) {
     let me = this
+    let allShapes = me.getShapes()
+
     me.save()
+
     array.each(
       shapes,
       function (shape) {
-        array.push(me.getShapes(), shape)
+        array.push(allShapes, shape)
       }
     )
     if (!silent) {
@@ -360,7 +385,8 @@ export default class Canvas {
   }
 
   getShapes() {
-    return this.histories[ this.historyIndex ]
+    const history = this.histories[ this.historyIndex ]
+    return history.shapes || (history.shapes = [ ])
   }
 
   drawing(Shape) {
@@ -478,22 +504,28 @@ export default class Canvas {
   save() {
     // 当前 shapes 必须存在于 histories
     // 否则无法进行 prev 和 next
-    const { histories, maxHistorySize, historyIndex } = this
+    const { element, histories, maxHistorySize, historyIndex } = this
 
     if (histories.length > historyIndex + 1) {
       histories.splice(historyIndex + 1)
     }
 
-    const shapes = this.getShapes()
+    const newHistory = {
+      width: element.width,
+      height: element.height,
+      shapes: this.getShapes(),
+    }
     if (histories.length > 0) {
       histories.splice(
-        histories.length - 1, 0, object.copy(shapes)
+        histories.length,
+        0,
+        newHistory
       )
     }
     else {
       histories.push(
-        object.copy(shapes),
-        shapes
+        object.copy(newHistory),
+        newHistory
       )
     }
 
@@ -525,7 +557,16 @@ export default class Canvas {
       this.emitter.fire(
         Emitter.RESET
       )
-      this.refresh()
+      const { width, height, shapes } = this.histories[ this.historyIndex ]
+      if (shapes) {
+        convertDimension(
+          shapes,
+          width,
+          height,
+          this.element.width,
+          this.element.height
+        )
+      }
       return true
     }
   }
@@ -550,6 +591,16 @@ export default class Canvas {
       this.emitter.fire(
         Emitter.RESET
       )
+      const { width, height, shapes } = this.histories[ this.historyIndex ]
+      if (shapes) {
+        convertDimension(
+          shapes,
+          width,
+          height,
+          this.element.width,
+          this.element.height
+        )
+      }
       this.refresh()
       return true
     }

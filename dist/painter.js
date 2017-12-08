@@ -1140,6 +1140,48 @@ var getInterRect = function (rect1, rect2) {
 };
 
 /**
+ * @file 转换图形尺寸
+ * @author musicode
+ */
+
+var convertDimension = function (shapes, oldWidth, oldHeight, newWidth, newHeight) {
+
+  var widthRatio = newWidth / oldWidth;
+  var heightRatio = newHeight / oldHeight;
+
+  if (widthRatio !== 1 || heightRatio !== 1) {
+    array.each(shapes, function (shape) {
+      if (widthRatio !== 1) {
+        if (shape.x) {
+          shape.x *= widthRatio;
+        }
+        if (shape.width) {
+          shape.width *= widthRatio;
+        }
+      }
+      if (heightRatio !== 1) {
+        if (shape.y) {
+          shape.y *= heightRatio;
+        }
+        if (shape.height) {
+          shape.height *= heightRatio;
+        }
+      }
+      if (shape.points) {
+        array.each(shape.points, function (point) {
+          if (point.x) {
+            point.x *= widthRatio;
+          }
+          if (point.y) {
+            point.y *= heightRatio;
+          }
+        });
+      }
+    });
+  }
+};
+
+/**
  * @file 画笔
  * @author musicode
  */
@@ -2660,12 +2702,12 @@ function createTextarea(painter, emitter, event, shape) {
       fontItalic = shape.fontItalic,
       fontWeight = shape.fontWeight,
       caretColor = shape.caretColor,
-      borderColor = shape.borderColor;
+      fillStyle = shape.fillStyle;
 
   var parentElement = document.body;
 
   textarea = document.createElement('textarea');
-  var style = '\n    position: absolute;\n    left: ' + event.pageX + 'px;\n    top: ' + event.pageY + 'px;\n    color: ' + TRANSPARENT + ';\n    caret-color: ' + caretColor + ';\n    background-color: ' + TRANSPARENT + ';\n    font: ' + fontSize + 'px ' + fontFamily + ';\n    line-height: ' + lineHeight + 'px;\n    border: 1px dashed ' + borderColor + ';\n    outline: none;\n    resize: none;\n    padding: 0;\n    overflow: hidden;\n    width: ' + fontSize + 'px;\n    wrap: physical;\n  ';
+  var style = '\n    position: absolute;\n    left: ' + event.pageX + 'px;\n    top: ' + event.pageY + 'px;\n    color: ' + TRANSPARENT + ';\n    caret-color: ' + caretColor + ';\n    background-color: ' + TRANSPARENT + ';\n    font: ' + fontSize + 'px ' + fontFamily + ';\n    line-height: ' + lineHeight + 'px;\n    border: 1px dashed ' + fillStyle + ';\n    outline: none;\n    resize: none;\n    padding: 0;\n    overflow: hidden;\n    width: ' + fontSize + 'px;\n    wrap: physical;\n  ';
   if (fontItalic) {
     style += 'font-style: italic;';
   }
@@ -2677,6 +2719,7 @@ function createTextarea(painter, emitter, event, shape) {
 
   setTimeout(function () {
     textarea.focus();
+    textarea.style.height = getTextSize(shape, 'W').height + 'px';
   });
 
   var savedData = painter.save();
@@ -2695,6 +2738,7 @@ function createTextarea(painter, emitter, event, shape) {
     var textareaSize = getTextSize(shape, textarea.value);
 
     textarea.style.width = textareaSize.width / constant.DEVICE_PIXEL_RATIO + fontSize + 'px';
+    textarea.style.height = getTextSize(shape, textarea.value).height + 'px';
 
     if (!textareaIsInCanvas(painter, textareaSize.width + x, textareaSize.height + y)) {
       textarea.maxLength = length;
@@ -2909,7 +2953,7 @@ var Canvas = function () {
 
     me.states = [];
 
-    me.histories = [[]];
+    me.histories = [{}];
     me.historyIndex = 0;
     me.maxHistorySize = maxHistorySize;
 
@@ -3003,21 +3047,37 @@ var Canvas = function () {
   /**
    * 调整画布大小
    *
-   * @param {number} width
-   * @param {number} height
+   * @param {number} newWidth
+   * @param {number} newHeight
    * @param {boolean} silent
    */
 
 
-  Canvas.prototype.resize = function (width, height, silent) {
-    var element = this.element;
+  Canvas.prototype.resize = function (newWidth, newHeight, silent) {
+    var element = this.element,
+        histories = this.histories,
+        historyIndex = this.historyIndex;
 
 
-    element.style.width = width + 'px';
-    element.style.height = height + 'px';
+    element.style.width = newWidth + 'px';
+    element.style.height = newHeight + 'px';
 
-    this.element.width = width * constant.DEVICE_PIXEL_RATIO;
-    this.element.height = height * constant.DEVICE_PIXEL_RATIO;
+    newWidth *= constant.DEVICE_PIXEL_RATIO;
+    newHeight *= constant.DEVICE_PIXEL_RATIO;
+
+    element.width = newWidth;
+    element.height = newHeight;
+
+    if (histories) {
+      var history = histories[historyIndex];
+
+      if (history.shapes && history.width && history.height) {
+        convertDimension(history.shapes, history.width, history.height, newWidth, newHeight);
+      }
+
+      history.width = newWidth;
+      history.height = newHeight;
+    }
 
     if (!silent) {
       this.refresh();
@@ -3046,9 +3106,12 @@ var Canvas = function () {
 
   Canvas.prototype.addShapes = function (shapes, silent) {
     var me = this;
+    var allShapes = me.getShapes();
+
     me.save();
+
     array.each(shapes, function (shape) {
-      array.push(me.getShapes(), shape);
+      array.push(allShapes, shape);
     });
     if (!silent) {
       me.refresh();
@@ -3147,7 +3210,8 @@ var Canvas = function () {
   };
 
   Canvas.prototype.getShapes = function () {
-    return this.histories[this.historyIndex];
+    var history = this.histories[this.historyIndex];
+    return history.shapes || (history.shapes = []);
   };
 
   Canvas.prototype.drawing = function (Shape) {
@@ -3254,7 +3318,8 @@ var Canvas = function () {
   Canvas.prototype.save = function () {
     // 当前 shapes 必须存在于 histories
     // 否则无法进行 prev 和 next
-    var histories = this.histories,
+    var element = this.element,
+        histories = this.histories,
         maxHistorySize = this.maxHistorySize,
         historyIndex = this.historyIndex;
 
@@ -3263,11 +3328,15 @@ var Canvas = function () {
       histories.splice(historyIndex + 1);
     }
 
-    var shapes = this.getShapes();
+    var newHistory = {
+      width: element.width,
+      height: element.height,
+      shapes: this.getShapes()
+    };
     if (histories.length > 0) {
-      histories.splice(histories.length - 1, 0, object.copy(shapes));
+      histories.splice(histories.length, 0, newHistory);
     } else {
-      histories.push(object.copy(shapes), shapes);
+      histories.push(object.copy(newHistory), newHistory);
     }
 
     if (histories.length > maxHistorySize + 1) {
@@ -3299,7 +3368,14 @@ var Canvas = function () {
     if (this.hasPrev()) {
       this.historyIndex--;
       this.emitter.fire(Emitter.RESET);
-      this.refresh();
+      var _histories$historyInd = this.histories[this.historyIndex],
+          width = _histories$historyInd.width,
+          height = _histories$historyInd.height,
+          shapes = _histories$historyInd.shapes;
+
+      if (shapes) {
+        convertDimension(shapes, width, height, this.element.width, this.element.height);
+      }
       return true;
     }
   };
@@ -3326,6 +3402,14 @@ var Canvas = function () {
     if (this.hasNext()) {
       this.historyIndex++;
       this.emitter.fire(Emitter.RESET);
+      var _histories$historyInd2 = this.histories[this.historyIndex],
+          width = _histories$historyInd2.width,
+          height = _histories$historyInd2.height,
+          shapes = _histories$historyInd2.shapes;
+
+      if (shapes) {
+        convertDimension(shapes, width, height, this.element.width, this.element.height);
+      }
       this.refresh();
       return true;
     }

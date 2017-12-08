@@ -45,7 +45,7 @@ function getTextSize (shape, text) {
 
 function createTextarea(painter, emitter, event, shape) {
 
-  const { fontSize, fontFamily, lineHeight, x, y, fontItalic, fontWeight, caretColor, borderColor } = shape
+  const { fontSize, fontFamily, lineHeight, x, y, fontItalic, fontWeight, caretColor, fillStyle } = shape
   const parentElement = document.body
 
   textarea = document.createElement('textarea')
@@ -58,7 +58,7 @@ function createTextarea(painter, emitter, event, shape) {
     background-color: ${TRANSPARENT};
     font: ${fontSize}px ${fontFamily};
     line-height: ${lineHeight}px;
-    border: 1px dashed ${borderColor};
+    border: 1px dashed ${fillStyle};
     outline: none;
     resize: none;
     padding: 0;
@@ -78,6 +78,7 @@ function createTextarea(painter, emitter, event, shape) {
   setTimeout(
     function () {
       textarea.focus()
+      textarea.style.height = getTextSize(shape, 'W').height + 'px'
     }
   )
 
@@ -97,6 +98,7 @@ function createTextarea(painter, emitter, event, shape) {
     let textareaSize = getTextSize(shape, textarea.value)
 
     textarea.style.width = (textareaSize.width / constant.DEVICE_PIXEL_RATIO + fontSize) + 'px'
+    textarea.style.height = getTextSize(shape, textarea.value).height + 'px'
 
     if (!textareaIsInCanvas(painter, textareaSize.width + x, textareaSize.height + y)) {
       textarea.maxLength = length
