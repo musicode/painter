@@ -254,11 +254,13 @@ var Emitter = function () {
       }
     };
 
-    if (container) {
-      getOffset(container);
-    } else {
-      getOffset(canvas);
-    }
+    var updateOffset = function () {
+      if (container) {
+        getOffset(container);
+      } else {
+        getOffset(canvas);
+      }
+    };
 
     var updatePosition = function (event) {
 
@@ -295,11 +297,14 @@ var Emitter = function () {
       }
     };
 
+    updateOffset();
+
     var onMouseDown = function (event) {
       if (!me.disabled) {
         updatePositionByTouchEvent(event);
         if (inCanvas) {
           drawing = true;
+          updateOffset();
         }
         fireEvent(Emitter.MOUSE_DOWN, {
           x: cursorX,

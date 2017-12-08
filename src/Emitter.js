@@ -21,11 +21,13 @@ export default class Emitter {
       }
     }
 
-    if (container) {
-      getOffset(container)
-    }
-    else {
-      getOffset(canvas)
+    let updateOffset = function () {
+      if (container) {
+        getOffset(container)
+      }
+      else {
+        getOffset(canvas)
+      }
     }
 
     let updatePosition = function (event) {
@@ -62,11 +64,14 @@ export default class Emitter {
       }
     }
 
+    updateOffset()
+
     let onMouseDown = function (event) {
       if (!me.disabled) {
         updatePositionByTouchEvent(event)
         if (inCanvas) {
           drawing = true
+          updateOffset()
         }
         fireEvent(
           Emitter.MOUSE_DOWN,
