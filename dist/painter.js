@@ -235,8 +235,8 @@ var Emitter = function () {
     this.listeners = {};
 
     var me = this,
-        offsetX = 0,
-        offsetY = 0,
+        offsetX,
+        offsetY,
         realX,
         realY,
         cursorX,
@@ -255,6 +255,8 @@ var Emitter = function () {
     };
 
     var updateOffset = function () {
+      offsetX = 0;
+      offsetY = 0;
       if (container) {
         getOffset(container);
       } else {
