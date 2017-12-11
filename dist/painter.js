@@ -232,6 +232,7 @@ var Emitter = function () {
     classCallCheck(this, Emitter);
 
 
+    this.canvas = canvas;
     this.listeners = {};
 
     var me = this,
@@ -338,9 +339,22 @@ var Emitter = function () {
       }
     };
 
-    document.addEventListener('mousedown', onMouseDown);
+    var documentEvents = {},
+        canvasEvents = {};
 
-    document.addEventListener('mousemove', function (event) {
+    var addDocumentEvent = function (type, listener) {
+      document.addEventListener(type, listener);
+      documentEvents[type] = listener;
+    };
+
+    var addCanvasEvent = function (type, listener) {
+      canvas.addEventListener(type, listener);
+      canvasEvents[type] = listener;
+    };
+
+    addDocumentEvent('mousedown', onMouseDown);
+
+    addDocumentEvent('mousemove', function (event) {
       if (!me.disabled) {
         pageX = event.pageX;
         pageY = event.pageY;
@@ -358,11 +372,11 @@ var Emitter = function () {
       }
     });
 
-    document.addEventListener('mouseup', onMouseUp);
+    addDocumentEvent('mouseup', onMouseUp);
 
     if ('ontouchstart' in document) {
-      document.addEventListener('touchstart', onMouseDown);
-      document.addEventListener('touchmove', function (event) {
+      addDocumentEvent('touchstart', onMouseDown);
+      addDocumentEvent('touchmove', function (event) {
         if (!me.disabled) {
           updatePositionByTouchEvent(event);
           fireEvent(Emitter.MOUSE_MOVE, {
@@ -376,7 +390,7 @@ var Emitter = function () {
           });
         }
       });
-      canvas.addEventListener('touchmove', function (event) {
+      addCanvasEvent('touchmove', function (event) {
         if (!me.disabled) {
           updatePositionByTouchEvent(event);
           fireEvent(Emitter.MOUSE_MOVE, {
@@ -393,11 +407,11 @@ var Emitter = function () {
           event.stopPropagation();
         }
       });
-      document.addEventListener('touchend', onMouseUp);
+      addDocumentEvent('touchend', onMouseUp);
     }
 
     if (SHORTCUT) {
-      document.addEventListener('keyup', function (event) {
+      addDocumentEvent('keyup', function (event) {
         if (!me.disabled) {
           var name = SHORTCUT[event.keyCode];
           if (name) {
@@ -406,6 +420,9 @@ var Emitter = function () {
         }
       });
     }
+
+    this.documentEvents = documentEvents;
+    this.canvasEvents = canvasEvents;
   }
 
   Emitter.prototype.fire = function (type, data) {
@@ -435,6 +452,19 @@ var Emitter = function () {
       array.remove(list, listener);
     }
     return this;
+  };
+
+  Emitter.prototype.dispose = function () {
+    var canvas = this.canvas,
+        documentEvents = this.documentEvents,
+        canvasEvents = this.canvasEvents;
+
+    object.each(documentEvents, function (listener, type) {
+      document.removeEventListener(type, listener);
+    });
+    object.each(canvasEvents, function (listener, type) {
+      canvas.removeEventListener(type, listener);
+    });
   };
 
   return Emitter;
@@ -3428,7 +3458,7 @@ var Canvas = function () {
 
 
   Canvas.prototype.dispose = function () {
-    this.painter = this.emitter = null;
+    this.emitter.dispose();
   };
 
   return Canvas;

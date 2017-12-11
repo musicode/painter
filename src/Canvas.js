@@ -610,8 +610,7 @@ export default class Canvas {
    * 销毁
    */
   dispose() {
-    this.painter =
-    this.emitter = null
+    this.emitter.dispose()
   }
 
 }

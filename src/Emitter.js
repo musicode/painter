@@ -3,12 +3,14 @@
  * @author musicode
  */
 import array from './util/array'
+import object from './util/object'
 import constant from './constant'
 
 export default class Emitter {
 
   constructor(canvas, container) {
 
+    this.canvas = canvas
     this.listeners = { }
 
     let me = this, offsetX, offsetY, realX, realY, cursorX, cursorY, pageX, pageY, inCanvas, drawing
@@ -111,12 +113,25 @@ export default class Emitter {
       }
     }
 
-    document.addEventListener(
+    let documentEvents = { }, canvasEvents = { }
+
+    let addDocumentEvent = function (type, listener) {
+      document.addEventListener(type, listener)
+      documentEvents[ type ] = listener
+    }
+
+    let addCanvasEvent = function (type, listener) {
+      canvas.addEventListener(type, listener)
+      canvasEvents[ type ] = listener
+    }
+
+
+    addDocumentEvent(
       'mousedown',
       onMouseDown
     )
 
-    document.addEventListener(
+    addDocumentEvent(
       'mousemove',
       function (event) {
         if (!me.disabled) {
@@ -140,17 +155,17 @@ export default class Emitter {
       }
     )
 
-    document.addEventListener(
+    addDocumentEvent(
       'mouseup',
       onMouseUp
     )
 
     if ('ontouchstart' in document) {
-      document.addEventListener(
+      addDocumentEvent(
         'touchstart',
         onMouseDown
       )
-      document.addEventListener(
+      addDocumentEvent(
         'touchmove',
         function (event) {
           if (!me.disabled) {
@@ -170,7 +185,7 @@ export default class Emitter {
           }
         }
       )
-      canvas.addEventListener(
+      addCanvasEvent(
         'touchmove',
         function (event) {
           if (!me.disabled) {
@@ -193,14 +208,14 @@ export default class Emitter {
           }
         }
       )
-      document.addEventListener(
+      addDocumentEvent(
         'touchend',
         onMouseUp
       )
     }
 
     if (SHORTCUT) {
-      document.addEventListener(
+      addDocumentEvent(
         'keyup',
         function (event) {
           if (!me.disabled) {
@@ -212,6 +227,9 @@ export default class Emitter {
         }
       )
     }
+
+    this.documentEvents = documentEvents
+    this.canvasEvents = canvasEvents
 
   }
 
@@ -246,6 +264,22 @@ export default class Emitter {
       array.remove(list, listener)
     }
     return this
+  }
+
+  dispose() {
+    let { canvas, documentEvents, canvasEvents } = this
+    object.each(
+      documentEvents,
+      function (listener, type) {
+        document.removeEventListener(type, listener)
+      }
+    )
+    object.each(
+      canvasEvents,
+      function (listener, type) {
+        canvas.removeEventListener(type, listener)
+      }
+    )
   }
 
 }
