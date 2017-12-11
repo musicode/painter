@@ -6,6 +6,10 @@ import array from './util/array'
 import object from './util/object'
 import constant from './constant'
 
+function getStyle(element, name) {
+  return window.getComputedStyle(element, null).getPropertyValue(name)
+}
+
 export default class Emitter {
 
   constructor(canvas, container) {
@@ -19,7 +23,9 @@ export default class Emitter {
       if (element && element.tagName) {
         offsetX += element.offsetLeft
         offsetY += element.offsetTop
-        getOffset(element.parentNode)
+        if (getStyle(element, 'position') !== 'fixed') {
+            getOffset(element.parentNode)
+        }
       }
     }
 

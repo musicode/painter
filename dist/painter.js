@@ -227,6 +227,10 @@ var constant = {
  * @file 事件处理
  * @author musicode
  */
+function getStyle(element, name) {
+  return window.getComputedStyle(element, null).getPropertyValue(name);
+}
+
 var Emitter = function () {
   function Emitter(canvas, container) {
     classCallCheck(this, Emitter);
@@ -251,7 +255,9 @@ var Emitter = function () {
       if (element && element.tagName) {
         offsetX += element.offsetLeft;
         offsetY += element.offsetTop;
-        getOffset(element.parentNode);
+        if (getStyle(element, 'position') !== 'fixed') {
+          getOffset(element.parentNode);
+        }
       }
     };
 
