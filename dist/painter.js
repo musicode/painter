@@ -2748,9 +2748,10 @@ function createTextarea(painter, emitter, event, shape) {
       fillStyle = shape.fillStyle;
 
   var parentElement = document.body;
+  var fontHeight = getTextSize(shape, 'W').height;
 
   textarea = document.createElement('textarea');
-  var style = '\n    position: absolute;\n    left: ' + event.pageX + 'px;\n    top: ' + event.pageY + 'px;\n    color: ' + TRANSPARENT + ';\n    caret-color: ' + caretColor + ';\n    background-color: ' + TRANSPARENT + ';\n    font: ' + fontSize + 'px ' + fontFamily + ';\n    line-height: ' + lineHeight + 'px;\n    border: 1px dashed ' + fillStyle + ';\n    outline: none;\n    resize: none;\n    padding: 0;\n    overflow: hidden;\n    width: ' + fontSize + 'px;\n    wrap: physical;\n  ';
+  var style = '\n    position: absolute;\n    left: ' + event.pageX + 'px;\n    top: ' + event.pageY + 'px;\n    color: ' + TRANSPARENT + ';\n    caret-color: ' + caretColor + ';\n    background-color: ' + TRANSPARENT + ';\n    font: ' + fontSize + 'px ' + fontFamily + ';\n    line-height: ' + lineHeight + 'px;\n    border: 1px dashed ' + fillStyle + ';\n    outline: none;\n    resize: none;\n    padding: 0;\n    overflow: hidden;\n    width: ' + fontSize + 'px;\n    height: ' + fontHeight + ' + \'px\';\n    wrap: physical;\n  ';
   if (fontItalic) {
     style += 'font-style: italic;';
   }
@@ -2762,7 +2763,6 @@ function createTextarea(painter, emitter, event, shape) {
 
   setTimeout(function () {
     textarea.focus();
-    textarea.style.height = getTextSize(shape, 'W').height + 'px';
   });
 
   var savedData = painter.save();
@@ -2775,13 +2775,13 @@ function createTextarea(painter, emitter, event, shape) {
     shape.draw(painter);
   };
 
-  textarea.addEventListener('input', function () {
+  var onInput = function () {
 
     var length = textarea.value.length;
     var textareaSize = getTextSize(shape, textarea.value);
 
     textarea.style.width = textareaSize.width / constant.DEVICE_PIXEL_RATIO + fontSize + 'px';
-    textarea.style.height = getTextSize(shape, textarea.value).height + 'px';
+    textarea.style.height = textareaSize.height + 'px';
 
     if (!textareaIsInCanvas(painter, textareaSize.width + x, textareaSize.height + y)) {
       textarea.maxLength = length;
@@ -2792,26 +2792,37 @@ function createTextarea(painter, emitter, event, shape) {
     if (!locked) {
       updateCanvas();
     }
-  });
+  };
 
-  textarea.addEventListener('compositionstart', function () {
+  var onCompositionStart = function () {
     locked = true;
-  });
+  };
 
-  textarea.addEventListener('compositionend', function (e) {
+  var onCompositionEnd = function () {
     locked = false;
     updateCanvas();
-  });
+  };
 
-  textarea.addEventListener('blur', function () {
+  var onBlur = function () {
+
+    textarea.removeEventListener('input', onInput);
+    textarea.removeEventListener('compositionstart', onCompositionStart);
+    textarea.removeEventListener('compositionend', onCompositionEnd);
+    textarea.removeEventListener('blur', onBlur);
 
     parentElement.removeChild(textarea);
 
     p = textarea = null;
+
     emitter.fire(Emitter.SHAPE_DRAWING_END, {
       shape: shape
     });
-  });
+  };
+
+  textarea.addEventListener('input', onInput);
+  textarea.addEventListener('compositionstart', onCompositionStart);
+  textarea.addEventListener('compositionend', onCompositionEnd);
+  textarea.addEventListener('blur', onBlur);
 
   emitter.fire(Emitter.SHAPE_DRAWING_START, {
     cursor: 'text'
@@ -2941,15 +2952,11 @@ var Text = function (_Shape) {
     var row = text.split('\n');
     painter.setFont(fontSize * constant.DEVICE_PIXEL_RATIO, fontFamily, fontItalic, fontWeight);
 
-    var width = getTextSize(this, text).width;
-    var height = getTextSize(this, text).height;
+    var rect = getTextSize(this, text);
+    rect.x = x;
+    rect.y = y;
 
-    return {
-      x: x,
-      y: y,
-      width: width,
-      height: height
-    };
+    return rect;
   };
 
   Text.prototype.toJSON = function () {

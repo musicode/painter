@@ -13,7 +13,7 @@ const TRANSPARENT = 'rgba(0,0,0,0)'
 let textarea
 let p
 
-function getTextSize (shape, text) {
+function getTextSize(shape, text) {
 
   const { fontSize, fontFamily, lineHeight, x, y } = shape
   const parentElement = document.body
@@ -47,6 +47,7 @@ function createTextarea(painter, emitter, event, shape) {
 
   const { fontSize, fontFamily, lineHeight, x, y, fontItalic, fontWeight, caretColor, fillStyle } = shape
   const parentElement = document.body
+  const fontHeight = getTextSize(shape, 'W').height
 
   textarea = document.createElement('textarea')
   let style = `
@@ -64,6 +65,7 @@ function createTextarea(painter, emitter, event, shape) {
     padding: 0;
     overflow: hidden;
     width: ${fontSize}px;
+    height: ${fontHeight} + 'px';
     wrap: physical;
   `
   if (fontItalic) {
@@ -78,7 +80,6 @@ function createTextarea(painter, emitter, event, shape) {
   setTimeout(
     function () {
       textarea.focus()
-      textarea.style.height = getTextSize(shape, 'W').height + 'px'
     }
   )
 
@@ -92,13 +93,13 @@ function createTextarea(painter, emitter, event, shape) {
     shape.draw(painter)
   }
 
-  textarea.addEventListener('input', function () {
+  let onInput = function () {
 
     let length = textarea.value.length
     let textareaSize = getTextSize(shape, textarea.value)
 
     textarea.style.width = (textareaSize.width / constant.DEVICE_PIXEL_RATIO + fontSize) + 'px'
-    textarea.style.height = getTextSize(shape, textarea.value).height + 'px'
+    textarea.style.height = textareaSize.height + 'px'
 
     if (!textareaIsInCanvas(painter, textareaSize.width + x, textareaSize.height + y)) {
       textarea.maxLength = length
@@ -109,29 +110,41 @@ function createTextarea(painter, emitter, event, shape) {
     if (!locked) {
       updateCanvas()
     }
-  })
+  }
 
-  textarea.addEventListener('compositionstart', function () {
+  let onCompositionStart = function () {
     locked = true
-  })
+  }
 
-  textarea.addEventListener('compositionend', function (e) {
+  let onCompositionEnd = function () {
     locked = false
     updateCanvas()
-  })
+  }
 
-  textarea.addEventListener('blur', function () {
+  let onBlur = function () {
+
+    textarea.removeEventListener('input', onInput)
+    textarea.removeEventListener('compositionstart', onCompositionStart)
+    textarea.removeEventListener('compositionend', onCompositionEnd)
+    textarea.removeEventListener('blur', onBlur)
 
     parentElement.removeChild(textarea)
 
     p = textarea = null
+
     emitter.fire(
       Emitter.SHAPE_DRAWING_END,
       {
         shape,
       }
     )
-  })
+
+  }
+
+  textarea.addEventListener('input', onInput)
+  textarea.addEventListener('compositionstart', onCompositionStart)
+  textarea.addEventListener('compositionend', onCompositionEnd)
+  textarea.addEventListener('blur', onBlur)
 
   emitter.fire(
     Emitter.SHAPE_DRAWING_START,
@@ -259,15 +272,12 @@ export default class Text extends Shape {
       fontWeight
     )
 
-    let width = getTextSize(this, text).width
-    let height = getTextSize(this, text).height
+    let rect = getTextSize(this, text)
+    rect.x = x
+    rect.y = y
 
-    return {
-      x: x,
-      y: y,
-      width: width,
-      height: height,
-    }
+    return rect
+
   }
 
   toJSON() {
