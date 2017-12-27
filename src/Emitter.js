@@ -17,37 +17,42 @@ export default class Emitter {
     this.canvas = canvas
     this.listeners = { }
 
-    let me = this, offsetX, offsetY, realX, realY, cursorX, cursorY, pageX, pageY, inCanvas, drawing
+    let me = this, canvasOffset = { }, containerOffset = { },
+    realX, realY, cursorX, cursorY, pageX, pageY, inCanvas, drawing
 
-    let getOffset = function (element) {
+    let getOffset = function (element, offset) {
       if (element && element.tagName) {
-        offsetX += element.offsetLeft
-        offsetY += element.offsetTop
+        offset.x += element.offsetLeft
+        offset.y += element.offsetTop
         if (getStyle(element, 'position') !== 'fixed') {
-            getOffset(element.parentNode)
+            getOffset(element.parentNode, offset)
         }
       }
     }
 
     let updateOffset = function () {
-      offsetX = 0
-      offsetY = 0
+
+      canvasOffset.x =
+      canvasOffset.y =
+      containerOffset.x =
+      containerOffset.y = 0
+
+      getOffset(canvas, canvasOffset)
+
       if (container) {
-        getOffset(container)
+        getOffset(container, containerOffset)
       }
-      else {
-        getOffset(canvas)
-      }
+
     }
 
     let updatePosition = function (event) {
 
-      realX = pageX - offsetX
-      realY = pageY - offsetY
+      realX = pageX - canvasOffset.x
+      realY = pageY - canvasOffset.y
 
       if (container) {
-        realX += container.scrollLeft
-        realY += container.scrollTop
+        realX = pageX + container.scrollLeft
+        realY = pageY + container.scrollTop
       }
 
       cursorX = realX * constant.DEVICE_PIXEL_RATIO

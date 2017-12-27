@@ -240,8 +240,8 @@ var Emitter = function () {
     this.listeners = {};
 
     var me = this,
-        offsetX,
-        offsetY,
+        canvasOffset = {},
+        containerOffset = {},
         realX,
         realY,
         cursorX,
@@ -251,34 +251,35 @@ var Emitter = function () {
         inCanvas,
         drawing;
 
-    var getOffset = function (element) {
+    var getOffset = function (element, offset) {
       if (element && element.tagName) {
-        offsetX += element.offsetLeft;
-        offsetY += element.offsetTop;
+        offset.x += element.offsetLeft;
+        offset.y += element.offsetTop;
         if (getStyle(element, 'position') !== 'fixed') {
-          getOffset(element.parentNode);
+          getOffset(element.parentNode, offset);
         }
       }
     };
 
     var updateOffset = function () {
-      offsetX = 0;
-      offsetY = 0;
+
+      canvasOffset.x = canvasOffset.y = containerOffset.x = containerOffset.y = 0;
+
+      getOffset(canvas, canvasOffset);
+
       if (container) {
-        getOffset(container);
-      } else {
-        getOffset(canvas);
+        getOffset(container, containerOffset);
       }
     };
 
     var updatePosition = function (event) {
 
-      realX = pageX - offsetX;
-      realY = pageY - offsetY;
+      realX = pageX - canvasOffset.x;
+      realY = pageY - canvasOffset.y;
 
       if (container) {
-        realX += container.scrollLeft;
-        realY += container.scrollTop;
+        realX = pageX + container.scrollLeft;
+        realY = pageY + container.scrollTop;
       }
 
       cursorX = realX * constant.DEVICE_PIXEL_RATIO;
