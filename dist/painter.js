@@ -287,7 +287,7 @@ var Emitter = function () {
 
       var target = event.target;
 
-      inCanvas = target.tagName === 'CANVAS' && target === canvas;
+      inCanvas = target.tagName === 'CANVAS' && target === canvas || target.className.indexOf('cursor') >= 0;
     };
 
     var updatePositionByTouchEvent = function (event) {
@@ -2758,7 +2758,7 @@ function createTextarea(painter, emitter, event, shape) {
   var fontHeight = getTextSize(shape, 'W').height;
 
   textarea = document.createElement('textarea');
-  var style = '\n    position: absolute;\n    left: ' + event.pageX + 'px;\n    top: ' + event.pageY + 'px;\n    color: ' + TRANSPARENT + ';\n    caret-color: ' + caretColor + ';\n    background-color: ' + TRANSPARENT + ';\n    font: ' + fontSize + 'px ' + fontFamily + ';\n    line-height: ' + lineHeight + 'px;\n    border: 1px dashed ' + fillStyle + ';\n    outline: none;\n    resize: none;\n    padding: 0;\n    overflow: hidden;\n    width: ' + fontSize + 'px;\n    height: ' + fontHeight + ' + \'px\';\n    wrap: physical;\n  ';
+  var style = '\n    position: absolute;\n    left: ' + event.pageX + 'px;\n    top: ' + event.pageY + 'px;\n    color: ' + TRANSPARENT + ';\n    caret-color: ' + caretColor + ';\n    background-color: ' + TRANSPARENT + ';\n    font: ' + fontSize + 'px ' + fontFamily + ';\n    line-height: ' + lineHeight + 'px;\n    border: 1px dashed ' + fillStyle + ';\n    outline: none;\n    resize: none;\n    padding: 0;\n    overflow: hidden;\n    width: ' + fontSize + 'px;\n    height: ' + fontHeight + 'px;\n    wrap: physical;\n  ';
   if (fontItalic) {
     style += 'font-style: italic;';
   }

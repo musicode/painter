@@ -60,6 +60,7 @@ export default class Emitter {
 
       let { target } = event
       inCanvas = target.tagName === 'CANVAS' && target === canvas
+        || target.className.indexOf('cursor') >= 0
 
     }
 

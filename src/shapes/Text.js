@@ -65,7 +65,7 @@ function createTextarea(painter, emitter, event, shape) {
     padding: 0;
     overflow: hidden;
     width: ${fontSize}px;
-    height: ${fontHeight} + 'px';
+    height: ${fontHeight}px;
     wrap: physical;
   `
   if (fontItalic) {
