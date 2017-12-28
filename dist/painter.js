@@ -1202,6 +1202,12 @@ var convertDimension = function (shapes, oldWidth, oldHeight, newWidth, newHeigh
         if (shape.width) {
           shape.width *= widthRatio;
         }
+        if (shape.fontSize) {
+          shape.fontSize *= widthRatio;
+        }
+        if (shape.lineWidth) {
+          shape.lineWidth *= widthRatio;
+        }
       }
       if (heightRatio !== 1) {
         if (shape.y) {
