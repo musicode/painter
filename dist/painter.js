@@ -1697,7 +1697,7 @@ var Shape = function () {
   Shape.prototype.toJSON = function (extra) {
     var json = {
       number: this.number,
-      lineWidth: this.lineWidth,
+      lineWidth: this.lineWidth * constant.DEVICE_PIXEL_RATIO,
       strokeStyle: this.strokeStyle,
       fillStyle: this.fillStyle
     };
@@ -2969,7 +2969,7 @@ var Text = function (_Shape) {
       x: this.x,
       y: this.y,
       text: this.text,
-      fontSize: this.fontSize,
+      fontSize: this.fontSize * constant.DEVICE_PIXEL_RATIO,
       fontFamily: this.fontFamily,
       fontItalic: this.fontItalic,
       fontWeight: this.fontWeight,

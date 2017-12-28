@@ -172,7 +172,7 @@ export default class Shape {
   toJSON(extra) {
     let json = {
       number: this.number,
-      lineWidth: this.lineWidth,
+      lineWidth: this.lineWidth * constant.DEVICE_PIXEL_RATIO,
       strokeStyle: this.strokeStyle,
       fillStyle: this.fillStyle,
     }
