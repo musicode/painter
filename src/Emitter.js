@@ -25,7 +25,7 @@ export default class Emitter {
         offset.x += element.offsetLeft
         offset.y += element.offsetTop
         if (getStyle(element, 'position') !== 'fixed') {
-            getOffset(element.parentNode, offset)
+            getOffset(element.offsetParent, offset)
         }
       }
     }
@@ -51,8 +51,8 @@ export default class Emitter {
       realY = pageY - canvasOffset.y
 
       if (container) {
-        realX = pageX + container.scrollLeft
-        realY = pageY + container.scrollTop
+        realX += container.scrollLeft
+        realY += container.scrollTop
       }
 
       cursorX = realX * constant.DEVICE_PIXEL_RATIO
