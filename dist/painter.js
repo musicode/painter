@@ -2726,23 +2726,27 @@ function getTextSize(shape, text) {
 
   var parentElement = document.body;
   p = document.createElement('p');
-  p.style.cssText = '\n    position: absolute;\n    visibility: hidden;\n    font: ' + fontSize * constant.DEVICE_PIXEL_RATIO + 'px ' + fontFamily + ';\n    line-height: ' + lineHeight + 'px;\n  ';
+  p.style.cssText = '\n    position: absolute;\n    visibility: hidden;\n    font: ' + fontSize + 'px ' + fontFamily + ';\n    line-height: ' + lineHeight + 'px;\n  ';
   parentElement.appendChild(p);
 
-  var textLines = (text + '').split('\n');
-  var width = 0;
-  var height = 0;
-  var rows = textLines.length;
-  for (var i = 0, l = rows; i < l; i++) {
-    p.innerHTML = textLines[i];
-    height = Math.max(p.offsetHeight, height);
-    width = Math.max(p.offsetWidth, width);
+  var lines = (text + '').split('\n');
+  if (lines[lines.length - 1] === '') {
+    lines[lines.length - 1] = 'W';
   }
+
+  p.innerHTML = lines.join('<br>');
+
+  var _p = p,
+      offsetWidth = _p.offsetWidth,
+      offsetHeight = _p.offsetHeight;
+
+
   parentElement.removeChild(p);
 
   return {
-    width: width,
-    height: height * rows
+    // 避免小数问题导致换行
+    width: offsetWidth + 1,
+    height: offsetHeight
   };
 }
 
@@ -2761,7 +2765,7 @@ function createTextarea(painter, emitter, event, shape) {
   var fontHeight = getTextSize(shape, 'W').height;
 
   textarea = document.createElement('textarea');
-  var style = '\n    position: absolute;\n    left: ' + event.pageX + 'px;\n    top: ' + event.pageY + 'px;\n    color: ' + TRANSPARENT + ';\n    caret-color: ' + caretColor + ';\n    background-color: ' + TRANSPARENT + ';\n    font: ' + fontSize + 'px ' + fontFamily + ';\n    line-height: ' + lineHeight + 'px;\n    border: 1px dashed ' + fillStyle + ';\n    outline: none;\n    resize: none;\n    padding: 0;\n    overflow: hidden;\n    width: ' + fontSize + 'px;\n    height: ' + fontHeight + 'px;\n    wrap: physical;\n  ';
+  var style = '\n    position: absolute;\n    left: ' + event.pageX + 'px;\n    top: ' + event.pageY + 'px;\n    color: ' + TRANSPARENT + ';\n    caret-color: ' + caretColor + ';\n    background-color: ' + TRANSPARENT + ';\n    font: ' + fontSize + 'px ' + fontFamily + ';\n    line-height: ' + lineHeight + 'px;\n    border: 1px dashed ' + fillStyle + ';\n    box-sizing: content-box;\n    outline: none;\n    resize: none;\n    padding: 0;\n    overflow: hidden;\n    width: ' + fontSize + 'px;\n    height: ' + fontHeight + 'px;\n    wrap: physical;\n  ';
   if (fontItalic) {
     style += 'font-style: italic;';
   }
@@ -2788,12 +2792,15 @@ function createTextarea(painter, emitter, event, shape) {
   var onInput = function () {
 
     var length = textarea.value.length;
-    var textareaSize = getTextSize(shape, textarea.value);
 
-    textarea.style.width = textareaSize.width / constant.DEVICE_PIXEL_RATIO + fontSize + 'px';
-    textarea.style.height = textareaSize.height + 'px';
+    var _getTextSize = getTextSize(shape, textarea.value || 'W'),
+        width = _getTextSize.width,
+        height = _getTextSize.height;
 
-    if (!textareaIsInCanvas(painter, textareaSize.width + x, textareaSize.height + y)) {
+    textarea.style.width = width + 'px';
+    textarea.style.height = height + 'px';
+
+    if (!textareaIsInCanvas(painter, width + x, height + y)) {
       textarea.maxLength = length;
       textarea.blur();
       return;
@@ -2842,7 +2849,7 @@ function createTextarea(painter, emitter, event, shape) {
     if (!textarea) {
       return;
     }
-    textarea.style.height = getTextSize(shape, textarea.value).height + 'px';
+    textarea.style.height = getTextSize(shape, textarea.value || 'W').height + 'px';
   });
 }
 
@@ -2959,12 +2966,14 @@ var Text = function (_Shape) {
         fontItalic = this.fontItalic,
         fontWeight = this.fontWeight;
 
-    var row = text.split('\n');
+
     painter.setFont(fontSize * constant.DEVICE_PIXEL_RATIO, fontFamily, fontItalic, fontWeight);
 
     var rect = getTextSize(this, text);
     rect.x = x;
     rect.y = y;
+    rect.width *= constant.DEVICE_PIXEL_RATIO;
+    rect.height *= constant.DEVICE_PIXEL_RATIO;
 
     return rect;
   };

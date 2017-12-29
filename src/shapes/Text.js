@@ -21,25 +21,26 @@ function getTextSize(shape, text) {
   p.style.cssText = `
     position: absolute;
     visibility: hidden;
-    font: ${fontSize * constant.DEVICE_PIXEL_RATIO}px ${fontFamily};
+    font: ${fontSize}px ${fontFamily};
     line-height: ${lineHeight}px;
   `
   parentElement.appendChild(p)
 
-  let textLines = (text + '').split('\n')
-  let width = 0
-  let height = 0
-  let rows = textLines.length
-  for (let i = 0, l = rows; i < l; i++) {
-    p.innerHTML = textLines[i]
-    height = Math.max(p.offsetHeight, height)
-    width = Math.max(p.offsetWidth, width)
+  let lines = (text + '').split('\n')
+  if (lines[ lines.length - 1 ] === '') {
+    lines[ lines.length - 1 ] = 'W'
   }
+
+  p.innerHTML = lines.join('<br>')
+
+  let { offsetWidth, offsetHeight } = p
+
   parentElement.removeChild(p)
 
   return {
-    width: width,
-    height: height * rows
+    // 避免小数问题导致换行
+    width: offsetWidth + 1,
+    height: offsetHeight
   }
 }
 
@@ -60,6 +61,7 @@ function createTextarea(painter, emitter, event, shape) {
     font: ${fontSize}px ${fontFamily};
     line-height: ${lineHeight}px;
     border: 1px dashed ${fillStyle};
+    box-sizing: content-box;
     outline: none;
     resize: none;
     padding: 0;
@@ -96,12 +98,12 @@ function createTextarea(painter, emitter, event, shape) {
   let onInput = function () {
 
     let length = textarea.value.length
-    let textareaSize = getTextSize(shape, textarea.value)
+    let { width, height } = getTextSize(shape, textarea.value || 'W')
 
-    textarea.style.width = (textareaSize.width / constant.DEVICE_PIXEL_RATIO + fontSize) + 'px'
-    textarea.style.height = textareaSize.height + 'px'
+    textarea.style.width = width + 'px'
+    textarea.style.height = height + 'px'
 
-    if (!textareaIsInCanvas(painter, textareaSize.width + x, textareaSize.height + y)) {
+    if (!textareaIsInCanvas(painter, width + x, height + y)) {
       textarea.maxLength = length
       textarea.blur()
       return
@@ -159,7 +161,7 @@ function createTextarea(painter, emitter, event, shape) {
       if (!textarea) {
         return
       }
-      textarea.style.height = getTextSize(shape, textarea.value).height + 'px'
+      textarea.style.height = getTextSize(shape, textarea.value || 'W').height + 'px'
     }
   )
 }
@@ -225,7 +227,7 @@ export default class Text extends Shape {
     )
   }
 
-  startDrawing (painter, emitter, event) {
+  startDrawing(painter, emitter, event) {
 
     if (!textarea) {
 
@@ -264,7 +266,7 @@ export default class Text extends Shape {
   getRect(painter) {
 
     const { x, y, text, fontSize, fontFamily, fontItalic, fontWeight } = this
-    let row = text.split('\n')
+
     painter.setFont(
       fontSize * constant.DEVICE_PIXEL_RATIO,
       fontFamily,
@@ -275,6 +277,8 @@ export default class Text extends Shape {
     let rect = getTextSize(this, text)
     rect.x = x
     rect.y = y
+    rect.width *= constant.DEVICE_PIXEL_RATIO
+    rect.height *= constant.DEVICE_PIXEL_RATIO
 
     return rect
 
