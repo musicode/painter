@@ -51,7 +51,10 @@ export default class Emitter {
         || target.className.indexOf('cursor') >= 0
     }
 
-    let updatePosition = function (event) {
+    let updatePosition = function (event, globalX, globalY) {
+
+      pageX = globalX
+      pageY = globalY
 
       realX = pageX - canvasOffset.x
       realY = pageY - canvasOffset.y
@@ -69,10 +72,18 @@ export default class Emitter {
     let updatePositionByTouchEvent = function (event) {
       let { touches } = event;
       if (touches) {
-        pageX = touches[ 0 ].pageX
-        pageY = touches[ 0 ].pageY
-        updatePosition(event)
-        return true
+        updatePosition(
+          event,
+          touches[ 0 ].pageX,
+          touches[ 0 ].pageY
+        )
+      }
+      else {
+        updatePosition(
+          event,
+          event.pageX,
+          event.pageY
+        )
       }
     }
 
@@ -152,9 +163,11 @@ export default class Emitter {
 
           updateInCanvas(event)
 
-          pageX = event.pageX
-          pageY = event.pageY
-          updatePosition(event)
+          updatePosition(
+            event,
+            event.pageX,
+            event.pageY
+          )
 
           fireEvent(
             Emitter.MOUSE_MOVE,

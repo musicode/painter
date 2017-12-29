@@ -278,7 +278,10 @@ var Emitter = function () {
       inCanvas = target.tagName === 'CANVAS' && target === canvas || target.className.indexOf('cursor') >= 0;
     };
 
-    var updatePosition = function (event) {
+    var updatePosition = function (event, globalX, globalY) {
+
+      pageX = globalX;
+      pageY = globalY;
 
       realX = pageX - canvasOffset.x;
       realY = pageY - canvasOffset.y;
@@ -296,10 +299,9 @@ var Emitter = function () {
       var touches = event.touches;
 
       if (touches) {
-        pageX = touches[0].pageX;
-        pageY = touches[0].pageY;
-        updatePosition(event);
-        return true;
+        updatePosition(event, touches[0].pageX, touches[0].pageY);
+      } else {
+        updatePosition(event, event.pageX, event.pageY);
       }
     };
 
@@ -368,9 +370,7 @@ var Emitter = function () {
 
         updateInCanvas(event);
 
-        pageX = event.pageX;
-        pageY = event.pageY;
-        updatePosition(event);
+        updatePosition(event, event.pageX, event.pageY);
 
         fireEvent(Emitter.MOUSE_MOVE, {
           x: cursorX,
