@@ -43,8 +43,8 @@ export default class Drawing extends State {
     me.mouseDownHandler = function (event) {
       if (event.inCanvas && !hoverShape) {
         moving = 0
-        startX = event.x
-        startY = event.y
+        startX = Math.floor(event.x)
+        startY = Math.floor(event.y)
         drawingShape = new me.createShape()
         if (drawingShape.startDrawing
           && drawingShape.startDrawing(painter, emitter, event) === false
@@ -64,7 +64,7 @@ export default class Drawing extends State {
     me.mouseMoveHandler = function (event) {
       if (drawingShape && drawingShape.drawing) {
         moving++
-        drawingShape.drawing(painter, startX, startY, event.x, event.y, restore)
+        drawingShape.drawing(painter, startX, startY, Math.floor(event.x), Math.floor(event.y), restore)
       }
     }
     me.mouseUpHandler = function () {

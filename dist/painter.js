@@ -272,6 +272,12 @@ var Emitter = function () {
       }
     };
 
+    var updateInCanvas = function (event) {
+      var target = event.target;
+
+      inCanvas = target.tagName === 'CANVAS' && target === canvas || target.className.indexOf('cursor') >= 0;
+    };
+
     var updatePosition = function (event) {
 
       realX = pageX - canvasOffset.x;
@@ -284,10 +290,6 @@ var Emitter = function () {
 
       cursorX = realX * constant.DEVICE_PIXEL_RATIO;
       cursorY = realY * constant.DEVICE_PIXEL_RATIO;
-
-      var target = event.target;
-
-      inCanvas = target.tagName === 'CANVAS' && target === canvas || target.className.indexOf('cursor') >= 0;
     };
 
     var updatePositionByTouchEvent = function (event) {
@@ -311,11 +313,11 @@ var Emitter = function () {
 
     var onMouseDown = function (event) {
       if (!me.disabled) {
-        updatePositionByTouchEvent(event);
         if (inCanvas) {
           drawing = true;
           updateOffset();
         }
+        updatePositionByTouchEvent(event);
         fireEvent(Emitter.MOUSE_DOWN, {
           x: cursorX,
           y: cursorY,
@@ -363,6 +365,9 @@ var Emitter = function () {
 
     addDocumentEvent('mousemove', function (event) {
       if (!me.disabled) {
+
+        updateInCanvas(event);
+
         pageX = event.pageX;
         pageY = event.pageY;
         updatePosition(event);
@@ -385,6 +390,7 @@ var Emitter = function () {
       addDocumentEvent('touchstart', onMouseDown);
       addDocumentEvent('touchmove', function (event) {
         if (!me.disabled) {
+          updateInCanvas(event);
           updatePositionByTouchEvent(event);
           fireEvent(Emitter.MOUSE_MOVE, {
             x: cursorX,
@@ -1104,8 +1110,8 @@ var Drawing = function (_State) {
     me.mouseDownHandler = function (event) {
       if (event.inCanvas && !hoverShape) {
         moving = 0;
-        startX = event.x;
-        startY = event.y;
+        startX = Math.floor(event.x);
+        startY = Math.floor(event.y);
         drawingShape = new me.createShape();
         if (drawingShape.startDrawing && drawingShape.startDrawing(painter, emitter, event) === false) {
           drawingShape = null;
@@ -1119,7 +1125,7 @@ var Drawing = function (_State) {
     me.mouseMoveHandler = function (event) {
       if (drawingShape && drawingShape.drawing) {
         moving++;
-        drawingShape.drawing(painter, startX, startY, event.x, event.y, restore);
+        drawingShape.drawing(painter, startX, startY, Math.floor(event.x), Math.floor(event.y), restore);
       }
     };
     me.mouseUpHandler = function () {

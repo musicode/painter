@@ -45,6 +45,12 @@ export default class Emitter {
 
     }
 
+    let updateInCanvas = function (event) {
+      let { target } = event
+      inCanvas = target.tagName === 'CANVAS' && target === canvas
+        || target.className.indexOf('cursor') >= 0
+    }
+
     let updatePosition = function (event) {
 
       realX = pageX - canvasOffset.x
@@ -57,10 +63,6 @@ export default class Emitter {
 
       cursorX = realX * constant.DEVICE_PIXEL_RATIO
       cursorY = realY * constant.DEVICE_PIXEL_RATIO
-
-      let { target } = event
-      inCanvas = target.tagName === 'CANVAS' && target === canvas
-        || target.className.indexOf('cursor') >= 0
 
     }
 
@@ -84,11 +86,11 @@ export default class Emitter {
 
     let onMouseDown = function (event) {
       if (!me.disabled) {
-        updatePositionByTouchEvent(event)
         if (inCanvas) {
           drawing = true
           updateOffset()
         }
+        updatePositionByTouchEvent(event)
         fireEvent(
           Emitter.MOUSE_DOWN,
           {
@@ -147,6 +149,9 @@ export default class Emitter {
       'mousemove',
       function (event) {
         if (!me.disabled) {
+
+          updateInCanvas(event)
+
           pageX = event.pageX
           pageY = event.pageY
           updatePosition(event)
@@ -181,6 +186,7 @@ export default class Emitter {
         'touchmove',
         function (event) {
           if (!me.disabled) {
+            updateInCanvas(event)
             updatePositionByTouchEvent(event)
             fireEvent(
               Emitter.MOUSE_MOVE,
