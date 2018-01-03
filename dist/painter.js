@@ -1077,7 +1077,6 @@ var Drawing = function (_State) {
     var _this = possibleConstructorReturn(this, _State.call(this, props, emitter));
 
     var me = _this,
-        hoverShape,
         drawingShape,
         moving,
         saved,
@@ -1099,16 +1098,8 @@ var Drawing = function (_State) {
       emitter.fire(Emitter.SHAPE_DRAWING);
     };
 
-    me.shapeEnterHandler = function (event) {
-      hoverShape = event.shape;
-    };
-    me.shapeLeaveHandler = function () {
-      if (hoverShape) {
-        hoverShape = null;
-      }
-    };
     me.mouseDownHandler = function (event) {
-      if (event.inCanvas && !hoverShape) {
+      if (event.inCanvas) {
         moving = 0;
         startX = Math.floor(event.x);
         startY = Math.floor(event.y);
@@ -1144,13 +1135,13 @@ var Drawing = function (_State) {
       }
     };
 
-    me.on(Emitter.SHAPE_ENTER, me.shapeEnterHandler).on(Emitter.SHAPE_LEAVE, me.shapeLeaveHandler).on(Emitter.MOUSE_DOWN, me.mouseDownHandler).on(Emitter.MOUSE_MOVE, me.mouseMoveHandler).on(Emitter.MOUSE_UP, me.mouseUpHandler).on(Emitter.RESET, me.mouseUpHandler);
+    me.on(Emitter.MOUSE_DOWN, me.mouseDownHandler).on(Emitter.MOUSE_MOVE, me.mouseMoveHandler).on(Emitter.MOUSE_UP, me.mouseUpHandler).on(Emitter.RESET, me.mouseUpHandler);
 
     return _this;
   }
 
   Drawing.prototype.destroy = function () {
-    this.off(Emitter.SHAPE_ENTER, this.shapeEnterHandler).off(Emitter.SHAPE_LEAVE, this.shapeLeaveHandler).off(Emitter.MOUSE_DOWN, this.mouseDownHandler).off(Emitter.MOUSE_MOVE, this.mouseMoveHandler).off(Emitter.MOUSE_UP, this.mouseUpHandler).off(Emitter.RESET, this.mouseUpHandler);
+    this.off(Emitter.MOUSE_DOWN, this.mouseDownHandler).off(Emitter.MOUSE_MOVE, this.mouseMoveHandler).off(Emitter.MOUSE_UP, this.mouseUpHandler).off(Emitter.RESET, this.mouseUpHandler);
   };
 
   Drawing.prototype.isPointInPath = function (painter, x, y) {
@@ -2023,6 +2014,7 @@ var RADIANS = Math.PI / 180;
 
 /**
  * points 点数组
+ * thickness 箭头粗细
  */
 
 var Arrow = function (_Polygon) {
@@ -2037,7 +2029,6 @@ var Arrow = function (_Polygon) {
    * 正在绘制
    *
    * @param {Painter} painter
-   * @param {number} thickness 箭头粗细
    * @param {number} startX 起始点 x 坐标
    * @param {number} startY 起始点 y 坐标
    * @param {number} endX 结束点 x 坐标
@@ -2053,7 +2044,7 @@ var Arrow = function (_Polygon) {
     var distance = getDistance(startX, startY, endX, endY);
 
     // 下面这些数字都是不断尝试调出的参数，没有理由，就是试
-    var threshold = thickness * 10,
+    var threshold = thickness * 20,
         header;
 
     if (distance < threshold) {
@@ -2061,8 +2052,8 @@ var Arrow = function (_Polygon) {
       header = distance / 3;
     } else {
       header = distance / 8;
-      if (header > 80) {
-        header = 80;
+      if (header > 50) {
+        header = 50;
       }
     }
 

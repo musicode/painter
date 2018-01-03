@@ -15,6 +15,7 @@ const RADIANS = Math.PI / 180
 
 /**
  * points 点数组
+ * thickness 箭头粗细
  */
 export default class Arrow extends Polygon {
 
@@ -22,7 +23,6 @@ export default class Arrow extends Polygon {
    * 正在绘制
    *
    * @param {Painter} painter
-   * @param {number} thickness 箭头粗细
    * @param {number} startX 起始点 x 坐标
    * @param {number} startY 起始点 y 坐标
    * @param {number} endX 结束点 x 坐标
@@ -37,7 +37,7 @@ export default class Arrow extends Polygon {
     const distance = getDistance(startX, startY, endX, endY)
 
     // 下面这些数字都是不断尝试调出的参数，没有理由，就是试
-    let threshold = thickness * 10, header
+    let threshold = thickness * 20, header
 
     if (distance < threshold) {
       thickness *= distance / threshold
@@ -45,8 +45,8 @@ export default class Arrow extends Polygon {
     }
     else {
       header = distance / 8
-      if (header > 80) {
-        header = 80
+      if (header > 50) {
+        header = 50
       }
     }
 
