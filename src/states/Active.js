@@ -21,6 +21,10 @@ const CENTER_BOTTOM = 5
 const LEFT_BOTTOM = 6
 const LEFT_MIDDLE = 7
 
+function isTextShape(shape) {
+  return shape.toJSON().fontSize ? true : false
+}
+
 export default class Active extends State {
 
   constructor(props, emitter, painter) {
@@ -256,35 +260,35 @@ export default class Active extends State {
   draw(painter) {
 
     let { shapes, x, y, width, height } = this
-
-    if (!shapes.length) {
+    let { length } = shapes
+    if (!length) {
       return
     }
 
     painter.disableShadow()
     painter.setLineWidth(1)
 
-    if (shapes.length > 1) {
+    // 是否只有文字
+    // 如果是，不用画九个 thumb
+    let textOnly
+
+    if (length > 1) {
+      textOnly = true
       painter.setStrokeStyle('#C0CED8')
       array.each(
         shapes,
         function (shape) {
           let rect = shape.getRect(painter)
           painter.strokeRect(rect.x + 0.5, rect.y + 0.5, rect.width, rect.height)
+          if (textOnly && !isTextShape(shape)) {
+            textOnly = false
+          }
         }
       )
     }
-
-    const thumbSize = this.thumbSize = 6 * constant.DEVICE_PIXEL_RATIO
-
-    const left = x - thumbSize / 2
-    const center = x + (width - thumbSize) / 2
-    const right = x + width - thumbSize / 2
-
-    const top = y - thumbSize / 2
-    const middle = y + (height - thumbSize) / 2
-    const bottom = y + height - thumbSize / 2
-
+    else {
+      textOnly = isTextShape(shapes[ 0 ])
+    }
 
     painter.setStrokeStyle('#ccc')
 
@@ -293,38 +297,50 @@ export default class Active extends State {
     painter.drawRect(x + 0.5, y + 0.5, width, height)
     painter.stroke()
 
-    painter.setStrokeStyle('#a2a2a2')
+    if (!textOnly) {
+      painter.setStrokeStyle('#a2a2a2')
 
-    // 方块加点阴影
-    painter.enableShadow(0, 2, 3, 'rgba(0,0,0,0.2)')
+      // 方块加点阴影
+      painter.enableShadow(0, 2, 3, 'rgba(0,0,0,0.2)')
 
-    const boxes = [
-      left, top,
-      center, top,
-      right, top,
-      right, middle,
-      right, bottom,
-      center, bottom,
-      left, bottom,
-      left, middle,
-    ]
+      const thumbSize = this.thumbSize = 6 * constant.DEVICE_PIXEL_RATIO
 
-    for (let i = 0, len = boxes.length, gradient; i < len; i += 2) {
-      x = boxes[ i ]
-      y = boxes[ i + 1 ]
-      gradient = painter.createLinearGradient(x, y + thumbSize, x, y)
-      gradient.addColorStop(0, '#d6d6d6')
-      gradient.addColorStop(1, '#f9f9f9')
-      painter.begin()
-      painter.setFillStyle(gradient)
-      painter.drawRect(x, y, thumbSize, thumbSize)
-      painter.stroke()
-      painter.fill()
+      const left = x - thumbSize / 2
+      const center = x + (width - thumbSize) / 2
+      const right = x + width - thumbSize / 2
+
+      const top = y - thumbSize / 2
+      const middle = y + (height - thumbSize) / 2
+      const bottom = y + height - thumbSize / 2
+
+      const boxes = [
+        left, top,
+        center, top,
+        right, top,
+        right, middle,
+        right, bottom,
+        center, bottom,
+        left, bottom,
+        left, middle,
+      ]
+
+      for (let i = 0, len = boxes.length, gradient; i < len; i += 2) {
+        x = boxes[ i ]
+        y = boxes[ i + 1 ]
+        gradient = painter.createLinearGradient(x, y + thumbSize, x, y)
+        gradient.addColorStop(0, '#d6d6d6')
+        gradient.addColorStop(1, '#f9f9f9')
+        painter.begin()
+        painter.setFillStyle(gradient)
+        painter.drawRect(x, y, thumbSize, thumbSize)
+        painter.stroke()
+        painter.fill()
+      }
+
+      this.boxes = boxes
+
+      painter.disableShadow()
     }
-
-    this.boxes = boxes
-
-    painter.disableShadow()
 
   }
 

@@ -169,7 +169,7 @@ function createTextarea(painter, emitter, event, shape) {
 function textareaIsInCanvas(painter, offsetWidth, offsetHeight) {
   const { width, height } = painter.getCanvasSize()
   return offsetWidth < width
-      && offsetHeight < height
+    && offsetHeight < height
 }
 
 export default class Text extends Shape {

@@ -702,6 +702,10 @@ var CENTER_BOTTOM = 5;
 var LEFT_BOTTOM = 6;
 var LEFT_MIDDLE = 7;
 
+function isTextShape(shape) {
+  return shape.toJSON().fontSize ? true : false;
+}
+
 var Active = function (_State) {
   inherits(Active, _State);
 
@@ -912,32 +916,32 @@ var Active = function (_State) {
         y = this.y,
         width = this.width,
         height = this.height;
+    var length = shapes.length;
 
-
-    if (!shapes.length) {
+    if (!length) {
       return;
     }
 
     painter.disableShadow();
     painter.setLineWidth(1);
 
-    if (shapes.length > 1) {
+    // 是否只有文字
+    // 如果是，不用画九个 thumb
+    var textOnly;
+
+    if (length > 1) {
+      textOnly = true;
       painter.setStrokeStyle('#C0CED8');
       array.each(shapes, function (shape) {
         var rect = shape.getRect(painter);
         painter.strokeRect(rect.x + 0.5, rect.y + 0.5, rect.width, rect.height);
+        if (textOnly && !isTextShape(shape)) {
+          textOnly = false;
+        }
       });
+    } else {
+      textOnly = isTextShape(shapes[0]);
     }
-
-    var thumbSize = this.thumbSize = 6 * constant.DEVICE_PIXEL_RATIO;
-
-    var left = x - thumbSize / 2;
-    var center = x + (width - thumbSize) / 2;
-    var right = x + width - thumbSize / 2;
-
-    var top = y - thumbSize / 2;
-    var middle = y + (height - thumbSize) / 2;
-    var bottom = y + height - thumbSize / 2;
 
     painter.setStrokeStyle('#ccc');
 
@@ -946,29 +950,41 @@ var Active = function (_State) {
     painter.drawRect(x + 0.5, y + 0.5, width, height);
     painter.stroke();
 
-    painter.setStrokeStyle('#a2a2a2');
+    if (!textOnly) {
+      painter.setStrokeStyle('#a2a2a2');
 
-    // 方块加点阴影
-    painter.enableShadow(0, 2, 3, 'rgba(0,0,0,0.2)');
+      // 方块加点阴影
+      painter.enableShadow(0, 2, 3, 'rgba(0,0,0,0.2)');
 
-    var boxes = [left, top, center, top, right, top, right, middle, right, bottom, center, bottom, left, bottom, left, middle];
+      var thumbSize = this.thumbSize = 6 * constant.DEVICE_PIXEL_RATIO;
 
-    for (var i = 0, len = boxes.length, gradient; i < len; i += 2) {
-      x = boxes[i];
-      y = boxes[i + 1];
-      gradient = painter.createLinearGradient(x, y + thumbSize, x, y);
-      gradient.addColorStop(0, '#d6d6d6');
-      gradient.addColorStop(1, '#f9f9f9');
-      painter.begin();
-      painter.setFillStyle(gradient);
-      painter.drawRect(x, y, thumbSize, thumbSize);
-      painter.stroke();
-      painter.fill();
+      var left = x - thumbSize / 2;
+      var center = x + (width - thumbSize) / 2;
+      var right = x + width - thumbSize / 2;
+
+      var top = y - thumbSize / 2;
+      var middle = y + (height - thumbSize) / 2;
+      var bottom = y + height - thumbSize / 2;
+
+      var boxes = [left, top, center, top, right, top, right, middle, right, bottom, center, bottom, left, bottom, left, middle];
+
+      for (var i = 0, len = boxes.length, gradient; i < len; i += 2) {
+        x = boxes[i];
+        y = boxes[i + 1];
+        gradient = painter.createLinearGradient(x, y + thumbSize, x, y);
+        gradient.addColorStop(0, '#d6d6d6');
+        gradient.addColorStop(1, '#f9f9f9');
+        painter.begin();
+        painter.setFillStyle(gradient);
+        painter.drawRect(x, y, thumbSize, thumbSize);
+        painter.stroke();
+        painter.fill();
+      }
+
+      this.boxes = boxes;
+
+      painter.disableShadow();
     }
-
-    this.boxes = boxes;
-
-    painter.disableShadow();
   };
 
   return Active;
@@ -2186,25 +2202,6 @@ var Doodle = function (_Shape) {
 
   Doodle.prototype.drawPath = function (painter) {
     painter.drawPoints(this.points);
-    if (this.autoClose) {
-      painter.close();
-    }
-  };
-
-  /**
-   * 填充
-   *
-   * @param {Painter} painter
-   */
-
-
-  Doodle.prototype.fill = function (painter) {
-    if (this.autoClose) {
-      painter.setFillStyle(this.fillStyle);
-      painter.begin();
-      this.drawPath(painter);
-      painter.fill();
-    }
   };
 
   Doodle.prototype.toJSON = function () {

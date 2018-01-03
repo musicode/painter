@@ -63,23 +63,6 @@ export default class Doodle extends Shape {
    */
   drawPath(painter) {
     painter.drawPoints(this.points)
-    if (this.autoClose) {
-      painter.close()
-    }
-  }
-
-  /**
-   * 填充
-   *
-   * @param {Painter} painter
-   */
-  fill(painter) {
-    if (this.autoClose) {
-      painter.setFillStyle(this.fillStyle)
-      painter.begin()
-      this.drawPath(painter)
-      painter.fill()
-    }
   }
 
   toJSON() {
