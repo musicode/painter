@@ -50,7 +50,13 @@ function createTextarea(painter, emitter, event, shape) {
   const parentElement = document.body
   const fontHeight = getTextSize(shape, 'W').height
 
+  const dpr = constant.DEVICE_PIXEL_RATIO
+  const { width, height } = painter.getCanvasSize()
+  const maxWidth = (width - shape.x) / dpr
+  const maxHeight = (height - shape.y) / dpr
+
   textarea = document.createElement('textarea')
+
   let style = `
     position: absolute;
     left: ${event.pageX}px;
@@ -68,6 +74,8 @@ function createTextarea(painter, emitter, event, shape) {
     overflow: hidden;
     width: ${fontSize}px;
     height: ${fontHeight}px;
+    max-width: ${maxWidth}px;
+    max-height: ${maxHeight}px;
     wrap: physical;
   `
   if (fontItalic) {
@@ -97,17 +105,13 @@ function createTextarea(painter, emitter, event, shape) {
 
   let onInput = function () {
 
-    let length = textarea.value.length
-    let { width, height } = getTextSize(shape, textarea.value || 'W')
+    let { width, height } = getTextSize(
+      shape,
+      textarea.value || 'W'
+    )
 
     textarea.style.width = width + 'px'
     textarea.style.height = height + 'px'
-
-    if (!textareaIsInCanvas(painter, width + x, height + y)) {
-      textarea.maxLength = length
-      textarea.blur()
-      return
-    }
 
     if (!locked) {
       updateCanvas()
@@ -164,12 +168,6 @@ function createTextarea(painter, emitter, event, shape) {
       textarea.style.height = getTextSize(shape, textarea.value || 'W').height + 'px'
     }
   )
-}
-
-function textareaIsInCanvas(painter, offsetWidth, offsetHeight) {
-  const { width, height } = painter.getCanvasSize()
-  return offsetWidth < width
-    && offsetHeight < height
 }
 
 export default class Text extends Shape {
@@ -231,14 +229,10 @@ export default class Text extends Shape {
 
     if (!textarea) {
 
-      const { fontSize } = this
-
       this.x = event.x
       this.y = event.y
-      this.lineHeight = fontSize + fontSize / 6
-      if (!textareaIsInCanvas(painter, fontSize + this.x, this.lineHeight + this.y)) {
-        return
-      }
+      this.lineHeight = this.fontSize + this.fontSize / 6
+
       createTextarea(painter, emitter, event, this)
     }
 

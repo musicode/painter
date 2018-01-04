@@ -14,18 +14,18 @@ export default class Emitter {
 
   constructor(canvas, container) {
 
-    this.canvas = canvas
-    this.listeners = { }
-
     let me = this, canvasOffset = { }, containerOffset = { },
     realX, realY, cursorX, cursorY, pageX, pageY, inCanvas, drawing
+
+    me.canvas = canvas
+    me.listeners = { }
 
     let getOffset = function (element, offset) {
       if (element && element.tagName) {
         offset.x += element.offsetLeft
         offset.y += element.offsetTop
         if (getStyle(element, 'position') !== 'fixed') {
-            getOffset(element.offsetParent, offset)
+          getOffset(element.offsetParent, offset)
         }
       }
     }

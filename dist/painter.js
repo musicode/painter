@@ -236,9 +236,6 @@ var Emitter = function () {
     classCallCheck(this, Emitter);
 
 
-    this.canvas = canvas;
-    this.listeners = {};
-
     var me = this,
         canvasOffset = {},
         containerOffset = {},
@@ -250,6 +247,9 @@ var Emitter = function () {
         pageY,
         inCanvas,
         drawing;
+
+    me.canvas = canvas;
+    me.listeners = {};
 
     var getOffset = function (element, offset) {
       if (element && element.tagName) {
@@ -589,12 +589,14 @@ var Selection = function (_State) {
         };
 
         var mouseUpHandler = function () {
+          console.log('<<<<<<<<<<<<<<<<< off');
           emitter.off(Emitter.MOUSE_MOVE, mouseMoveHandler);
           emitter.off(Emitter.MOUSE_UP, mouseUpHandler);
+          emitter.off(Emitter.RESET, mouseUpHandler);
           me.x = me.y = me.width = me.height = update = null;
           emitter.fire(Emitter.SELECTION_END);
         };
-
+        console.log('>>>>>>>>>>>>>>> on');
         emitter.on(Emitter.MOUSE_MOVE, mouseMoveHandler).on(Emitter.MOUSE_UP, mouseUpHandler).on(Emitter.RESET, mouseUpHandler);
       }
     };
@@ -2752,8 +2754,18 @@ function createTextarea(painter, emitter, event, shape) {
   var parentElement = document.body;
   var fontHeight = getTextSize(shape, 'W').height;
 
+  var dpr = constant.DEVICE_PIXEL_RATIO;
+
+  var _painter$getCanvasSiz = painter.getCanvasSize(),
+      width = _painter$getCanvasSiz.width,
+      height = _painter$getCanvasSiz.height;
+
+  var maxWidth = (width - shape.x) / dpr;
+  var maxHeight = (height - shape.y) / dpr;
+
   textarea = document.createElement('textarea');
-  var style = '\n    position: absolute;\n    left: ' + event.pageX + 'px;\n    top: ' + event.pageY + 'px;\n    color: ' + TRANSPARENT + ';\n    caret-color: ' + caretColor + ';\n    background-color: ' + TRANSPARENT + ';\n    font: ' + fontSize + 'px ' + fontFamily + ';\n    line-height: ' + lineHeight + 'px;\n    border: 1px dashed ' + fillStyle + ';\n    box-sizing: content-box;\n    outline: none;\n    resize: none;\n    padding: 0;\n    overflow: hidden;\n    width: ' + fontSize + 'px;\n    height: ' + fontHeight + 'px;\n    wrap: physical;\n  ';
+
+  var style = '\n    position: absolute;\n    left: ' + event.pageX + 'px;\n    top: ' + event.pageY + 'px;\n    color: ' + TRANSPARENT + ';\n    caret-color: ' + caretColor + ';\n    background-color: ' + TRANSPARENT + ';\n    font: ' + fontSize + 'px ' + fontFamily + ';\n    line-height: ' + lineHeight + 'px;\n    border: 1px dashed ' + fillStyle + ';\n    box-sizing: content-box;\n    outline: none;\n    resize: none;\n    padding: 0;\n    overflow: hidden;\n    width: ' + fontSize + 'px;\n    height: ' + fontHeight + 'px;\n    max-width: ' + maxWidth + 'px;\n    max-height: ' + maxHeight + 'px;\n    wrap: physical;\n  ';
   if (fontItalic) {
     style += 'font-style: italic;';
   }
@@ -2778,21 +2790,12 @@ function createTextarea(painter, emitter, event, shape) {
   };
 
   var onInput = function () {
-
-    var length = textarea.value.length;
-
     var _getTextSize = getTextSize(shape, textarea.value || 'W'),
         width = _getTextSize.width,
         height = _getTextSize.height;
 
     textarea.style.width = width + 'px';
     textarea.style.height = height + 'px';
-
-    if (!textareaIsInCanvas(painter, width + x, height + y)) {
-      textarea.maxLength = length;
-      textarea.blur();
-      return;
-    }
 
     if (!locked) {
       updateCanvas();
@@ -2839,14 +2842,6 @@ function createTextarea(painter, emitter, event, shape) {
     }
     textarea.style.height = getTextSize(shape, textarea.value || 'W').height + 'px';
   });
-}
-
-function textareaIsInCanvas(painter, offsetWidth, offsetHeight) {
-  var _painter$getCanvasSiz = painter.getCanvasSize(),
-      width = _painter$getCanvasSiz.width,
-      height = _painter$getCanvasSiz.height;
-
-  return offsetWidth < width && offsetHeight < height;
 }
 
 var Text = function (_Shape) {
@@ -2912,15 +2907,11 @@ var Text = function (_Shape) {
   Text.prototype.startDrawing = function (painter, emitter, event) {
 
     if (!textarea) {
-      var fontSize = this.fontSize;
-
 
       this.x = event.x;
       this.y = event.y;
-      this.lineHeight = fontSize + fontSize / 6;
-      if (!textareaIsInCanvas(painter, fontSize + this.x, this.lineHeight + this.y)) {
-        return;
-      }
+      this.lineHeight = this.fontSize + this.fontSize / 6;
+
       createTextarea(painter, emitter, event, this);
     }
 
