@@ -13,16 +13,20 @@ const TRANSPARENT = 'rgba(0,0,0,0)'
 let textarea
 let p
 
+function getLineHeight(fontSize) {
+  return fontSize + fontSize / 6
+}
+
 function getTextSize(shape, text) {
 
-  const { fontSize, fontFamily, lineHeight, x, y } = shape
+  const { fontSize, fontFamily, x, y } = shape
   const parentElement = document.body
   p = document.createElement('p')
   p.style.cssText = `
     position: absolute;
     visibility: hidden;
     font: ${fontSize}px ${fontFamily};
-    line-height: ${lineHeight}px;
+    line-height: ${getLineHeight(fontSize)}px;
   `
   parentElement.appendChild(p)
 
@@ -46,7 +50,7 @@ function getTextSize(shape, text) {
 
 function createTextarea(painter, emitter, event, shape) {
 
-  const { fontSize, fontFamily, lineHeight, x, y, fontItalic, fontWeight, caretColor, fillStyle } = shape
+  const { fontSize, fontFamily, x, y, fontItalic, fontWeight, caretColor, fillStyle } = shape
   const parentElement = document.body
   const fontHeight = getTextSize(shape, 'W').height
 
@@ -62,10 +66,10 @@ function createTextarea(painter, emitter, event, shape) {
     left: ${event.pageX}px;
     top: ${event.pageY}px;
     color: ${TRANSPARENT};
-    caret-color: ${caretColor};
+    caret-color: ${caretColor || fillStyle};
     background-color: ${TRANSPARENT};
     font: ${fontSize}px ${fontFamily};
-    line-height: ${lineHeight}px;
+    line-height: ${getLineHeight(fontSize)}px;
     border: 1px dashed ${fillStyle};
     box-sizing: content-box;
     outline: none;
@@ -231,7 +235,6 @@ export default class Text extends Shape {
 
       this.x = event.x
       this.y = event.y
-      this.lineHeight = this.fontSize + this.fontSize / 6
 
       createTextarea(painter, emitter, event, this)
     }
@@ -288,7 +291,6 @@ export default class Text extends Shape {
       fontFamily: this.fontFamily,
       fontItalic: this.fontItalic,
       fontWeight: this.fontWeight,
-      lineHeight: this.lineHeight,
     })
   }
 

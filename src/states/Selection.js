@@ -34,7 +34,6 @@ export default class Selection extends State {
         }
 
         const mouseUpHandler = function () {
-          console.log('<<<<<<<<<<<<<<<<< off')
           emitter.off(Emitter.MOUSE_MOVE, mouseMoveHandler)
           emitter.off(Emitter.MOUSE_UP, mouseUpHandler)
           emitter.off(Emitter.RESET, mouseUpHandler)
@@ -43,7 +42,6 @@ export default class Selection extends State {
             Emitter.SELECTION_END
           )
         }
-        console.log('>>>>>>>>>>>>>>> on')
         emitter
         .on(Emitter.MOUSE_MOVE, mouseMoveHandler)
         .on(Emitter.MOUSE_UP, mouseUpHandler)

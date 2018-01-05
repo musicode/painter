@@ -594,14 +594,12 @@ var Selection = function (_State) {
         };
 
         var mouseUpHandler = function () {
-          console.log('<<<<<<<<<<<<<<<<< off');
           emitter.off(Emitter.MOUSE_MOVE, mouseMoveHandler);
           emitter.off(Emitter.MOUSE_UP, mouseUpHandler);
           emitter.off(Emitter.RESET, mouseUpHandler);
           me.x = me.y = me.width = me.height = update = null;
           emitter.fire(Emitter.SELECTION_END);
         };
-        console.log('>>>>>>>>>>>>>>> on');
         emitter.on(Emitter.MOUSE_MOVE, mouseMoveHandler).on(Emitter.MOUSE_UP, mouseUpHandler).on(Emitter.RESET, mouseUpHandler);
       }
     };
@@ -2712,16 +2710,19 @@ var TRANSPARENT = 'rgba(0,0,0,0)';
 var textarea;
 var p;
 
+function getLineHeight(fontSize) {
+  return fontSize + fontSize / 6;
+}
+
 function getTextSize(shape, text) {
   var fontSize = shape.fontSize,
       fontFamily = shape.fontFamily,
-      lineHeight = shape.lineHeight,
       x = shape.x,
       y = shape.y;
 
   var parentElement = document.body;
   p = document.createElement('p');
-  p.style.cssText = '\n    position: absolute;\n    visibility: hidden;\n    font: ' + fontSize + 'px ' + fontFamily + ';\n    line-height: ' + lineHeight + 'px;\n  ';
+  p.style.cssText = '\n    position: absolute;\n    visibility: hidden;\n    font: ' + fontSize + 'px ' + fontFamily + ';\n    line-height: ' + getLineHeight(fontSize) + 'px;\n  ';
   parentElement.appendChild(p);
 
   var lines = (text + '').split('\n');
@@ -2748,7 +2749,6 @@ function getTextSize(shape, text) {
 function createTextarea(painter, emitter, event, shape) {
   var fontSize = shape.fontSize,
       fontFamily = shape.fontFamily,
-      lineHeight = shape.lineHeight,
       x = shape.x,
       y = shape.y,
       fontItalic = shape.fontItalic,
@@ -2770,7 +2770,7 @@ function createTextarea(painter, emitter, event, shape) {
 
   textarea = document.createElement('textarea');
 
-  var style = '\n    position: absolute;\n    left: ' + event.pageX + 'px;\n    top: ' + event.pageY + 'px;\n    color: ' + TRANSPARENT + ';\n    caret-color: ' + caretColor + ';\n    background-color: ' + TRANSPARENT + ';\n    font: ' + fontSize + 'px ' + fontFamily + ';\n    line-height: ' + lineHeight + 'px;\n    border: 1px dashed ' + fillStyle + ';\n    box-sizing: content-box;\n    outline: none;\n    resize: none;\n    padding: 0;\n    overflow: hidden;\n    width: ' + fontSize + 'px;\n    height: ' + fontHeight + 'px;\n    max-width: ' + maxWidth + 'px;\n    max-height: ' + maxHeight + 'px;\n    wrap: physical;\n  ';
+  var style = '\n    position: absolute;\n    left: ' + event.pageX + 'px;\n    top: ' + event.pageY + 'px;\n    color: ' + TRANSPARENT + ';\n    caret-color: ' + (caretColor || fillStyle) + ';\n    background-color: ' + TRANSPARENT + ';\n    font: ' + fontSize + 'px ' + fontFamily + ';\n    line-height: ' + getLineHeight(fontSize) + 'px;\n    border: 1px dashed ' + fillStyle + ';\n    box-sizing: content-box;\n    outline: none;\n    resize: none;\n    padding: 0;\n    overflow: hidden;\n    width: ' + fontSize + 'px;\n    height: ' + fontHeight + 'px;\n    max-width: ' + maxWidth + 'px;\n    max-height: ' + maxHeight + 'px;\n    wrap: physical;\n  ';
   if (fontItalic) {
     style += 'font-style: italic;';
   }
@@ -2915,7 +2915,6 @@ var Text = function (_Shape) {
 
       this.x = event.x;
       this.y = event.y;
-      this.lineHeight = this.fontSize + this.fontSize / 6;
 
       createTextarea(painter, emitter, event, this);
     }
@@ -2971,8 +2970,7 @@ var Text = function (_Shape) {
       fontSize: this.fontSize * constant.DEVICE_PIXEL_RATIO,
       fontFamily: this.fontFamily,
       fontItalic: this.fontItalic,
-      fontWeight: this.fontWeight,
-      lineHeight: this.lineHeight
+      fontWeight: this.fontWeight
     });
   };
 
