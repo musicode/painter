@@ -315,6 +315,11 @@ var Emitter = function () {
 
     var onMouseDown = function (event) {
       if (!me.disabled) {
+        // 容错
+        if (drawing) {
+          onMouseUp();
+          return;
+        }
         if (inCanvas) {
           drawing = true;
           updateOffset();
@@ -1866,8 +1871,8 @@ var getDistance = function (startX, startY, endX, endY) {
  */
 var getPointOfCircle = function (x, y, radius, radian) {
   return {
-    x: x + radius * Math.cos(radian),
-    y: y + radius * Math.sin(radian)
+    x: Math.floor(x + radius * Math.cos(radian)),
+    y: Math.floor(y + radius * Math.sin(radian))
   };
 };
 
@@ -2017,8 +2022,8 @@ var Polygon = function (_Shape) {
 var getRotatePoints = function (x, y, radian, points) {
   return points.map(function (point) {
     return {
-      x: (point.x - x) * Math.cos(radian) - (point.y - y) * Math.sin(radian) + x,
-      y: (point.x - x) * Math.sin(radian) + (point.y - y) * Math.cos(radian) + y
+      x: Math.floor((point.x - x) * Math.cos(radian) - (point.y - y) * Math.sin(radian) + x),
+      y: Math.floor((point.x - x) * Math.sin(radian) + (point.y - y) * Math.cos(radian) + y)
     };
   });
 };

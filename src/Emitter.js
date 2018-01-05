@@ -97,6 +97,11 @@ export default class Emitter {
 
     let onMouseDown = function (event) {
       if (!me.disabled) {
+        // 容错
+        if (drawing) {
+          onMouseUp()
+          return
+        }
         if (inCanvas) {
           drawing = true
           updateOffset()

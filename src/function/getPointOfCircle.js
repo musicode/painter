@@ -4,7 +4,7 @@
  */
 export default function (x, y, radius, radian) {
   return {
-    x: x + radius * Math.cos(radian),
-    y: y + radius * Math.sin(radian),
+    x: Math.floor(x + radius * Math.cos(radian)),
+    y: Math.floor(y + radius * Math.sin(radian)),
   }
 }
