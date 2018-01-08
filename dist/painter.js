@@ -2996,7 +2996,7 @@ var Canvas = function () {
     var me = this;
 
     me.element = canvas;
-    me.resize(canvas.width, canvas.height, true);
+    me.resize(canvas.clientWidth, canvas.clientHeight, true);
 
     var painter = me.painter = new Painter(canvas.getContext('2d'));
 

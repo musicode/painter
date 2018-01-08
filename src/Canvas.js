@@ -29,7 +29,7 @@ export default class Canvas {
     const me = this
 
     me.element = canvas
-    me.resize(canvas.width, canvas.height, true)
+    me.resize(canvas.clientWidth, canvas.clientHeight, true)
 
     const painter = me.painter = new Painter(canvas.getContext('2d'))
 
