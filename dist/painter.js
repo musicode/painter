@@ -1715,7 +1715,7 @@ var Shape = function () {
   Shape.prototype.toJSON = function (extra) {
     var json = {
       number: this.number,
-      lineWidth: this.lineWidth * constant.DEVICE_PIXEL_RATIO,
+      lineWidth: this.lineWidth,
       strokeStyle: this.strokeStyle,
       fillStyle: this.fillStyle
     };
