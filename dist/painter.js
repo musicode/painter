@@ -1191,7 +1191,7 @@ var getInterRect = function (rect1, rect2) {
   var top = Math.max(rect1.y, rect2.y);
   var right = Math.min(rect1.x + rect1.width, rect2.x + rect2.width);
   var bottom = Math.min(rect1.y + rect1.height, rect2.y + rect2.height);
-  if (right - left > 0 && bottom - top > 0) {
+  if (right - left >= 0 && bottom - top >= 0) {
     return {
       x: left,
       y: top,
@@ -1568,6 +1568,9 @@ var getRectByPoints = function (points) {
  * @file 图形基类
  * @author musicode
  */
+// 避免太小无法进行碰撞检测
+var SIZE_MIN = 5;
+
 /**
  * 图形是点的集合
  * 因此图形基类默认通过 points 进行绘制
@@ -1597,7 +1600,19 @@ var Shape = function () {
 
   Shape.prototype.isPointInPath = function (painter, x, y) {
 
-    if (containRect(this.getRect(painter), x, y)) {
+    var rect = this.getRect(painter);
+
+    if (!rect.width) {
+      rect.x -= SIZE_MIN / 2;
+      rect.width = SIZE_MIN;
+    }
+
+    if (!rect.height) {
+      rect.y -= SIZE_MIN / 2;
+      rect.height = SIZE_MIN;
+    }
+
+    if (containRect(rect, x, y)) {
       if (isValidStyle(this.fillStyle) && this.isPointInFill) {
         return this.isPointInFill(painter, x, y);
       }
@@ -1611,8 +1626,8 @@ var Shape = function () {
     var lineWidth = this.lineWidth,
         points = this.points;
 
-    if (lineWidth < 5) {
-      lineWidth = 5;
+    if (lineWidth < SIZE_MIN) {
+      lineWidth = SIZE_MIN;
     }
 
     for (var i = 0, len = points.length; i < len; i++) {
@@ -2967,7 +2982,7 @@ var Text = function (_Shape) {
       x: this.x,
       y: this.y,
       text: this.text,
-      fontSize: this.fontSize * constant.DEVICE_PIXEL_RATIO,
+      fontSize: this.fontSize,
       fontFamily: this.fontFamily,
       fontItalic: this.fontItalic,
       fontWeight: this.fontWeight

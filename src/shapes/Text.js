@@ -287,7 +287,7 @@ export default class Text extends Shape {
       x: this.x,
       y: this.y,
       text: this.text,
-      fontSize: this.fontSize * constant.DEVICE_PIXEL_RATIO,
+      fontSize: this.fontSize,
       fontFamily: this.fontFamily,
       fontItalic: this.fontItalic,
       fontWeight: this.fontWeight,
