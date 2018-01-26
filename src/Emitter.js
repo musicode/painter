@@ -97,7 +97,7 @@ export default class Emitter {
 
     let onMouseDown = function (event) {
       // 左键是 0，触摸屏没有 button 属性，因此取反就行
-      if (!me.disabled && !event.button && !event.isHandled) {
+      if (!me.disabled && !event.button) {
         // 容错
         if (drawing) {
           onMouseUp()
@@ -121,7 +121,10 @@ export default class Emitter {
             inCanvas,
           }
         )
-        event.isHandled = true
+        // 不要冒泡，避免出现画板嵌套时，出现一笔画到了多个画板上
+        if (event.stopPropagation) {
+          event.stopPropagation();
+        }
       }
     }
 
@@ -158,7 +161,7 @@ export default class Emitter {
     }
 
 
-    addDocumentEvent(
+    addCanvasEvent(
       'mousedown',
       onMouseDown
     )
@@ -198,7 +201,7 @@ export default class Emitter {
     )
 
     if ('ontouchstart' in document) {
-      addDocumentEvent(
+      addCanvasEvent(
         'touchstart',
         onMouseDown
       )

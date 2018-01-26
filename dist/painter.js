@@ -315,7 +315,7 @@ var Emitter = function () {
 
     var onMouseDown = function (event) {
       // 左键是 0，触摸屏没有 button 属性，因此取反就行
-      if (!me.disabled && !event.button && !event.isHandled) {
+      if (!me.disabled && !event.button) {
         // 容错
         if (drawing) {
           onMouseUp();
@@ -336,7 +336,10 @@ var Emitter = function () {
           target: event.target,
           inCanvas: inCanvas
         });
-        event.isHandled = true;
+        // 不要冒泡，避免出现画板嵌套时，出现一笔画到了多个画板上
+        if (event.stopPropagation) {
+          event.stopPropagation();
+        }
       }
     };
 
@@ -370,7 +373,7 @@ var Emitter = function () {
       canvasEvents[type] = listener;
     };
 
-    addDocumentEvent('mousedown', onMouseDown);
+    addCanvasEvent('mousedown', onMouseDown);
 
     addDocumentEvent('mousemove', function (event) {
       if (!me.disabled) {
@@ -394,7 +397,7 @@ var Emitter = function () {
     addDocumentEvent('mouseup', onMouseUp);
 
     if ('ontouchstart' in document) {
-      addDocumentEvent('touchstart', onMouseDown);
+      addCanvasEvent('touchstart', onMouseDown);
       addDocumentEvent('touchmove', function (event) {
         if (!me.disabled) {
           updateInCanvas(event);
