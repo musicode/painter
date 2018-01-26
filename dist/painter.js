@@ -275,13 +275,25 @@ var Emitter = function () {
     var updateInCanvas = function (event) {
       var target = event.target;
 
-      inCanvas = target.tagName === 'CANVAS' && target === canvas || target.className.indexOf('cursor') >= 0;
+      if (target.tagName === 'CANVAS' && target === canvas) {
+        inCanvas = true;
+      } else {
+        // 如果有自定义光标，鼠标事件基本都落在了光标元素上
+        // 这里没有什么好的方式判断自定义光标元素，所以约定 className 必须包含 cursor
+        if (target.className.indexOf('cursor') >= 0) {
+          // 如有多个 canvas，自定义光标必须带一个 canvasId，否则无法区分当前交互的是哪个 canvas
+          var canvasId = target.getAttribute('canvas-id');
+          inCanvas = canvasId ? canvasId === canvas.id : true;
+        } else {
+          inCanvas = false;
+        }
+      }
     };
 
-    var updatePosition = function (event, globalX, globalY) {
+    var updatePosition = function (event) {
 
-      pageX = globalX;
-      pageY = globalY;
+      pageX = event.pageX;
+      pageY = event.pageY;
 
       realX = pageX - canvasOffset.x;
       realY = pageY - canvasOffset.y;
@@ -299,9 +311,9 @@ var Emitter = function () {
       var touches = event.touches;
 
       if (touches) {
-        updatePosition(event, touches[0].pageX, touches[0].pageY);
+        updatePosition(touches[0]);
       } else {
-        updatePosition(event, event.pageX, event.pageY);
+        updatePosition(event);
       }
     };
 
@@ -336,10 +348,6 @@ var Emitter = function () {
           target: event.target,
           inCanvas: inCanvas
         });
-        // 不要冒泡，避免出现画板嵌套时，出现一笔画到了多个画板上
-        if (event.stopPropagation) {
-          event.stopPropagation();
-        }
       }
     };
 
@@ -373,14 +381,14 @@ var Emitter = function () {
       canvasEvents[type] = listener;
     };
 
-    addCanvasEvent('mousedown', onMouseDown);
+    addDocumentEvent('mousedown', onMouseDown);
 
     addDocumentEvent('mousemove', function (event) {
       if (!me.disabled) {
 
         updateInCanvas(event);
 
-        updatePosition(event, event.pageX, event.pageY);
+        updatePosition(event);
 
         fireEvent(Emitter.MOUSE_MOVE, {
           x: cursorX,
@@ -397,7 +405,7 @@ var Emitter = function () {
     addDocumentEvent('mouseup', onMouseUp);
 
     if ('ontouchstart' in document) {
-      addCanvasEvent('touchstart', onMouseDown);
+      addDocumentEvent('touchstart', onMouseDown);
       addDocumentEvent('touchmove', function (event) {
         if (!me.disabled) {
           updateInCanvas(event);
