@@ -216,11 +216,15 @@ var State = function () {
  * @file 常量
  * @author musicode
  */
+var devicePixelRatio = window.devicePixelRatio > 1 ? window.devicePixelRatio : 1;
+
 var constant = {
-  DEVICE_PIXEL_RATIO: window.devicePixelRatio > 1 ? window.devicePixelRatio : 1,
+  DEVICE_PIXEL_RATIO: devicePixelRatio,
   STROKE_POSITION_INSIDE: 1,
   STROKE_POSITION_CENTER: 2,
-  STROKE_POSITION_OUTSIDE: 3
+  STROKE_POSITION_OUTSIDE: 3,
+
+  SIZE_MIN: devicePixelRatio * 6
 };
 
 /**
@@ -1581,9 +1585,6 @@ var getRectByPoints = function (points) {
  * @file 图形基类
  * @author musicode
  */
-// 避免太小无法进行碰撞检测
-var SIZE_MIN = 5;
-
 /**
  * 图形是点的集合
  * 因此图形基类默认通过 points 进行绘制
@@ -1616,13 +1617,13 @@ var Shape = function () {
     var rect = this.getRect(painter);
 
     if (!rect.width) {
-      rect.x -= SIZE_MIN / 2;
-      rect.width = SIZE_MIN;
+      rect.x -= constant.SIZE_MIN / 2;
+      rect.width = constant.SIZE_MIN;
     }
 
     if (!rect.height) {
-      rect.y -= SIZE_MIN / 2;
-      rect.height = SIZE_MIN;
+      rect.y -= constant.SIZE_MIN / 2;
+      rect.height = constant.SIZE_MIN;
     }
 
     if (containRect(rect, x, y)) {
@@ -1639,8 +1640,8 @@ var Shape = function () {
     var lineWidth = this.lineWidth,
         points = this.points;
 
-    if (lineWidth < SIZE_MIN) {
-      lineWidth = SIZE_MIN;
+    if (lineWidth < constant.SIZE_MIN) {
+      lineWidth = constant.SIZE_MIN;
     }
 
     for (var i = 0, len = points.length; i < len; i++) {
@@ -2420,14 +2421,25 @@ var Oval = function (_Shape) {
         lineWidth = this.lineWidth;
 
 
+    if (lineWidth < constant.SIZE_MIN) {
+      lineWidth = constant.SIZE_MIN;
+    }
+
+    var halfLineWidth = 0.5 * lineWidth;
+    var doubleLineWidth = 2 * lineWidth;
+
+    painter.begin();
+
     switch (strokePosition) {
       case constant.STROKE_POSITION_OUTSIDE:
-        painter.begin();
-        painter.drawOval(x, y, width, height);
-        return painter.isPointInPath(x1, y1);
+        painter.drawOval(x, y, width + doubleLineWidth, height + doubleLineWidth);
+        if (painter.isPointInPath(x1, y1)) {
+          painter.begin();
+          painter.drawOval(x, y, width, height);
+          return !painter.isPointInPath(x1, y1);
+        }
       case constant.STROKE_POSITION_CENTER:
-        painter.begin();
-        painter.drawOval(x, y, width, height);
+        painter.drawOval(x, y, width + lineWidth, height + lineWidth);
         if (painter.isPointInPath(x1, y1)) {
           width -= lineWidth;
           height -= lineWidth;
@@ -2437,11 +2449,10 @@ var Oval = function (_Shape) {
         }
         break;
       case constant.STROKE_POSITION_INSIDE:
-        painter.begin();
         painter.drawOval(x, y, width, height);
         if (painter.isPointInPath(x1, y1)) {
-          width -= 2 * lineWidth;
-          height -= 2 * lineWidth;
+          width -= doubleLineWidth;
+          height -= doubleLineWidth;
           painter.begin();
           painter.drawOval(x, y, width, height);
           return !painter.isPointInPath(x1, y1);

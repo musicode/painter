@@ -30,6 +30,7 @@ export default class Oval extends Shape {
   }
 
   isPointInStroke(painter, x1, y1) {
+
     let {
       x,
       y,
@@ -40,14 +41,25 @@ export default class Oval extends Shape {
       lineWidth,
     } = this
 
+    if (lineWidth < constant.SIZE_MIN) {
+      lineWidth = constant.SIZE_MIN
+    }
+
+    let halfLineWidth = 0.5 * lineWidth
+    let doubleLineWidth = 2 * lineWidth
+
+    painter.begin()
+
     switch (strokePosition) {
       case constant.STROKE_POSITION_OUTSIDE:
-        painter.begin()
-        painter.drawOval(x, y, width, height)
-        return painter.isPointInPath(x1, y1)
+        painter.drawOval(x, y, width + doubleLineWidth, height + doubleLineWidth)
+        if (painter.isPointInPath(x1, y1)) {
+          painter.begin()
+          painter.drawOval(x, y, width, height)
+          return !painter.isPointInPath(x1, y1)
+        }
       case constant.STROKE_POSITION_CENTER:
-        painter.begin()
-        painter.drawOval(x, y, width, height)
+        painter.drawOval(x, y, width + lineWidth, height + lineWidth)
         if (painter.isPointInPath(x1, y1)) {
           width -= lineWidth
           height -= lineWidth
@@ -57,11 +69,10 @@ export default class Oval extends Shape {
         }
         break
       case constant.STROKE_POSITION_INSIDE:
-        painter.begin()
         painter.drawOval(x, y, width, height)
         if (painter.isPointInPath(x1, y1)) {
-          width -= 2 * lineWidth
-          height -= 2 * lineWidth
+          width -= doubleLineWidth
+          height -= doubleLineWidth
           painter.begin()
           painter.drawOval(x, y, width, height)
           return !painter.isPointInPath(x1, y1)

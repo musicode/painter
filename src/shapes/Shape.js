@@ -10,9 +10,6 @@ import containLine from '../contain/line'
 import containRect from '../contain/rect'
 import getRectByPoints from '../function/getRectByPoints'
 
-// 避免太小无法进行碰撞检测
-const SIZE_MIN = 5
-
 /**
  * 图形是点的集合
  * 因此图形基类默认通过 points 进行绘制
@@ -42,13 +39,13 @@ export default class Shape {
     let rect = this.getRect(painter)
 
     if (!rect.width) {
-      rect.x -= SIZE_MIN / 2
-      rect.width = SIZE_MIN
+      rect.x -= constant.SIZE_MIN / 2
+      rect.width = constant.SIZE_MIN
     }
 
     if (!rect.height) {
-      rect.y -= SIZE_MIN / 2
-      rect.height = SIZE_MIN
+      rect.y -= constant.SIZE_MIN / 2
+      rect.height = constant.SIZE_MIN
     }
 
     if (containRect(rect, x, y)) {
@@ -64,8 +61,8 @@ export default class Shape {
 
   isPointInStroke(painter, x, y) {
     let { lineWidth, points } = this
-    if (lineWidth < SIZE_MIN) {
-      lineWidth = SIZE_MIN
+    if (lineWidth < constant.SIZE_MIN) {
+      lineWidth = constant.SIZE_MIN
     }
 
     for (let i = 0, len = points.length; i < len; i++) {
