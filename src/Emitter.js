@@ -149,10 +149,15 @@ export default class Emitter {
       }
     }
 
+    let doc = typeof document !== 'undefined' ? document : null
+    if (!doc) {
+      return
+    }
+
     let documentEvents = { }, canvasEvents = { }
 
     let addDocumentEvent = function (type, listener) {
-      document.addEventListener(type, listener)
+      doc.addEventListener(type, listener)
       documentEvents[ type ] = listener
     }
 
@@ -197,7 +202,7 @@ export default class Emitter {
       onMouseUp
     )
 
-    if ('ontouchstart' in document) {
+    if ('ontouchstart' in doc) {
       addDocumentEvent(
         'touchstart',
         onMouseDown
@@ -306,18 +311,22 @@ export default class Emitter {
 
   dispose() {
     let { canvas, documentEvents, canvasEvents } = this
-    object.each(
-      documentEvents,
-      function (listener, type) {
-        document.removeEventListener(type, listener)
-      }
-    )
-    object.each(
-      canvasEvents,
-      function (listener, type) {
-        canvas.removeEventListener(type, listener)
-      }
-    )
+    if (documentEvents) {
+      object.each(
+        documentEvents,
+        function (listener, type) {
+          document.removeEventListener(type, listener)
+        }
+      )
+    }
+    if (canvasEvents) {
+      object.each(
+        canvasEvents,
+        function (listener, type) {
+          canvas.removeEventListener(type, listener)
+        }
+      )
+    }
   }
 
 }
