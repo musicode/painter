@@ -13,6 +13,10 @@ const PI2 = 2 * Math.PI
 
 export default class Star extends Polygon {
 
+  isPathClosed() {
+    return true
+  }
+
   drawing(painter, startX, startY, endX, endY, restore) {
 
     restore()

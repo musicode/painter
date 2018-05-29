@@ -65,13 +65,15 @@ export default class Shape {
       lineWidth = constant.SIZE_MIN
     }
 
-    for (let i = 0, len = points.length; i < len; i++) {
-      if (points[ i + 1 ]
+    let isPathClosed = this.isPathClosed && this.isPathClosed()
+    for (let i = 0, nextPoint, len = points.length; i < len; i++) {
+      nextPoint = points[ i + 1 ] || (isPathClosed && points[ 0 ])
+      if (nextPoint
         && containLine(
             points[ i ].x,
             points[ i ].y,
-            points[ i + 1 ].x,
-            points[ i + 1 ].y,
+            nextPoint.x,
+            nextPoint.y,
             lineWidth * constant.DEVICE_PIXEL_RATIO, x, y
           )
       ) {

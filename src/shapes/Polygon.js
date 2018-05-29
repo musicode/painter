@@ -21,6 +21,10 @@ const PI2 = 2 * Math.PI
  */
 export default class Polygon extends Shape {
 
+  isPathClosed() {
+    return true
+  }
+
   isPointInFill(painter, x, y) {
     return containPolygon(this.points, x, y)
   }
