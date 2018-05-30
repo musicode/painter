@@ -250,6 +250,7 @@ var Emitter = function () {
         pageX,
         pageY,
         inCanvas,
+        isMouseDown,
         drawing;
 
     me.canvas = canvas;
@@ -332,16 +333,22 @@ var Emitter = function () {
     var onMouseDown = function (event) {
       // 左键是 0，触摸屏没有 button 属性，因此取反就行
       if (!me.disabled && !event.button) {
+
+        isMouseDown = true;
+
         // 容错
         if (drawing) {
           onMouseUp();
           return;
         }
+
         if (inCanvas) {
           drawing = true;
           updateOffset();
         }
+
         updatePositionByTouchEvent(event);
+
         fireEvent(Emitter.MOUSE_DOWN, {
           x: cursorX,
           y: cursorY,
@@ -356,7 +363,10 @@ var Emitter = function () {
     };
 
     var onMouseUp = function () {
-      if (!me.disabled) {
+      // 为手写板优化
+      // 有些手写板，笔触漂浮时，会 mousemove mouseup 循环触发
+      if (isMouseDown) {
+        isMouseDown = false;
         fireEvent(Emitter.MOUSE_UP, {
           x: cursorX,
           y: cursorY,
@@ -372,11 +382,16 @@ var Emitter = function () {
       }
     };
 
+    var doc = typeof document !== 'undefined' ? document : null;
+    if (!doc) {
+      return;
+    }
+
     var documentEvents = {},
         canvasEvents = {};
 
     var addDocumentEvent = function (type, listener) {
-      document.addEventListener(type, listener);
+      doc.addEventListener(type, listener);
       documentEvents[type] = listener;
     };
 
@@ -390,25 +405,29 @@ var Emitter = function () {
     addDocumentEvent('mousemove', function (event) {
       if (!me.disabled) {
 
-        updateInCanvas(event);
+        var oldX = cursorX,
+            oldY = cursorY;
 
+        updateInCanvas(event);
         updatePosition(event);
 
-        fireEvent(Emitter.MOUSE_MOVE, {
-          x: cursorX,
-          y: cursorY,
-          realX: realX,
-          realY: realY,
-          pageX: pageX,
-          pageY: pageY,
-          inCanvas: drawing ? true : inCanvas
-        });
+        if (oldX !== cursorX || oldY !== cursorY) {
+          fireEvent(Emitter.MOUSE_MOVE, {
+            x: cursorX,
+            y: cursorY,
+            realX: realX,
+            realY: realY,
+            pageX: pageX,
+            pageY: pageY,
+            inCanvas: drawing ? true : inCanvas
+          });
+        }
       }
     });
 
     addDocumentEvent('mouseup', onMouseUp);
 
-    if ('ontouchstart' in document) {
+    if ('ontouchstart' in doc) {
       addDocumentEvent('touchstart', onMouseDown);
       addDocumentEvent('touchmove', function (event) {
         if (!me.disabled) {
@@ -494,12 +513,16 @@ var Emitter = function () {
         documentEvents = this.documentEvents,
         canvasEvents = this.canvasEvents;
 
-    object.each(documentEvents, function (listener, type) {
-      document.removeEventListener(type, listener);
-    });
-    object.each(canvasEvents, function (listener, type) {
-      canvas.removeEventListener(type, listener);
-    });
+    if (documentEvents) {
+      object.each(documentEvents, function (listener, type) {
+        document.removeEventListener(type, listener);
+      });
+    }
+    if (canvasEvents) {
+      object.each(canvasEvents, function (listener, type) {
+        canvas.removeEventListener(type, listener);
+      });
+    }
   };
 
   return Emitter;
@@ -1644,8 +1667,10 @@ var Shape = function () {
       lineWidth = constant.SIZE_MIN;
     }
 
-    for (var i = 0, len = points.length; i < len; i++) {
-      if (points[i + 1] && containLine(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y, lineWidth * constant.DEVICE_PIXEL_RATIO, x, y)) {
+    var isPathClosed = this.isPathClosed && this.isPathClosed();
+    for (var i = 0, nextPoint, len = points.length; i < len; i++) {
+      nextPoint = points[i + 1] || isPathClosed && points[0];
+      if (nextPoint && containLine(points[i].x, points[i].y, nextPoint.x, nextPoint.y, lineWidth * constant.DEVICE_PIXEL_RATIO, x, y)) {
         return true;
       }
     }
@@ -1922,6 +1947,10 @@ var Polygon = function (_Shape) {
     classCallCheck(this, Polygon);
     return possibleConstructorReturn(this, _Shape.apply(this, arguments));
   }
+
+  Polygon.prototype.isPathClosed = function () {
+    return true;
+  };
 
   Polygon.prototype.isPointInFill = function (painter, x, y) {
     return containPolygon(this.points, x, y);
@@ -2691,6 +2720,10 @@ var Star = function (_Polygon) {
     classCallCheck(this, Star);
     return possibleConstructorReturn(this, _Polygon.apply(this, arguments));
   }
+
+  Star.prototype.isPathClosed = function () {
+    return true;
+  };
 
   Star.prototype.drawing = function (painter, startX, startY, endX, endY, restore) {
 

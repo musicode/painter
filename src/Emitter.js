@@ -15,7 +15,7 @@ export default class Emitter {
   constructor(canvas, container) {
 
     let me = this, canvasOffset = { }, containerOffset = { },
-    realX, realY, cursorX, cursorY, pageX, pageY, inCanvas, drawing
+    realX, realY, cursorX, cursorY, pageX, pageY, inCanvas, isMouseDown, drawing
 
     me.canvas = canvas
     me.listeners = { }
@@ -103,16 +103,22 @@ export default class Emitter {
     let onMouseDown = function (event) {
       // 左键是 0，触摸屏没有 button 属性，因此取反就行
       if (!me.disabled && !event.button) {
+
+        isMouseDown = true
+
         // 容错
         if (drawing) {
           onMouseUp()
           return
         }
+
         if (inCanvas) {
           drawing = true
           updateOffset()
         }
+
         updatePositionByTouchEvent(event)
+
         fireEvent(
           Emitter.MOUSE_DOWN,
           {
@@ -130,7 +136,10 @@ export default class Emitter {
     }
 
     let onMouseUp = function () {
-      if (!me.disabled) {
+      // 为手写板优化
+      // 有些手写板，笔触漂浮时，会 mousemove mouseup 循环触发
+      if (isMouseDown) {
+        isMouseDown = false
         fireEvent(
           Emitter.MOUSE_UP,
           {
@@ -177,22 +186,25 @@ export default class Emitter {
       function (event) {
         if (!me.disabled) {
 
-          updateInCanvas(event)
+          let oldX = cursorX, oldY = cursorY
 
+          updateInCanvas(event)
           updatePosition(event)
 
-          fireEvent(
-            Emitter.MOUSE_MOVE,
-            {
-              x: cursorX,
-              y: cursorY,
-              realX: realX,
-              realY: realY,
-              pageX: pageX,
-              pageY: pageY,
-              inCanvas: drawing ? true : inCanvas,
-            }
-          )
+          if (oldX !== cursorX || oldY !== cursorY) {
+            fireEvent(
+              Emitter.MOUSE_MOVE,
+              {
+                x: cursorX,
+                y: cursorY,
+                realX: realX,
+                realY: realY,
+                pageX: pageX,
+                pageY: pageY,
+                inCanvas: drawing ? true : inCanvas,
+              }
+            )
+          }
         }
       }
     )
