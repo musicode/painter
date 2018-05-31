@@ -6,6 +6,8 @@ import array from './util/array'
 import object from './util/object'
 import constant from './constant'
 
+import getDistance from './function/getDistance'
+
 function getStyle(element, name) {
   return window.getComputedStyle(element, null).getPropertyValue(name)
 }
@@ -191,7 +193,9 @@ export default class Emitter {
           updateInCanvas(event)
           updatePosition(event)
 
-          if (oldX !== cursorX || oldY !== cursorY) {
+          let distance = getDistance(oldX, oldY, cursorX, cursorY)
+          // 需要上限是因为某些手写板，会突然冒出一个差距过大的坐标
+          if (distance > 0 && distance < 300) {
             fireEvent(
               Emitter.MOUSE_MOVE,
               {
@@ -237,29 +241,6 @@ export default class Emitter {
                 inCanvas: drawing ? true : inCanvas,
               }
             )
-          }
-        }
-      )
-      addCanvasEvent(
-        'touchmove',
-        function (event) {
-          if (!me.disabled) {
-            updatePositionByTouchEvent(event)
-            fireEvent(
-              Emitter.MOUSE_MOVE,
-              {
-                x: cursorX,
-                y: cursorY,
-                realX: realX,
-                realY: realY,
-                pageX: pageX,
-                pageY: pageY,
-                inCanvas: drawing ? true : inCanvas,
-              }
-            )
-            // 在 canvas 画画时禁止页面滚动
-            event.preventDefault()
-            event.stopPropagation()
           }
         }
       )
