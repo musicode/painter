@@ -183,6 +183,7 @@ export default class Emitter {
       onMouseDown
     )
 
+    let maxDistance = 150 * constant.DEVICE_PIXEL_RATIO
     addDocumentEvent(
       'mousemove',
       function (event) {
@@ -195,7 +196,7 @@ export default class Emitter {
 
           let distance = getDistance(oldX, oldY, cursorX, cursorY)
           // 需要上限是因为某些手写板，会突然冒出一个差距过大的坐标
-          if (distance > 0 && distance < 300) {
+          if (distance > 0 && distance < maxDistance) {
             fireEvent(
               Emitter.MOUSE_MOVE,
               {
