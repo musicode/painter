@@ -6,6 +6,7 @@
 import Shape from './Shape'
 
 import getDistance from '../function/getDistance'
+import object from '../util/object'
 
 /**
  * points 点数组

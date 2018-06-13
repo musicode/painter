@@ -2013,33 +2013,8 @@ var Polygon = function (_Shape) {
 
 
   Polygon.prototype.drawing = function (painter, startX, startY, endX, endY, restore) {
-
     restore();
-
-    var count = this.count;
-
-
-    var radius = getDistance(startX, startY, endX, endY);
-
-    // 单位旋转的角度
-    var stepRadian = PI2 / count;
-
-    var points = [];
-
-    var radian = Math.atan2(endY - startY, endX - startX),
-        endRadian = radian + PI2;
-
-    do {
-      array.push(points, getPointOfCircle(startX, startY, radius, radian));
-      radian += stepRadian;
-    } while (radian <= endRadian);
-
-    if (points.length - count === 1) {
-      array.pop(points);
-    }
-
-    this.points = points;
-
+    object.extend(this, Polygon.getProps(startX, startY, endX, endY, this.count));
     this.draw(painter);
   };
 
@@ -2056,6 +2031,32 @@ var Polygon = function (_Shape) {
 
   return Polygon;
 }(Shape);
+
+Polygon.getProps = function (startX, startY, endX, endY, count) {
+
+  var radius = getDistance(startX, startY, endX, endY);
+
+  // 单位旋转的角度
+  var stepRadian = PI2 / count;
+
+  var points = [];
+
+  var radian = Math.atan2(endY - startY, endX - startX),
+      endRadian = radian + PI2;
+
+  do {
+    array.push(points, getPointOfCircle(startX, startY, radius, radian));
+    radian += stepRadian;
+  } while (radian <= endRadian);
+
+  if (points.length - count === 1) {
+    array.pop(points);
+  }
+
+  return {
+    points: points
+  };
+};
 
 /**
  * @file 旋转后的点
@@ -2101,78 +2102,8 @@ var Arrow = function (_Polygon) {
    * @param {Function} 还原为鼠标按下时的画布
    */
   Arrow.prototype.drawing = function (painter, startX, startY, endX, endY, restore) {
-
     restore();
-
-    var thickness = this.thickness;
-
-    var distance = getDistance(startX, startY, endX, endY);
-
-    // 下面这些数字都是不断尝试调出的参数，没有理由，就是试
-    var threshold = thickness * 20,
-        header;
-
-    if (distance < threshold) {
-      thickness *= distance / threshold;
-      header = distance / 3;
-    } else {
-      header = distance / 8;
-      if (header > 50) {
-        header = 50;
-      }
-    }
-
-    var points = [];
-    var double = this.double;
-
-    var arrowRadians = 70;
-    var arrowRadius = 0.5 * header;
-    var arrowDistance = Math.cos(arrowRadians * RADIANS) * arrowRadius;
-
-    var drawSingleArrow = function (point) {
-      array.push(points, point);
-      point = {
-        x: point.x + distance - header,
-        y: point.y
-      };
-      if (double) {
-        point.x -= header;
-      }
-      array.push(points, point);
-      array.push(points, getPointOfCircle(point.x, point.y, arrowRadius, (180 + arrowRadians) * RADIANS));
-      array.push(points, {
-        x: startX + distance,
-        y: startY
-      });
-    };
-
-    if (double) {
-      array.push(points, {
-        x: startX,
-        y: startY
-      });
-      var point = {
-        x: startX + header,
-        y: startY - thickness
-      };
-      array.push(points, getPointOfCircle(point.x, point.y, arrowRadius, (360 - arrowRadians) * RADIANS));
-      drawSingleArrow(point);
-    } else {
-      drawSingleArrow({
-        x: startX,
-        y: startY - thickness
-      });
-    }
-
-    for (var i = points.length - 2; i >= 0; i--) {
-      points.push({
-        x: points[i].x,
-        y: 2 * startY - points[i].y
-      });
-    }
-
-    this.points = getRotatePoints(startX, startY, Math.atan2(endY - startY, endX - startX), points);
-
+    object.extend(this, Arrow.getProps(startX, startY, endX, endY, this.thickness, this.double));
     this.draw(painter);
   };
 
@@ -2184,6 +2115,76 @@ var Arrow = function (_Polygon) {
 
   return Arrow;
 }(Polygon);
+
+Arrow.getProps = function (startX, startY, endX, endY, thickness, double) {
+
+  var distance = getDistance(startX, startY, endX, endY);
+
+  // 下面这些数字都是不断尝试调出的参数，没有理由，就是试
+  var threshold = thickness * 20,
+      header;
+
+  if (distance < threshold) {
+    thickness *= distance / threshold;
+    header = distance / 3;
+  } else {
+    header = distance / 8;
+    if (header > 50) {
+      header = 50;
+    }
+  }
+
+  var points = [];
+  var arrowRadians = 70;
+  var arrowRadius = 0.5 * header;
+  var arrowDistance = Math.cos(arrowRadians * RADIANS) * arrowRadius;
+
+  var drawSingleArrow = function (point) {
+    array.push(points, point);
+    point = {
+      x: point.x + distance - header,
+      y: point.y
+    };
+    if (double) {
+      point.x -= header;
+    }
+    array.push(points, point);
+    array.push(points, getPointOfCircle(point.x, point.y, arrowRadius, (180 + arrowRadians) * RADIANS));
+    array.push(points, {
+      x: startX + distance,
+      y: startY
+    });
+  };
+
+  if (double) {
+    array.push(points, {
+      x: startX,
+      y: startY
+    });
+    var point = {
+      x: startX + header,
+      y: startY - thickness
+    };
+    array.push(points, getPointOfCircle(point.x, point.y, arrowRadius, (360 - arrowRadians) * RADIANS));
+    drawSingleArrow(point);
+  } else {
+    drawSingleArrow({
+      x: startX,
+      y: startY - thickness
+    });
+  }
+
+  for (var i = points.length - 2; i >= 0; i--) {
+    points.push({
+      x: points[i].x,
+      y: 2 * startY - points[i].y
+    });
+  }
+
+  return {
+    points: getRotatePoints(startX, startY, Math.atan2(endY - startY, endX - startX), points)
+  };
+};
 
 /**
  * @file 涂鸦
@@ -2292,35 +2293,8 @@ var Heart = function (_Polygon) {
   }
 
   Heart.prototype.drawing = function (painter, startX, startY, endX, endY, restore) {
-
     restore();
-
-    this.x = startX;
-    this.y = startY;
-    this.width = this.height = 2 * getDistance(startX, startY, endX, endY);
-
-    var width = getDistance(startX, 0, endX, 0);
-    var height = getDistance(0, startY, 0, endY);
-
-    var points = [],
-        radius = width / 32;
-
-    var radian = PI,
-        stepRadian = PI2$1 / Math.max(radius * 16, 30),
-        endRadian = -PI;
-
-    array.push(points, {
-      x: heart.getOffsetX(this.x + width / 2, radius, radian),
-      y: heart.getOffsetY(this.y, radius, radian)
-    });
-    do {
-      array.push(points, {
-        x: heart.getOffsetX(this.x + width / 2, radius, radian),
-        y: heart.getOffsetY(this.y, radius, radian)
-      });
-      radian -= stepRadian;
-    } while (radian >= endRadian);
-    this.points = points;
+    object.extend(this, Heart.getProps(startX, startY, endX, endY));
     this.draw(painter);
   };
 
@@ -2336,6 +2310,38 @@ var Heart = function (_Polygon) {
 
   return Heart;
 }(Polygon);
+
+Heart.getProps = function (startX, startY, endX, endY) {
+
+  var result = {};
+
+  result.width = result.height = 2 * getDistance(startX, startY, endX, endY);
+
+  var width = getDistance(startX, 0, endX, 0);
+  var height = getDistance(0, startY, 0, endY);
+
+  var points = [],
+      radius = width / 32;
+
+  var radian = PI,
+      stepRadian = PI2$1 / Math.max(radius * 16, 30),
+      endRadian = -PI;
+
+  array.push(points, {
+    x: heart.getOffsetX(startX + width / 2, radius, radian),
+    y: heart.getOffsetY(startY, radius, radian)
+  });
+  do {
+    array.push(points, {
+      x: heart.getOffsetX(startX + width / 2, radius, radian),
+      y: heart.getOffsetY(startY, radius, radian)
+    });
+    radian -= stepRadian;
+  } while (radian >= endRadian);
+  result.points = points;
+
+  return result;
+};
 
 /**
  * @file 椭圆
@@ -2556,12 +2562,8 @@ var Oval = function (_Shape) {
 
 
   Oval.prototype.drawing = function (painter, startX, startY, endX, endY, restore) {
-
     restore();
-
-    this.x = startX;
-    this.y = startY;
-    this.width = this.height = 2 * getDistance(startX, startY, endX, endY);
+    object.extend(this, Oval.getProps(startX, startY, endX, endY));
     this.draw(painter);
   };
 
@@ -2611,6 +2613,16 @@ var Oval = function (_Shape) {
 
   return Oval;
 }(Shape);
+
+Oval.getProps = function (startX, startY, endX, endY) {
+  var size = 2 * getDistance(startX, startY, endX, endY);
+  return {
+    x: startX,
+    y: startY,
+    width: size,
+    height: size
+  };
+};
 
 /**
  * @file 多个矩形的并集
@@ -2671,16 +2683,7 @@ var Rect = function (_Polygon) {
    */
   Rect.prototype.drawing = function (painter, startX, startY, endX, endY, restore) {
     restore();
-
-    var points = this.points || (this.points = []);
-
-    var rect = getRect(startX, startY, endX, endY);
-
-    points[0] = { x: rect.x, y: rect.y };
-    points[1] = { x: rect.x + rect.width, y: rect.y };
-    points[2] = { x: rect.x + rect.width, y: rect.y + rect.height };
-    points[3] = { x: rect.x, y: rect.y + rect.height };
-
+    object.extend(this, Rect.getProps(startX, startY, endX, endY));
     this.draw(painter);
   };
 
@@ -2692,6 +2695,13 @@ var Rect = function (_Polygon) {
 
   return Rect;
 }(Polygon);
+
+Rect.getProps = function (startX, startY, endX, endY) {
+  var rect = getRect(startX, startY, endX, endY);
+  return {
+    points: [{ x: rect.x, y: rect.y }, { x: rect.x + rect.width, y: rect.y }, { x: rect.x + rect.width, y: rect.y + rect.height }, { x: rect.x, y: rect.y + rect.height }]
+  };
+};
 
 /**
  * @file 内多边形
@@ -2712,36 +2722,8 @@ var Star = function (_Polygon) {
   };
 
   Star.prototype.drawing = function (painter, startX, startY, endX, endY, restore) {
-
     restore();
-
-    var count = this.count,
-        radius = this.radius;
-
-
-    var outerRadius = getDistance(startX, startY, endX, endY);
-    var stepRadian = PI2$2 / count;
-    var innerRadius = radius;
-
-    if (!innerRadius) {
-      innerRadius = outerRadius / 2;
-    }
-
-    var points = [];
-
-    var radian = Math.atan2(endY - startY, endX - startX),
-        endRadian = radian + PI2$2;
-    do {
-      array.push(points, getPointOfCircle(startX, startY, outerRadius, radian));
-      array.push(points, getPointOfCircle(startX, startY, innerRadius, radian + stepRadian / 2));
-      radian += stepRadian;
-    } while (radian <= endRadian);
-
-    if (points.length - count * 2 === 2) {
-      array.pop(points);
-    }
-    this.points = points;
-
+    object.extend(this, Star.getProps(startX, startY, endX, endY, this.count, this.radius));
     this.draw(painter);
   };
 
@@ -2758,6 +2740,35 @@ var Star = function (_Polygon) {
 
   return Star;
 }(Polygon);
+
+Star.getProps = function (startX, startY, endX, endY, count, radius) {
+
+  var outerRadius = getDistance(startX, startY, endX, endY);
+  var stepRadian = PI2$2 / count;
+  var innerRadius = radius;
+
+  if (!innerRadius) {
+    innerRadius = outerRadius / 2;
+  }
+
+  var points = [];
+
+  var radian = Math.atan2(endY - startY, endX - startX),
+      endRadian = radian + PI2$2;
+  do {
+    array.push(points, getPointOfCircle(startX, startY, outerRadius, radian));
+    array.push(points, getPointOfCircle(startX, startY, innerRadius, radian + stepRadian / 2));
+    radian += stepRadian;
+  } while (radian <= endRadian);
+
+  if (points.length - count * 2 === 2) {
+    array.pop(points);
+  }
+
+  return {
+    points: points
+  };
+};
 
 /**
  * @file 文字

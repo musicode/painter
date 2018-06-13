@@ -6,6 +6,7 @@
 import Polygon from './Polygon'
 
 import getRect from '../function/getRect'
+import object from '../util/object'
 
 /**
  * points
@@ -24,18 +25,8 @@ export default class Rect extends Polygon {
    */
   drawing(painter, startX, startY, endX, endY, restore) {
     restore()
-
-    const points = this.points || (this.points = [ ])
-
-    const rect = getRect(startX, startY, endX, endY)
-
-    points[ 0 ] = { x: rect.x, y: rect.y }
-    points[ 1 ] = { x: rect.x + rect.width, y: rect.y }
-    points[ 2 ] = { x: rect.x + rect.width, y: rect.y + rect.height }
-    points[ 3 ] = { x: rect.x, y: rect.y + rect.height }
-
+    object.extend(this, Rect.getProps(startX, startY, endX, endY))
     this.draw(painter)
-
   }
 
   toJSON() {
@@ -44,4 +35,16 @@ export default class Rect extends Polygon {
     })
   }
 
+}
+
+Rect.getProps = function (startX, startY, endX, endY) {
+  const rect = getRect(startX, startY, endX, endY)
+  return {
+    points: [
+      { x: rect.x, y: rect.y },
+      { x: rect.x + rect.width, y: rect.y },
+      { x: rect.x + rect.width, y: rect.y + rect.height },
+      { x: rect.x, y: rect.y + rect.height }
+    ]
+  }
 }

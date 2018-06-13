@@ -7,6 +7,7 @@ import Shape from './Shape'
 import constant from '../constant'
 
 import array from '../util/array'
+import object from '../util/object'
 
 import containPolygon from '../contain/polygon'
 import getOffsetPoints from '../function/getOffsetPoints'
@@ -90,37 +91,9 @@ export default class Polygon extends Shape {
    * @param {Function} 还原为鼠标按下时的画布
    */
   drawing(painter, startX, startY, endX, endY, restore) {
-
     restore()
-
-    const { count } = this
-
-    const radius = getDistance(startX, startY, endX, endY)
-
-    // 单位旋转的角度
-    const stepRadian = PI2 / count
-
-    const points = [ ]
-
-    let radian = Math.atan2(endY - startY, endX - startX), endRadian = radian + PI2
-
-    do {
-      array.push(
-        points,
-        getPointOfCircle(startX, startY, radius, radian)
-      )
-      radian += stepRadian
-    }
-    while (radian <= endRadian)
-
-    if (points.length - count === 1) {
-      array.pop(points)
-    }
-
-    this.points = points
-
+    object.extend(this, Polygon.getProps(startX, startY, endX, endY, this.count))
     this.draw(painter)
-
   }
 
   validate() {
@@ -134,4 +107,33 @@ export default class Polygon extends Shape {
     })
   }
 
+}
+
+Polygon.getProps = function (startX, startY, endX, endY, count) {
+
+  const radius = getDistance(startX, startY, endX, endY)
+
+  // 单位旋转的角度
+  const stepRadian = PI2 / count
+
+  const points = [ ]
+
+  let radian = Math.atan2(endY - startY, endX - startX), endRadian = radian + PI2
+
+  do {
+    array.push(
+      points,
+      getPointOfCircle(startX, startY, radius, radian)
+    )
+    radian += stepRadian
+  }
+  while (radian <= endRadian)
+
+  if (points.length - count === 1) {
+    array.pop(points)
+  }
+
+  return {
+    points: points
+  }
 }

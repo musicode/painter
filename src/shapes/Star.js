@@ -5,6 +5,7 @@
 import Polygon from './Polygon'
 
 import array from '../util/array'
+import object from '../util/object'
 
 import getDistance from '../function/getDistance'
 import getPointOfCircle from '../function/getPointOfCircle'
@@ -18,42 +19,9 @@ export default class Star extends Polygon {
   }
 
   drawing(painter, startX, startY, endX, endY, restore) {
-
     restore()
-
-    const { count, radius } = this
-
-    const outerRadius = getDistance(startX, startY, endX, endY)
-    const stepRadian = PI2 / count
-    let innerRadius = radius
-
-    if (!innerRadius) {
-      innerRadius = outerRadius / 2
-    }
-
-    const points = [ ]
-
-    let radian = Math.atan2(endY - startY, endX - startX), endRadian = radian + PI2
-    do {
-      array.push(
-        points,
-        getPointOfCircle(startX, startY, outerRadius, radian)
-      )
-      array.push(
-        points,
-        getPointOfCircle(startX, startY, innerRadius, radian + stepRadian / 2)
-      )
-      radian += stepRadian
-    }
-    while (radian <= endRadian)
-
-    if (points.length - count * 2 === 2) {
-      array.pop(points)
-    }
-    this.points = points
-
+    object.extend(this, Star.getProps(startX, startY, endX, endY, this.count, this.radius))
     this.draw(painter)
-
   }
 
   validate() {
@@ -67,4 +35,39 @@ export default class Star extends Polygon {
     })
   }
 
+}
+
+Star.getProps = function (startX, startY, endX, endY, count, radius) {
+
+  const outerRadius = getDistance(startX, startY, endX, endY)
+  const stepRadian = PI2 / count
+  let innerRadius = radius
+
+  if (!innerRadius) {
+    innerRadius = outerRadius / 2
+  }
+
+  const points = [ ]
+
+  let radian = Math.atan2(endY - startY, endX - startX), endRadian = radian + PI2
+  do {
+    array.push(
+      points,
+      getPointOfCircle(startX, startY, outerRadius, radian)
+    )
+    array.push(
+      points,
+      getPointOfCircle(startX, startY, innerRadius, radian + stepRadian / 2)
+    )
+    radian += stepRadian
+  }
+  while (radian <= endRadian)
+
+  if (points.length - count * 2 === 2) {
+    array.pop(points)
+  }
+
+  return {
+    points: points
+  }
 }

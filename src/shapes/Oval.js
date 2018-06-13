@@ -8,6 +8,8 @@ import constant from '../constant'
 import containRect from '../contain/rect'
 import getDistance from '../function/getDistance'
 
+import object from '../util/object'
+
 /**
  * (x, y) 圆心
  * width 宽
@@ -156,14 +158,9 @@ export default class Oval extends Shape {
    * @param {Function} 还原为鼠标按下时的画布
    */
   drawing(painter, startX, startY, endX, endY, restore) {
-
     restore()
-
-    this.x = startX
-    this.y = startY
-    this.width = this.height = 2 * getDistance(startX, startY, endX, endY)
+    object.extend(this, Oval.getProps(startX, startY, endX, endY))
     this.draw(painter)
-
   }
 
   save(rect) {
@@ -206,4 +203,14 @@ export default class Oval extends Shape {
     })
   }
 
+}
+
+Oval.getProps = function (startX, startY, endX, endY) {
+  let size = 2 * getDistance(startX, startY, endX, endY)
+  return {
+    x: startX,
+    y: startY,
+    width: size,
+    height: size,
+  }
 }
