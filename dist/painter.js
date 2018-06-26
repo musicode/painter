@@ -298,7 +298,10 @@ var Emitter = function () {
       } else {
         // 如果有自定义光标，鼠标事件基本都落在了光标元素上
         // 这里没有什么好的方式判断自定义光标元素，所以约定 className 必须包含 cursor
-        if (target.className.indexOf('cursor') >= 0) {
+        // svg 的 className 居然是个对象...
+        var className = target.className;
+
+        if (typeof className === 'string' && className.indexOf('cursor') >= 0) {
           // 如有多个 canvas，自定义光标必须带一个 canvasId，否则无法区分当前交互的是哪个 canvas
           var canvasId = target.getAttribute('canvas-id');
           inCanvas = canvasId ? canvasId === canvas.id : true;
@@ -1790,53 +1793,53 @@ var Shape = function () {
  */
 var windingLine = function (x0, y0, x1, y1, x, y) {
 
-    if (y > y0 && y > y1 || y < y0 && y < y1) {
-        return 0;
-    }
-    // Ignore horizontal line
-    if (y1 === y0) {
-        return 0;
-    }
-    var dir = y1 < y0 ? 1 : -1;
-    var t = (y - y0) / (y1 - y0);
+  if (y > y0 && y > y1 || y < y0 && y < y1) {
+    return 0;
+  }
+  // Ignore horizontal line
+  if (y1 === y0) {
+    return 0;
+  }
+  var dir = y1 < y0 ? 1 : -1;
+  var t = (y - y0) / (y1 - y0);
 
-    // Avoid winding error when intersection point is the connect point of two line of polygon
-    if (t === 1 || t === 0) {
-        dir = y1 < y0 ? 0.5 : -0.5;
-    }
+  // Avoid winding error when intersection point is the connect point of two line of polygon
+  if (t === 1 || t === 0) {
+    dir = y1 < y0 ? 0.5 : -0.5;
+  }
 
-    var x_ = t * (x1 - x0) + x0;
+  var x_ = t * (x1 - x0) + x0;
 
-    return x_ > x ? dir : 0;
+  return x_ > x ? dir : 0;
 };
 
 var EPSILON = 1e-8;
 
 function isAroundEqual(a, b) {
-    return Math.abs(a - b) < EPSILON;
+  return Math.abs(a - b) < EPSILON;
 }
 
 var containPolygon = function (points, x, y) {
-    var w = 0;
-    var p = points[0];
+  var w = 0,
+      p = points[0];
 
-    if (!p) {
-        return false;
-    }
+  if (!p) {
+    return false;
+  }
 
-    for (var i = 1; i < points.length; i++) {
-        var p2 = points[i];
-        w += windingLine(p.x, p.y, p2.x, p2.y, x, y);
-        p = p2;
-    }
+  for (var i = 1, p1; i < points.length; i++) {
+    p1 = points[i];
+    w += windingLine(p.x, p.y, p1.x, p1.y, x, y);
+    p = p1;
+  }
 
-    // Close polygon
-    var p0 = points[0];
-    if (!isAroundEqual(p.x, p0.x) || !isAroundEqual(p.y, p0.y)) {
-        w += windingLine(p.x, p.y, p0.x, p0.y, x, y);
-    }
+  // Close polygon
+  var p0 = points[0];
+  if (!isAroundEqual(p.x, p0.x) || !isAroundEqual(p.y, p0.y)) {
+    w += windingLine(p.x, p.y, p0.x, p0.y, x, y);
+  }
 
-    return w !== 0;
+  return w !== 0;
 };
 
 /**

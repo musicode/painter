@@ -55,7 +55,11 @@ export default class Emitter {
       else {
         // 如果有自定义光标，鼠标事件基本都落在了光标元素上
         // 这里没有什么好的方式判断自定义光标元素，所以约定 className 必须包含 cursor
-        if (target.className.indexOf('cursor') >= 0) {
+        // svg 的 className 居然是个对象...
+        let { className } = target
+        if (typeof className === 'string'
+          && className.indexOf('cursor') >= 0
+        ) {
           // 如有多个 canvas，自定义光标必须带一个 canvasId，否则无法区分当前交互的是哪个 canvas
           let canvasId = target.getAttribute('canvas-id')
           inCanvas = canvasId ? canvasId === canvas.id : true
