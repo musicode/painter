@@ -2462,21 +2462,21 @@ var Oval = function (_Shape) {
           painter.drawOval(x, y, width, height);
           return !painter.isPointInPath(x1, y1);
         }
-      case constant.STROKE_POSITION_CENTER:
-        painter.drawOval(x, y, width + lineWidth, height + lineWidth);
-        if (painter.isPointInPath(x1, y1)) {
-          width -= lineWidth;
-          height -= lineWidth;
-          painter.begin();
-          painter.drawOval(x, y, width, height);
-          return !painter.isPointInPath(x1, y1);
-        }
-        break;
       case constant.STROKE_POSITION_INSIDE:
         painter.drawOval(x, y, width, height);
         if (painter.isPointInPath(x1, y1)) {
           width -= doubleLineWidth;
           height -= doubleLineWidth;
+          painter.begin();
+          painter.drawOval(x, y, width, height);
+          return !painter.isPointInPath(x1, y1);
+        }
+        break;
+      default:
+        painter.drawOval(x, y, width + lineWidth, height + lineWidth);
+        if (painter.isPointInPath(x1, y1)) {
+          width -= lineWidth;
+          height -= lineWidth;
           painter.begin();
           painter.drawOval(x, y, width, height);
           return !painter.isPointInPath(x1, y1);
