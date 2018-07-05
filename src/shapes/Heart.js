@@ -17,7 +17,7 @@ export default class Heart extends Polygon {
 
   drawing(painter, startX, startY, endX, endY, restore) {
     restore()
-    object.extend(this, Heart.getProps(startX, startY, endX, endY))
+    object.extend(this, Heart.draw(startX, startY, endX, endY))
     this.draw(painter)
   }
 
@@ -33,7 +33,7 @@ export default class Heart extends Polygon {
 
 }
 
-Heart.getProps = function (startX, startY, endX, endY) {
+Heart.draw = function (startX, startY, endX, endY) {
 
   let result = { }
 

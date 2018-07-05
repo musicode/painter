@@ -32,7 +32,7 @@ export default class Arrow extends Polygon {
    */
   drawing(painter, startX, startY, endX, endY, restore) {
     restore()
-    object.extend(this, Arrow.getProps(startX, startY, endX, endY, this.thickness, this.double))
+    object.extend(this, Arrow.draw(startX, startY, endX, endY, this.thickness, this.double))
     this.draw(painter)
   }
 
@@ -44,7 +44,7 @@ export default class Arrow extends Polygon {
 
 }
 
-Arrow.getProps = function (startX, startY, endX, endY, thickness, double) {
+Arrow.draw = function (startX, startY, endX, endY, thickness, double) {
 
   const distance = getDistance(startX, startY, endX, endY)
 

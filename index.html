@@ -223,6 +223,9 @@
                 <button class="btn btn-warning btn-next">
                     恢复
                 </button>
+                <button class="btn btn-warning btn-zoom">
+                    放大
+                </button>
             </div>
         </div>
     </div>
@@ -354,6 +357,9 @@
 
         $('.btn-next').on('click', function () {
             instance.next();
+        });
+        $('.btn-zoom').on('click', function () {
+            instance.resize(canvas.offsetWidth * 2, canvas.offsetHeight * 2);
         });
 
     </script>

@@ -841,7 +841,7 @@ var Active = function (_State) {
         }
         var offsetX = event.x - me.x,
             offsetY = event.y - me.y;
-        update = function update(x, y) {
+        update = function (x, y) {
           me.x = x - offsetX;
           me.y = y - offsetY;
         };
@@ -2017,7 +2017,7 @@ var Polygon = function (_Shape) {
 
   Polygon.prototype.drawing = function (painter, startX, startY, endX, endY, restore) {
     restore();
-    object.extend(this, Polygon.getProps(startX, startY, endX, endY, this.count));
+    object.extend(this, Polygon.draw(startX, startY, endX, endY, this.count));
     this.draw(painter);
   };
 
@@ -2035,7 +2035,7 @@ var Polygon = function (_Shape) {
   return Polygon;
 }(Shape);
 
-Polygon.getProps = function (startX, startY, endX, endY, count) {
+Polygon.draw = function (startX, startY, endX, endY, count) {
 
   var radius = getDistance(startX, startY, endX, endY);
 
@@ -2106,7 +2106,7 @@ var Arrow = function (_Polygon) {
    */
   Arrow.prototype.drawing = function (painter, startX, startY, endX, endY, restore) {
     restore();
-    object.extend(this, Arrow.getProps(startX, startY, endX, endY, this.thickness, this.double));
+    object.extend(this, Arrow.draw(startX, startY, endX, endY, this.thickness, this.double));
     this.draw(painter);
   };
 
@@ -2119,7 +2119,7 @@ var Arrow = function (_Polygon) {
   return Arrow;
 }(Polygon);
 
-Arrow.getProps = function (startX, startY, endX, endY, thickness, double) {
+Arrow.draw = function (startX, startY, endX, endY, thickness, double) {
 
   var distance = getDistance(startX, startY, endX, endY);
 
@@ -2297,7 +2297,7 @@ var Heart = function (_Polygon) {
 
   Heart.prototype.drawing = function (painter, startX, startY, endX, endY, restore) {
     restore();
-    object.extend(this, Heart.getProps(startX, startY, endX, endY));
+    object.extend(this, Heart.draw(startX, startY, endX, endY));
     this.draw(painter);
   };
 
@@ -2314,7 +2314,7 @@ var Heart = function (_Polygon) {
   return Heart;
 }(Polygon);
 
-Heart.getProps = function (startX, startY, endX, endY) {
+Heart.draw = function (startX, startY, endX, endY) {
 
   var result = {};
 
@@ -2514,10 +2514,12 @@ var Oval = function (_Shape) {
         strokePosition = this.strokePosition,
         lineWidth = this.lineWidth;
 
+
+    lineWidth *= constant.DEVICE_PIXEL_RATIO;
+
     // Canvas 的描边机制是 center
 
     // inside
-
     if (strokePosition === constant.STROKE_POSITION_INSIDE) {
       width -= lineWidth;
       height -= lineWidth;
@@ -2566,7 +2568,7 @@ var Oval = function (_Shape) {
 
   Oval.prototype.drawing = function (painter, startX, startY, endX, endY, restore) {
     restore();
-    object.extend(this, Oval.getProps(startX, startY, endX, endY));
+    object.extend(this, Oval.draw(startX, startY, endX, endY));
     this.draw(painter);
   };
 
@@ -2617,7 +2619,7 @@ var Oval = function (_Shape) {
   return Oval;
 }(Shape);
 
-Oval.getProps = function (startX, startY, endX, endY) {
+Oval.draw = function (startX, startY, endX, endY) {
   var size = 2 * getDistance(startX, startY, endX, endY);
   return {
     x: startX,
@@ -2686,7 +2688,7 @@ var Rect = function (_Polygon) {
    */
   Rect.prototype.drawing = function (painter, startX, startY, endX, endY, restore) {
     restore();
-    object.extend(this, Rect.getProps(startX, startY, endX, endY));
+    object.extend(this, Rect.draw(startX, startY, endX, endY));
     this.draw(painter);
   };
 
@@ -2699,7 +2701,7 @@ var Rect = function (_Polygon) {
   return Rect;
 }(Polygon);
 
-Rect.getProps = function (startX, startY, endX, endY) {
+Rect.draw = function (startX, startY, endX, endY) {
   var rect = getRect(startX, startY, endX, endY);
   return {
     points: [{ x: rect.x, y: rect.y }, { x: rect.x + rect.width, y: rect.y }, { x: rect.x + rect.width, y: rect.y + rect.height }, { x: rect.x, y: rect.y + rect.height }]
@@ -2726,7 +2728,7 @@ var Star = function (_Polygon) {
 
   Star.prototype.drawing = function (painter, startX, startY, endX, endY, restore) {
     restore();
-    object.extend(this, Star.getProps(startX, startY, endX, endY, this.count, this.radius));
+    object.extend(this, Star.draw(startX, startY, endX, endY, this.count, this.radius));
     this.draw(painter);
   };
 
@@ -2744,7 +2746,7 @@ var Star = function (_Polygon) {
   return Star;
 }(Polygon);
 
-Star.getProps = function (startX, startY, endX, endY, count, radius) {
+Star.draw = function (startX, startY, endX, endY, count, radius) {
 
   var outerRadius = getDistance(startX, startY, endX, endY);
   var stepRadian = PI2$2 / count;
@@ -3178,6 +3180,7 @@ var Canvas = function () {
 
   Canvas.prototype.resize = function (newWidth, newHeight, silent) {
     var element = this.element,
+        states = this.states,
         histories = this.histories,
         historyIndex = this.historyIndex;
 
@@ -3196,6 +3199,9 @@ var Canvas = function () {
 
       if (history.shapes && history.width && history.height) {
         convertDimension(history.shapes, history.width, history.height, newWidth, newHeight);
+        if (states && states.length > 0) {
+          convertDimension(states, history.width, history.height, newWidth, newHeight);
+        }
       }
 
       history.width = newWidth;

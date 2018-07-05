@@ -25,7 +25,7 @@ export default class Rect extends Polygon {
    */
   drawing(painter, startX, startY, endX, endY, restore) {
     restore()
-    object.extend(this, Rect.getProps(startX, startY, endX, endY))
+    object.extend(this, Rect.draw(startX, startY, endX, endY))
     this.draw(painter)
   }
 
@@ -37,7 +37,7 @@ export default class Rect extends Polygon {
 
 }
 
-Rect.getProps = function (startX, startY, endX, endY) {
+Rect.draw = function (startX, startY, endX, endY) {
   const rect = getRect(startX, startY, endX, endY)
   return {
     points: [

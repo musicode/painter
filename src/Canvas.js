@@ -211,7 +211,7 @@ export default class Canvas {
    */
   resize(newWidth, newHeight, silent) {
 
-    const { element, histories, historyIndex } = this
+    const { element, states, histories, historyIndex } = this
 
     element.style.width = newWidth + 'px'
     element.style.height = newHeight + 'px'
@@ -233,6 +233,15 @@ export default class Canvas {
           newWidth,
           newHeight
         )
+        if (states && states.length > 0) {
+          convertDimension(
+            states,
+            history.width,
+            history.height,
+            newWidth,
+            newHeight
+          )
+        }
       }
 
       history.width = newWidth

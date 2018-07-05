@@ -111,6 +111,8 @@ export default class Oval extends Shape {
       lineWidth,
     } = this
 
+    lineWidth *= constant.DEVICE_PIXEL_RATIO
+
     // Canvas 的描边机制是 center
 
     // inside
@@ -159,7 +161,7 @@ export default class Oval extends Shape {
    */
   drawing(painter, startX, startY, endX, endY, restore) {
     restore()
-    object.extend(this, Oval.getProps(startX, startY, endX, endY))
+    object.extend(this, Oval.draw(startX, startY, endX, endY))
     this.draw(painter)
   }
 
@@ -205,7 +207,7 @@ export default class Oval extends Shape {
 
 }
 
-Oval.getProps = function (startX, startY, endX, endY) {
+Oval.draw = function (startX, startY, endX, endY) {
   let size = 2 * getDistance(startX, startY, endX, endY)
   return {
     x: startX,

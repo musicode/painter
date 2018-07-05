@@ -20,7 +20,7 @@ export default class Star extends Polygon {
 
   drawing(painter, startX, startY, endX, endY, restore) {
     restore()
-    object.extend(this, Star.getProps(startX, startY, endX, endY, this.count, this.radius))
+    object.extend(this, Star.draw(startX, startY, endX, endY, this.count, this.radius))
     this.draw(painter)
   }
 
@@ -37,7 +37,7 @@ export default class Star extends Polygon {
 
 }
 
-Star.getProps = function (startX, startY, endX, endY, count, radius) {
+Star.draw = function (startX, startY, endX, endY, count, radius) {
 
   const outerRadius = getDistance(startX, startY, endX, endY)
   const stepRadian = PI2 / count

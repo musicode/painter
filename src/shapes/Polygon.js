@@ -92,7 +92,7 @@ export default class Polygon extends Shape {
    */
   drawing(painter, startX, startY, endX, endY, restore) {
     restore()
-    object.extend(this, Polygon.getProps(startX, startY, endX, endY, this.count))
+    object.extend(this, Polygon.draw(startX, startY, endX, endY, this.count))
     this.draw(painter)
   }
 
@@ -109,7 +109,7 @@ export default class Polygon extends Shape {
 
 }
 
-Polygon.getProps = function (startX, startY, endX, endY, count) {
+Polygon.draw = function (startX, startY, endX, endY, count) {
 
   const radius = getDistance(startX, startY, endX, endY)
 

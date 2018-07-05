@@ -5,6 +5,7 @@ let path = require('path')
 
 function optimize(source) {
 
+
   /**
    * 因为 typeof 的问题，Babel 会加上下面这段代码，因此要删掉
    *
@@ -16,11 +17,10 @@ function optimize(source) {
    *
    */
 
-  let startIndex = source.indexOf('var _typeof = typeof Symbol')
-  let endCode = 'Symbol.prototype ? "symbol" : typeof obj;'
-  let endIndex = source.indexOf(endCode) + endCode.length + 3 // 包括换行符加 };
-
-  source = source.substr(0, startIndex) + source.substr(endIndex)
+  source = source.replace(
+    /var _typeof = typeof Symbol [\s\S]+?};/,
+    ''
+  )
 
   /**
    * Babel 会把 typeof a === x 编译成 ((typeof a === 'undefined' ? 'undefined' : _typeof(a))) === x
@@ -86,10 +86,10 @@ function optimize(source) {
    * 我们全都转成匿名函数
    */
    source = source.replace(
-     /var ([\w$]+) = function ([\w$]+)/g,
-     function ($0, $1, $2) {
-       if ($1 === $2) {
-         return `var ${$1} = function `
+     /(\b)([\w$]+) = function ([\w$]+)/g,
+     function ($0, $1, $2, $3) {
+       if ($2 === $3) {
+         return `${$1}${$2} = function `
        }
        throw new Error(`${$1} is not equals to ${$2}`)
      }
