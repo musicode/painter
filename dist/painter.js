@@ -1255,34 +1255,36 @@ var convertDimension = function (shapes, oldWidth, oldHeight, newWidth, newHeigh
 
   if (widthRatio !== 1 || heightRatio !== 1) {
     array.each(shapes, function (shape) {
-      if (widthRatio !== 1) {
-        if (shape.x) {
-          shape.x *= widthRatio;
-        }
-        if (shape.width) {
-          shape.width *= widthRatio;
-        }
-        if (shape.fontSize) {
-          shape.fontSize *= widthRatio;
-        }
-      }
-      if (heightRatio !== 1) {
-        if (shape.y) {
-          shape.y *= heightRatio;
-        }
-        if (shape.height) {
-          shape.height *= heightRatio;
-        }
-      }
-      if (shape.points) {
-        array.each(shape.points, function (point) {
-          if (point.x) {
-            point.x *= widthRatio;
+      if (shape) {
+        if (widthRatio !== 1) {
+          if (shape.x) {
+            shape.x *= widthRatio;
           }
-          if (point.y) {
-            point.y *= heightRatio;
+          if (shape.width) {
+            shape.width *= widthRatio;
           }
-        });
+          if (shape.fontSize) {
+            shape.fontSize *= widthRatio;
+          }
+        }
+        if (heightRatio !== 1) {
+          if (shape.y) {
+            shape.y *= heightRatio;
+          }
+          if (shape.height) {
+            shape.height *= heightRatio;
+          }
+        }
+        if (shape.points) {
+          array.each(shape.points, function (point) {
+            if (point.x) {
+              point.x *= widthRatio;
+            }
+            if (point.y) {
+              point.y *= heightRatio;
+            }
+          });
+        }
       }
     });
   }
